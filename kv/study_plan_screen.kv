@@ -1,0 +1,332 @@
+#:import dp kivy.metrics.dp
+#:import sp kivy.metrics.sp
+
+<DarkSpinner@Spinner>:
+    background_normal: ""
+    background_down: ""
+    background_color: 0.10, 0.085, 0.15, 1
+
+    color: 0.94, 0.92, 1, 1
+    font_size: sp(15)
+
+    size_hint_y: None
+    height: dp(48)
+
+    padding: dp(14), 0
+
+<SpinnerOption>:
+    background_normal: ""
+    background_down: ""
+    background_color: 0.11, 0.095, 0.16, 1
+    color: 0.94, 0.92, 1, 1
+    font_size: sp(15)
+    height: dp(46)
+
+<TaskRow>:
+    orientation: "vertical"
+    adaptive_height: True
+    padding: dp(16)
+    spacing: dp(10)
+    radius: [dp(22), dp(22), dp(22), dp(22)]
+    elevation: 0
+    md_bg_color: 0.12, 0.10, 0.17, 1
+    line_color: app.hex_to_rgba(root.subject_color) if root.is_active else (0, 0, 0, 0)
+    line_width: dp(2)
+
+    MDBoxLayout:
+        adaptive_height: True
+        spacing: dp(10)
+
+        MDCard:
+            size_hint: None, None
+            size: dp(18), dp(18)
+            radius: [dp(9), dp(9), dp(9), dp(9)]
+            elevation: 0
+            md_bg_color: app.hex_to_rgba(root.subject_color)
+
+        MDLabel:
+            text: root.subject_name
+            bold: True
+            theme_text_color: "Custom"
+            text_color: app.hex_to_rgba(root.subject_color)
+            adaptive_height: True
+
+        MDLabel:
+            text: root.status_text
+            halign: "right"
+            theme_text_color: "Custom"
+            text_color: 0.72, 0.68, 0.84, 1
+            adaptive_height: True
+
+    MDLabel:
+        text: root.title
+        font_style: "H6"
+        bold: True
+        theme_text_color: "Custom"
+        text_color: (0.58, 0.55, 0.64, 1) if root.is_completed else (0.96, 0.94, 1, 1)
+        adaptive_height: True
+
+    MDLabel:
+        text: root.detail_text + "  •  " + root.priority_text
+        theme_text_color: "Custom"
+        text_color: 0.68, 0.65, 0.78, 1
+        adaptive_height: True
+
+    MDBoxLayout:
+        adaptive_height: True
+        spacing: dp(4)
+
+        MDIconButton:
+            icon: "play-outline"
+            disabled: root.is_completed or root.is_active
+            opacity: 0.35 if self.disabled else 1
+            on_release: app.root.ids.screen_manager.get_screen("study").start_task(root.task_id)
+
+        MDIconButton:
+            icon: "check-circle-outline" if not root.is_completed else "backup-restore"
+            on_release: app.root.ids.screen_manager.get_screen("study").toggle_complete(root.task_id)
+
+        MDIconButton:
+            icon: "content-copy"
+            disabled: root.is_completed
+            opacity: 0.35 if self.disabled else 1
+            on_release: app.root.ids.screen_manager.get_screen("study").duplicate_task(root.task_id)
+
+        MDIconButton:
+            icon: "pencil-outline"
+            on_release: app.root.ids.screen_manager.get_screen("study").edit_task(root.task_id)
+
+        MDIconButton:
+            icon: "arrow-up"
+            disabled: root.index == 0 or root.is_completed
+            opacity: 0.35 if self.disabled else 1
+            on_release: app.root.ids.screen_manager.get_screen("study").move_task(root.task_id, -1)
+
+        MDIconButton:
+            icon: "arrow-down"
+            disabled: root.index >= root.total - 1 or root.is_completed
+            opacity: 0.35 if self.disabled else 1
+            on_release: app.root.ids.screen_manager.get_screen("study").move_task(root.task_id, 1)
+
+        Widget:
+
+        MDIconButton:
+            icon: "delete-outline"
+            theme_icon_color: "Custom"
+            icon_color: 0.95, 0.38, 0.46, 1
+            on_release: app.root.ids.screen_manager.get_screen("study").delete_task(root.task_id)
+
+<StudyPlanScreen>:
+    md_bg_color: 0.055, 0.047, 0.09, 1
+
+    MDBoxLayout:
+        orientation: "vertical"
+
+        MDTopAppBar:
+            title: "Study Plan"
+            elevation: 0
+            md_bg_color: 0.055, 0.047, 0.09, 1
+            specific_text_color: 0.96, 0.94, 1, 1
+            left_action_items: [["menu", lambda x: app.toggle_navigation_drawer()]]
+            right_action_items: [["play", lambda x: root.start_plan()]]
+
+        ScrollView:
+            do_scroll_x: False
+            bar_width: 0
+
+            MDBoxLayout:
+                orientation: "vertical"
+                adaptive_height: True
+                padding: dp(18), dp(12), dp(18), dp(30)
+                spacing: dp(16)
+
+                MDLabel:
+                    text: "Günlük çalışma planın"
+                    font_style: "H5"
+                    bold: True
+                    theme_text_color: "Custom"
+                    text_color: 0.96, 0.94, 1, 1
+                    adaptive_height: True
+
+                MDLabel:
+                    text: root.summary_text
+                    theme_text_color: "Custom"
+                    text_color: 0.68, 0.65, 0.78, 1
+                    adaptive_height: True
+
+                MDCard:
+                    orientation: "vertical"
+                    adaptive_height: True
+                    padding: dp(16), dp(18), dp(16), dp(18)
+                    spacing: dp(16)
+                    radius: [dp(24), dp(24), dp(24), dp(24)]
+                    elevation: 0
+                    md_bg_color: 0.105, 0.09, 0.16, 1
+
+                    MDLabel:
+                        text: "Görev ekle" if not root.editing_task_id else "Görevi düzenle"
+                        font_style: "H6"
+                        bold: True
+                        theme_text_color: "Custom"
+                        text_color: 0.96, 0.94, 1, 1
+                        adaptive_height: True
+
+                    DarkSpinner:
+                        id: subject_spinner
+                        text: root.selected_subject_name
+                        values: []
+                        on_text: root.selected_subject_name = self.text
+
+                    MDTextField:
+                        id: task_title
+                        hint_text: app.t("task_name")
+                        mode: "fill"
+                        multiline: False
+
+                        size_hint_y: None
+                        height: dp(64)
+
+                        fill_color_normal: 0.075, 0.065, 0.115, 1
+                        fill_color_focus: 0.09, 0.075, 0.14, 1
+
+                        text_color_normal: 0.96, 0.94, 1, 1
+                        text_color_focus: 0.96, 0.94, 1, 1
+
+                        hint_text_color_normal: 0.55, 0.52, 0.66, 1
+                        hint_text_color_focus: 0.68, 0.60, 0.96, 1
+
+                        line_color_normal: 0, 0, 0, 0
+                        line_color_focus: 0.65, 0.55, 0.98, 1
+
+                        on_text_validate: root.add_or_update_task()
+
+                    MDBoxLayout:
+                        adaptive_height: True
+                        spacing: dp(10)
+
+                        MDBoxLayout:
+                            size_hint_y: None
+                            height: dp(72)
+                            spacing: dp(10)
+
+                            MDTextField:
+                                id: focus_minutes
+                                text: "25"
+                                hint_text: app.t("focus_minutes")
+                                helper_text: app.t("minutes")
+                                helper_text_mode: "persistent"
+                                mode: "fill"
+                                input_filter: "int"
+
+                                size_hint_y: None
+                                height: dp(68)
+
+                                fill_color_normal: 0.075, 0.065, 0.115, 1
+                                fill_color_focus: 0.09, 0.075, 0.14, 1
+
+                                text_color_normal: 0.96, 0.94, 1, 1
+                                text_color_focus: 0.96, 0.94, 1, 1
+
+                                hint_text_color_normal: 0.55, 0.52, 0.66, 1
+                                hint_text_color_focus: 0.68, 0.60, 0.96, 1
+
+                                helper_text_color_normal: 0.52, 0.49, 0.63, 1
+                                helper_text_color_focus: 0.68, 0.60, 0.96, 1
+
+                                line_color_normal: 0, 0, 0, 0
+                                line_color_focus: 0.65, 0.55, 0.98, 1
+
+                            MDTextField:
+                                id: break_minutes
+                                text: "5"
+                                hint_text: app.t("break_minutes")
+                                helper_text: app.t("minutes")
+                                helper_text_mode: "persistent"
+                                mode: "fill"
+                                input_filter: "int"
+
+                                size_hint_y: None
+                                height: dp(68)
+
+                                fill_color_normal: 0.075, 0.065, 0.115, 1
+                                fill_color_focus: 0.09, 0.075, 0.14, 1
+
+                                text_color_normal: 0.96, 0.94, 1, 1
+                                text_color_focus: 0.96, 0.94, 1, 1
+
+                                hint_text_color_normal: 0.55, 0.52, 0.66, 1
+                                hint_text_color_focus: 0.68, 0.60, 0.96, 1
+
+                                helper_text_color_normal: 0.52, 0.49, 0.63, 1
+                                helper_text_color_focus: 0.68, 0.60, 0.96, 1
+
+                                line_color_normal: 0, 0, 0, 0
+                                line_color_focus: 0.65, 0.55, 0.98, 1
+
+                    DarkSpinner:
+                        id: priority_spinner
+                        text: "Orta"
+                        values: ["Düşük", "Orta", "Yüksek"]
+                        size_hint_y: None
+                        height: dp(46)
+
+                    MDBoxLayout:
+                        orientation: "horizontal"
+                        size_hint_y: None
+                        height: dp(54)
+                        spacing: dp(10)
+
+                        MDFlatButton:
+                            text: app.t("cancel")
+                            size_hint_x: 0.35
+                            height: dp(48)
+                            opacity: 1 if root.editing_task_id else 0
+                            disabled: not root.editing_task_id
+                            theme_text_color: "Custom"
+                            text_color: 0.72, 0.68, 0.84, 1
+                            on_release: root.cancel_edit()
+
+                        MDRaisedButton:
+                            text: app.t("save")
+                            size_hint_x: 0.65 if root.editing_task_id else 1
+                            height: dp(48)
+                            md_bg_color: 0.60, 0.45, 0.96, 1
+                            on_release: root.add_or_update_task()
+
+                    MDLabel:
+                        text: root.form_status
+                        halign: "center"
+                        theme_text_color: "Custom"
+                        text_color: 0.95, 0.66, 0.35, 1
+                        adaptive_height: True
+
+                MDBoxLayout:
+                    adaptive_height: True
+                    spacing: dp(6)
+
+                    MDFlatButton:
+                        text: "Tümü"
+                        on_release: root.set_filter("all")
+                    MDFlatButton:
+                        text: "Bekleyen"
+                        on_release: root.set_filter("pending")
+                    MDFlatButton:
+                        text: "Aktif"
+                        on_release: root.set_filter("active")
+                    MDFlatButton:
+                        text: "Biten"
+                        on_release: root.set_filter("completed")
+
+                MDLabel:
+                    id: empty_label
+                    text: "Henüz görev yok. İlk görevini yukarıdan ekleyebilirsin."
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: 0.68, 0.65, 0.78, 1
+                    adaptive_height: True
+
+                MDBoxLayout:
+                    id: task_list
+                    orientation: "vertical"
+                    adaptive_height: True
+                    spacing: dp(10)

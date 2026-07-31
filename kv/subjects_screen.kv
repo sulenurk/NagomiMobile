@@ -1,0 +1,184 @@
+#:import dp kivy.metrics.dp
+
+<ColorDot>:
+    size_hint: None, None
+    size: dp(34), dp(34)
+    radius: [dp(17), dp(17), dp(17), dp(17)]
+    elevation: 0
+    md_bg_color: app.hex_to_rgba(root.color_hex)
+    line_color: (1, 1, 1, 1) if root.color_hex == root.selected_color else (0, 0, 0, 0)
+    line_width: dp(2)
+
+<SubjectRow>:
+    orientation: "horizontal"
+    size_hint_y: None
+    height: dp(72)
+    padding: dp(16), dp(12)
+    spacing: dp(12)
+    radius: [dp(20), dp(20), dp(20), dp(20)]
+    elevation: 0
+    md_bg_color: 0.105, 0.09, 0.16, 1
+
+    MDCard:
+        size_hint: None, None
+        size: dp(18), dp(18)
+        radius: [dp(9), dp(9), dp(9), dp(9)]
+        elevation: 0
+        md_bg_color: app.hex_to_rgba(root.subject_color)
+        pos_hint: {"center_y": .5}
+
+    MDLabel:
+        text: root.subject_name
+        bold: True
+        theme_text_color: "Custom"
+        text_color: 0.96, 0.94, 1, 1
+        shorten: True
+        shorten_from: "right"
+
+    MDIconButton:
+        icon: "palette-outline"
+        theme_icon_color: "Custom"
+        icon_color: app.hex_to_rgba(root.subject_color)
+        on_release: app.root.ids.screen_manager.get_screen("subjects").cycle_subject_color(root.subject_id)
+
+    MDLabel:
+        text: "Varsayılan" if root.is_default else ""
+        size_hint_x: None
+        width: dp(72) if root.is_default else 0
+        font_style: "Caption"
+        halign: "center"
+        theme_text_color: "Custom"
+        text_color: 0.72, 0.68, 0.84, 1
+
+    MDIconButton:
+        icon: "delete-outline"
+        opacity: 0 if root.is_default else 1
+        disabled: root.is_default
+        theme_icon_color: "Custom"
+        icon_color: 0.95, 0.38, 0.46, 1
+        on_release: app.root.ids.screen_manager.get_screen("subjects").delete_subject(root.subject_id)
+
+<SubjectsScreen>:
+    md_bg_color: 0.055, 0.047, 0.09, 1
+
+    MDBoxLayout:
+        orientation: "vertical"
+
+        MDTopAppBar:
+            title: app.t("subjects")
+            elevation: 0
+            md_bg_color: 0.055, 0.047, 0.09, 1
+            specific_text_color: 0.96, 0.94, 1, 1
+            left_action_items: [["menu", lambda x: app.toggle_navigation_drawer()]]
+
+        ScrollView:
+            do_scroll_x: False
+            bar_width: 0
+
+            MDBoxLayout:
+                orientation: "vertical"
+                adaptive_height: True
+                padding: dp(18), dp(12), dp(18), dp(30)
+                spacing: dp(18)
+
+                MDLabel:
+                    text: "Derslerini düzenle"
+                    font_style: "H5"
+                    bold: True
+                    theme_text_color: "Custom"
+                    text_color: 0.96, 0.94, 1, 1
+                    adaptive_height: True
+
+                MDLabel:
+                    text: "Study plan ve istatistiklerde kullanacağın dersleri buradan ekleyebilirsin."
+                    theme_text_color: "Custom"
+                    text_color: 0.68, 0.65, 0.78, 1
+                    adaptive_height: True
+
+                MDCard:
+                    orientation: "vertical"
+                    adaptive_height: True
+                    padding: dp(18)
+                    spacing: dp(14)
+                    radius: [dp(26), dp(26), dp(26), dp(26)]
+                    elevation: 0
+                    md_bg_color: 0.105, 0.09, 0.16, 1
+
+                    MDLabel:
+                        text: "Yeni ders"
+                        font_style: "H6"
+                        bold: True
+                        theme_text_color: "Custom"
+                        text_color: 0.96, 0.94, 1, 1
+                        adaptive_height: True
+
+                    MDTextField:
+                        id: subject_name
+                        hint_text: "Örn. Matematik"
+                        mode: "rectangle"
+                        multiline: False
+                        on_text_validate: root.add_subject()
+
+                    MDLabel:
+                        text: "Renk seç"
+                        bold: True
+                        theme_text_color: "Custom"
+                        text_color: 0.72, 0.68, 0.84, 1
+                        adaptive_height: True
+
+                    MDGridLayout:
+                        cols: 8
+                        adaptive_height: True
+                        spacing: dp(12)
+
+                        ColorDot:
+                            color_hex: "#A78BFA"
+                            selected_color: root.selected_color
+                        ColorDot:
+                            color_hex: "#F472B6"
+                            selected_color: root.selected_color
+                        ColorDot:
+                            color_hex: "#60A5FA"
+                            selected_color: root.selected_color
+                        ColorDot:
+                            color_hex: "#34D399"
+                            selected_color: root.selected_color
+                        ColorDot:
+                            color_hex: "#FBBF24"
+                            selected_color: root.selected_color
+                        ColorDot:
+                            color_hex: "#FB7185"
+                            selected_color: root.selected_color
+                        ColorDot:
+                            color_hex: "#22D3EE"
+                            selected_color: root.selected_color
+                        ColorDot:
+                            color_hex: "#C084FC"
+                            selected_color: root.selected_color
+
+                    MDRaisedButton:
+                        text: "Ders ekle"
+                        size_hint_x: 1
+                        md_bg_color: app.hex_to_rgba(root.selected_color)
+                        on_release: root.add_subject()
+
+                    MDLabel:
+                        text: root.status_text
+                        halign: "center"
+                        theme_text_color: "Custom"
+                        text_color: 0.95, 0.66, 0.35, 1
+                        adaptive_height: True
+
+                MDLabel:
+                    text: "Dersler"
+                    font_style: "H6"
+                    bold: True
+                    theme_text_color: "Custom"
+                    text_color: 0.96, 0.94, 1, 1
+                    adaptive_height: True
+
+                MDBoxLayout:
+                    id: subjects_list
+                    orientation: "vertical"
+                    adaptive_height: True
+                    spacing: dp(10)

@@ -1,0 +1,66 @@
+#:import dp kivy.metrics.dp
+
+MDNavigationLayout:
+
+    ScreenManager:
+        id: screen_manager
+
+        PomodoroScreen:
+            name: "pomodoro"
+
+        FocusScreen:
+            name: "focus"
+
+        SubjectsScreen:
+            name: "subjects"
+
+        StudyPlanScreen:
+            name: "study"
+
+    MDNavigationDrawer:
+        id: nav_drawer
+
+        MDBoxLayout:
+            orientation: "vertical"
+            padding: dp(20)
+            spacing: dp(8)
+            md_bg_color: 0.055, 0.047, 0.09, 1
+
+            MDLabel:
+                text: "Nagomi"
+                font_style: "H4"
+                bold: True
+                theme_text_color: "Custom"
+                text_color: 0.96, 0.94, 1, 1
+                size_hint_y: None
+                height: dp(90)
+
+            MDFlatButton:
+                text: "Pomodoro"
+                size_hint_x: 1
+                theme_text_color: "Custom"
+                text_color: 0.90, 0.87, 0.98, 1
+                on_release: app.show_page("pomodoro")
+
+            MDFlatButton:
+                text: "Odak Sayacı"
+                size_hint_x: 1
+                theme_text_color: "Custom"
+                text_color: 0.90, 0.87, 0.98, 1
+                on_release: app.show_page("focus")
+
+            MDFlatButton:
+                text: app.t("subjects")
+                size_hint_x: 1
+                theme_text_color: "Custom"
+                text_color: 0.90, 0.87, 0.98, 1
+                on_release: app.show_page("subjects")
+
+            MDFlatButton:
+                text: app.t("study_plan")
+                size_hint_x: 1
+                theme_text_color: "Custom"
+                text_color: 0.90, 0.87, 0.98, 1
+                on_release: app.show_page("study")
+
+            Widget:

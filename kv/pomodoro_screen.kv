@@ -1,0 +1,142 @@
+#:import dp kivy.metrics.dp
+
+<PomodoroScreen>:
+    md_bg_color: 0.055, 0.047, 0.09, 1
+
+    MDBoxLayout:
+        orientation: "vertical"
+
+        MDTopAppBar:
+            title: "Nagomi"
+            anchor_title: "center"
+            elevation: 0
+            md_bg_color: 0.055, 0.047, 0.09, 1
+            specific_text_color: 0.96, 0.94, 1, 1
+            left_action_items:
+                [["menu", lambda x: app.toggle_navigation_drawer()]]
+            right_action_items:
+                [["cog-outline", lambda x: root.open_settings()]]
+
+        MDBoxLayout:
+            orientation: "vertical"
+            padding: dp(18), dp(12), dp(18), dp(24)
+            spacing: dp(8)
+
+            MDLabel:
+                text: app.t("regular_pomodoro")
+                halign: "center"
+                font_style: "H5"
+                bold: True
+                theme_text_color: "Custom"
+                text_color: 0.96, 0.94, 1, 1
+                size_hint_y: None
+                height: dp(34)
+
+            MDLabel:
+                text: "Sakinleş, odaklan ve küçük adımlarla ilerle."
+                halign: "center"
+                theme_text_color: "Custom"
+                text_color: 0.68, 0.65, 0.78, 1
+                size_hint_y: None
+                height: dp(30)
+
+            Widget:
+                size_hint_y: 0.25
+
+            MDCard:
+                orientation: "vertical"
+                size_hint_y: None
+                height: dp(485)
+                padding: dp(18), dp(20), dp(18), dp(20)
+                spacing: dp(8)
+                radius: [dp(30), dp(30), dp(30), dp(30)]
+                elevation: 0
+                md_bg_color: 0.105, 0.09, 0.16, 1
+
+                MDLabel:
+                    text: root.mode_text
+                    halign: "center"
+                    font_style: "H6"
+                    bold: True
+                    theme_text_color: "Custom"
+                    text_color: root.mode_color
+                    size_hint_y: None
+                    height: dp(36)
+
+                FloatLayout:
+                    size_hint_y: None
+                    height: dp(305)
+
+                    CircularProgress:
+                        progress: root.progress
+                        progress_color: root.mode_color
+                        track_color: 0.18, 0.16, 0.25, 1
+                        line_width: dp(11)
+
+                        size_hint: None, None
+                        size: dp(275), dp(275)
+
+                        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+
+                    MDBoxLayout:
+                        orientation: "vertical"
+                        size_hint: None, None
+                        size: dp(220), dp(110)
+                        spacing: dp(2)
+
+                        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+
+                        MDLabel:
+                            text: root.timer_text
+                            halign: "center"
+                            font_style: "H2"
+                            bold: True
+                            theme_text_color: "Custom"
+                            text_color: 0.98, 0.97, 1, 1
+
+                        MDLabel:
+                            text: root.cycle_text
+                            halign: "center"
+                            font_style: "Subtitle1"
+                            theme_text_color: "Custom"
+                            text_color: 0.68, 0.65, 0.78, 1
+
+                MDBoxLayout:
+                    size_hint_y: None
+                    height: dp(76)
+                    spacing: dp(16)
+                    padding: dp(10), 0
+
+                    Widget:
+
+                    MDFloatingActionButton:
+                        icon: "restore"
+                        type: "small"
+                        md_bg_color: 0.18, 0.16, 0.25, 1
+                        on_release: root.reset_timer()
+
+                    MDFloatingActionButton:
+                        icon: root.primary_action_icon
+                        type: "large"
+                        md_bg_color: root.mode_color
+                        on_release: root.toggle_timer()
+
+                    MDFloatingActionButton:
+                        icon: "skip-next"
+                        type: "small"
+                        md_bg_color: 0.18, 0.16, 0.25, 1
+                        on_release: root.skip_session()
+
+                    Widget:
+
+                MDLabel:
+                    text: root.status_text
+                    halign: "center"
+                    bold: True
+                    theme_text_color: "Custom"
+                    text_color: 0.95, 0.66, 0.35, 1
+                    size_hint_y: None
+                    height: dp(28)
+
+            Widget:
+                size_hint_y: 0.75

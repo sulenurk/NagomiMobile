@@ -1,0 +1,161 @@
+#:import dp kivy.metrics.dp
+
+<FocusScreen>:
+    md_bg_color: 0.055, 0.047, 0.09, 1
+
+    MDBoxLayout:
+        orientation: "vertical"
+
+        MDTopAppBar:
+            title: "Nagomi"
+            anchor_title: "center"
+            elevation: 0
+            md_bg_color: 0.055, 0.047, 0.09, 1
+            specific_text_color: 0.96, 0.94, 1, 1
+
+            left_action_items:
+                [["menu", lambda x: app.toggle_navigation_drawer()]]
+
+            right_action_items:
+                [["cog-outline", lambda x: root.open_settings()]]
+
+        MDBoxLayout:
+            orientation: "vertical"
+            padding: dp(18), dp(12), dp(18), dp(24)
+            spacing: dp(8)
+
+            MDLabel:
+                text: app.t("focus_timer")
+                halign: "center"
+                font_style: "H5"
+                bold: True
+                theme_text_color: "Custom"
+                text_color: 0.96, 0.94, 1, 1
+                size_hint_y: None
+                height: dp(34)
+
+            MDLabel:
+                text: "Zamanı saymadan, kendi ritminde odaklan."
+                halign: "center"
+                theme_text_color: "Custom"
+                text_color: 0.68, 0.65, 0.78, 1
+                size_hint_y: None
+                height: dp(30)
+
+            Widget:
+                size_hint_y: 0.15
+
+            MDCard:
+                orientation: "vertical"
+                size_hint_y: None
+                height: dp(475)
+                padding: dp(18), dp(20), dp(18), dp(20)
+                spacing: dp(10)
+                radius: [dp(30), dp(30), dp(30), dp(30)]
+                elevation: 0
+                md_bg_color: 0.105, 0.09, 0.16, 1
+
+                MDLabel:
+                    text: str(root.active_task_name)
+                    halign: "center"
+                    valign: "middle"
+                    font_style: "H6"
+                    bold: True
+                    theme_text_color: "Custom"
+                    text_color: 0.67, 0.55, 0.98, 1
+                    size_hint_y: None
+                    height: dp(46)
+                    text_size: self.width - dp(20), None
+
+                MDBoxLayout:
+                    orientation: "vertical"
+                    size_hint_y: None
+                    height: dp(220)
+                    spacing: dp(2)
+
+                    Widget:
+                        size_hint_y: 0.3
+
+                    MDLabel:
+                        text: str(root.timer_text)
+                        halign: "center"
+                        font_style: "H2"
+                        bold: True
+                        theme_text_color: "Custom"
+                        text_color: 0.98, 0.97, 1, 1
+
+                    MDLabel:
+                        text: str(root.status_text)
+                        halign: "center"
+                        font_style: "Subtitle1"
+                        theme_text_color: "Custom"
+                        text_color: 0.68, 0.65, 0.78, 1
+                        size_hint_y: None
+                        height: dp(34)
+
+                    Widget:
+                        size_hint_y: 0.3
+
+                MDBoxLayout:
+                    size_hint_y: None
+                    height: dp(76)
+                    spacing: dp(16)
+                    padding: dp(10), 0
+
+                    Widget:
+
+                    MDFloatingActionButton:
+                        icon: "restore"
+                        type: "small"
+                        md_bg_color: 0.18, 0.16, 0.25, 1
+                        on_release: root.reset_timer()
+
+                    MDFloatingActionButton:
+                        icon: root.primary_action_icon
+                        type: "large"
+                        md_bg_color: 0.49, 0.36, 0.92, 1
+                        on_release: root.toggle_timer()
+
+                    MDFloatingActionButton:
+                        icon: "stop"
+                        type: "small"
+                        md_bg_color: 0.18, 0.16, 0.25, 1
+                        on_release: root.finish_session()
+
+                    Widget:
+
+                MDCard:
+                    orientation: "horizontal"
+                    size_hint_y: None
+                    height: dp(72)
+                    padding: dp(16), dp(10)
+                    radius: [dp(18), dp(18), dp(18), dp(18)]
+                    elevation: 0
+                    md_bg_color: 0.14, 0.12, 0.20, 1
+
+                    MDBoxLayout:
+                        orientation: "vertical"
+
+                        MDLabel:
+                            text: app.t("away_time")
+                            font_style: "Caption"
+                            theme_text_color: "Custom"
+                            text_color: 0.68, 0.65, 0.78, 1
+
+                        MDLabel:
+                            text: str(root.away_time_text)
+                            font_style: "H6"
+                            bold: True
+                            theme_text_color: "Custom"
+                            text_color: 0.95, 0.66, 0.35, 1
+
+                    MDIcon:
+                        icon: "timer-sand"
+                        halign: "center"
+                        theme_text_color: "Custom"
+                        text_color: 0.95, 0.66, 0.35, 1
+                        size_hint_x: None
+                        width: dp(42)
+
+            Widget:
+                size_hint_y: 0.85

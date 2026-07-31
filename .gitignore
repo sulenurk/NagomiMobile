@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Kivy
+.kivy/
+*.log
+
+# Build outputs
+build/
+bin/
+dist/
+.buildozer/
+*.apk
+*.aab
+
+# Local application data
+app_data.json
+
+# IDE
+.vscode/
+.idea/
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
