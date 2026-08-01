@@ -272,10 +272,162 @@
                         adaptive_height: True
 
                     MDBoxLayout:
-                        id: weekly_list
                         orientation: "vertical"
-                        adaptive_height: True
-                        spacing: dp(10)
+                        size_hint_y: None
+                        height: dp(245)
+                        spacing: dp(4)
+
+                        # Sütunların üzerindeki dakika değerleri
+                        MDBoxLayout:
+                            size_hint_y: None
+                            height: dp(24)
+                            spacing: 0
+
+                            MDLabel:
+                                text: root.weekly_value_texts[0]
+                                halign: "center"
+                                valign: "middle"
+
+                                text_size: None, None
+                                shorten: True
+
+                                font_style: "Caption"
+                                theme_text_color: "Custom"
+                                text_color: 0.72, 0.68, 0.84, 1
+
+                            MDLabel:
+                                text: root.weekly_value_texts[1]
+                                halign: "center"
+                                valign: "middle"
+
+                                text_size: None, None
+                                shorten: True
+
+                                font_style: "Caption"
+                                theme_text_color: "Custom"
+                                text_color: 0.72, 0.68, 0.84, 1
+
+                            MDLabel:
+                                text: root.weekly_value_texts[2]
+                                halign: "center"
+                                valign: "middle"
+
+                                text_size: None, None
+                                shorten: True
+
+                                font_style: "Caption"
+                                theme_text_color: "Custom"
+                                text_color: 0.72, 0.68, 0.84, 1
+
+                            MDLabel:
+                                text: root.weekly_value_texts[3]
+                                halign: "center"
+                                valign: "middle"
+
+                                text_size: None, None
+                                shorten: True
+
+                                font_style: "Caption"
+                                theme_text_color: "Custom"
+                                text_color: 0.72, 0.68, 0.84, 1
+
+                            MDLabel:
+                                text: root.weekly_value_texts[4]
+                                halign: "center"
+                                valign: "middle"
+
+                                text_size: None, None
+                                shorten: True
+
+                                font_style: "Caption"
+                                theme_text_color: "Custom"
+                                text_color: 0.72, 0.68, 0.84, 1
+
+                            MDLabel:
+                                text: root.weekly_value_texts[5]
+                                halign: "center"
+                                valign: "middle"
+
+                                text_size: None, None
+                                shorten: True
+
+                                font_style: "Caption"
+                                theme_text_color: "Custom"
+                                text_color: 0.72, 0.68, 0.84, 1
+
+                            MDLabel:
+                                text: root.weekly_value_texts[6]
+                                halign: "center"
+                                valign: "middle"
+
+                                text_size: None, None
+                                shorten: True
+
+                                font_style: "Caption"
+                                theme_text_color: "Custom"
+                                text_color: 0.72, 0.68, 0.84, 1
+
+                        WeeklyBarChart:
+                            id: weekly_bar_chart
+                            labels: root.weekly_labels
+                            values: root.weekly_values
+                            size_hint_y: None
+                            height: dp(175)
+
+                        # Gün isimleri
+                        MDBoxLayout:
+                            size_hint_y: None
+                            height: dp(28)
+                            spacing: 0
+
+                            MDLabel:
+                                text: root.weekly_labels[0]
+                                halign: "center"
+                                font_style: "Caption"
+                                theme_text_color: "Custom"
+                                text_color: 0.72, 0.68, 0.84, 1
+
+                            MDLabel:
+                                text: root.weekly_labels[1]
+                                halign: "center"
+                                font_style: "Caption"
+                                theme_text_color: "Custom"
+                                text_color: 0.72, 0.68, 0.84, 1
+
+                            MDLabel:
+                                text: root.weekly_labels[2]
+                                halign: "center"
+                                font_style: "Caption"
+                                theme_text_color: "Custom"
+                                text_color: 0.72, 0.68, 0.84, 1
+
+                            MDLabel:
+                                text: root.weekly_labels[3]
+                                halign: "center"
+                                font_style: "Caption"
+                                theme_text_color: "Custom"
+                                text_color: 0.72, 0.68, 0.84, 1
+
+                            MDLabel:
+                                text: root.weekly_labels[4]
+                                halign: "center"
+                                font_style: "Caption"
+                                theme_text_color: "Custom"
+                                text_color: 0.72, 0.68, 0.84, 1
+
+                            MDLabel:
+                                text: root.weekly_labels[5]
+                                halign: "center"
+                                font_style: "Caption"
+                                theme_text_color: "Custom"
+                                text_color: 0.72, 0.68, 0.84, 1
+
+                            MDLabel:
+                                text: root.weekly_labels[6]
+                                halign: "center"
+                                font_style: "Caption"
+                                theme_text_color: "Custom"
+                                text_color: 0.72, 0.68, 0.84, 1
 
                 # -----------------------------------------------
                 # DERS DAĞILIMI

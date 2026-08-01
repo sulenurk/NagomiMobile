@@ -15,6 +15,133 @@ from kivymd.uix.label import MDLabel
 from kivymd.uix.progressbar import MDProgressBar
 from kivymd.uix.screen import MDScreen
 
+from kivy.graphics import Color, Line, RoundedRectangle
+from kivy.properties import ListProperty
+from kivy.uix.widget import Widget
+
+class WeeklyBarChart(Widget):
+    labels = ListProperty([])
+    values = ListProperty([])
+    bar_color = ListProperty([0.49, 0.28, 0.86, 1])
+    empty_bar_color = ListProperty([0.23, 0.21, 0.29, 1])
+    text_color = ListProperty([0.72, 0.68, 0.84, 1])
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.bind(
+            pos=self._redraw,
+            size=self._redraw,
+            labels=self._redraw,
+            values=self._redraw,
+            bar_color=self._redraw,
+            empty_bar_color=self._redraw,
+        )
+
+    def set_data(
+        self,
+        labels: list[str],
+        values: list[int],
+    ) -> None:
+        self.labels = list(labels)
+        self.values = list(values)
+        self._redraw()
+
+    def _redraw(self, *_args) -> None:
+        self.canvas.clear()
+
+        if not self.labels or not self.values:
+            return
+
+        chart_left = self.x + dp(12)
+        chart_right = self.right - dp(12)
+        chart_bottom = self.y + dp(34)
+        chart_top = self.top - dp(30)
+
+        chart_width = max(0, chart_right - chart_left)
+        chart_height = max(0, chart_top - chart_bottom)
+
+        if chart_width <= 0 or chart_height <= 0:
+            return
+
+        values = [
+            max(0, int(value))
+            for value in self.values[:7]
+        ]
+
+        labels = [
+            str(label)
+            for label in self.labels[:7]
+        ]
+
+        while len(values) < 7:
+            values.append(0)
+
+        while len(labels) < 7:
+            labels.append("")
+
+        max_value = max(values) if values else 0
+        scale_max = max(max_value, 1)
+
+        column_width = chart_width / 7
+        bar_width = min(dp(28), column_width * 0.56)
+
+        with self.canvas:
+            # Yatay referans çizgileri
+            Color(0.22, 0.20, 0.28, 1)
+
+            for index in range(4):
+                y = chart_bottom + (
+                    chart_height * index / 3
+                )
+
+                Line(
+                    points=[
+                        chart_left,
+                        y,
+                        chart_right,
+                        y,
+                    ],
+                    width=1,
+                )
+
+            for index, value in enumerate(values):
+                center_x = (
+                    chart_left
+                    + column_width * index
+                    + column_width / 2
+                )
+
+                if value > 0:
+                    bar_height = max(
+                        dp(5),
+                        chart_height
+                        * value
+                        / scale_max,
+                    )
+                    color = self.bar_color
+                else:
+                    bar_height = dp(4)
+                    color = self.empty_bar_color
+
+                Color(*color)
+
+                RoundedRectangle(
+                    pos=(
+                        center_x - bar_width / 2,
+                        chart_bottom,
+                    ),
+                    size=(
+                        bar_width,
+                        bar_height,
+                    ),
+                    radius=[
+                        dp(6),
+                        dp(6),
+                        0,
+                        0,
+                    ],
+                )
 
 class StatisticsScreen(MDScreen):
     today_focus_text = StringProperty("00:00")
@@ -39,6 +166,15 @@ class StatisticsScreen(MDScreen):
     )
     empty_recent_text = StringProperty(
         "Bugün tamamlanmış bir odak oturumu yok."
+    )
+
+    weekly_labels = ListProperty(
+        ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
+    )
+
+    weekly_values = ListProperty([0, 0, 0, 0, 0, 0, 0])
+    weekly_value_texts = ListProperty(
+        ["0", "0", "0", "0", "0", "0", "0"]
     )
 
     selected_subject_id = StringProperty("all")
@@ -391,69 +527,39 @@ class StatisticsScreen(MDScreen):
         return totals
 
     def render_weekly_overview(self) -> None:
-        if "weekly_list" not in self.ids:
-            return
-
-        container = self.ids.weekly_list
-        container.clear_widgets()
-
         totals = self.get_weekly_daily_totals()
         labels = self.get_week_day_labels()
 
         values = [
-            seconds // 60
+            max(0, int(seconds)) // 60
             for seconds in totals.values()
         ]
 
+        while len(values) < 7:
+            values.append(0)
+
+        values = values[:7]
+        labels = labels[:7]
+
         weekly_total = sum(values)
-        highest_value = max(values) if values else 0
+
+        self.weekly_labels = labels
+        self.weekly_values = values
+        self.weekly_value_texts = [
+            str(value)
+            for value in values
+        ]
 
         self.weekly_total_text = (
             f"Bu hafta: {weekly_total} dk · "
             f"{self.selected_subject_name}"
         )
 
-        for label, minutes in zip(labels, values):
-            row = MDBoxLayout(
-                orientation="horizontal",
-                adaptive_height=True,
-                spacing=dp(10),
+        if "weekly_bar_chart" in self.ids:
+            self.ids.weekly_bar_chart.set_data(
+                labels,
+                values,
             )
-
-            day_label = MDLabel(
-                text=label,
-                size_hint_x=None,
-                width=dp(38),
-                adaptive_height=True,
-                theme_text_color="Custom",
-                text_color=(0.72, 0.68, 0.84, 1),
-            )
-
-            progress = MDProgressBar(
-                value=(
-                    minutes / highest_value * 100
-                    if highest_value > 0
-                    else 0
-                ),
-                size_hint_y=None,
-                height=dp(8),
-            )
-
-            value_label = MDLabel(
-                text=f"{minutes} dk",
-                size_hint_x=None,
-                width=dp(58),
-                halign="right",
-                adaptive_height=True,
-                theme_text_color="Custom",
-                text_color=(0.92, 0.90, 0.98, 1),
-            )
-
-            row.add_widget(day_label)
-            row.add_widget(progress)
-            row.add_widget(value_label)
-
-            container.add_widget(row)
 
     # ---------------------------------------------------------
     # DERS DAĞILIMI
@@ -558,17 +664,6 @@ class StatisticsScreen(MDScreen):
                 spacing=dp(8),
             )
 
-            color_dot = MDLabel(
-                text="●",
-                size_hint_x=None,
-                width=dp(20),
-                adaptive_height=True,
-                theme_text_color="Custom",
-                text_color=self.app.hex_to_rgba(
-                    item["color"]
-                ),
-            )
-
             name_label = MDLabel(
                 text=str(item["name"]),
                 adaptive_height=True,
@@ -593,7 +688,6 @@ class StatisticsScreen(MDScreen):
                 height=dp(8),
             )
 
-            header.add_widget(color_dot)
             header.add_widget(name_label)
             header.add_widget(value_label)
 
@@ -638,7 +732,6 @@ class StatisticsScreen(MDScreen):
             if source == "regular_pomodoro":
                 title = "Klasik Pomodoro"
                 source_text = "Pomodoro"
-                icon = "timer-outline"
             else:
                 title = str(
                     session.get("task_title")
@@ -646,7 +739,6 @@ class StatisticsScreen(MDScreen):
                     or "Odak oturumu"
                 )
                 source_text = "Çalışma planı"
-                icon = "target"
 
             duration_minutes = (
                 self._safe_seconds(
@@ -687,17 +779,6 @@ class StatisticsScreen(MDScreen):
                 spacing=dp(8),
             )
 
-            icon_text = "◷" if source == "regular_pomodoro" else "●"
-
-            icon_label = MDLabel(
-                text=icon_text,
-                markup=False,
-                size_hint_x=None,
-                width=dp(25),
-                adaptive_height=True,
-                theme_text_color="Custom",
-                text_color=(0.65, 0.55, 0.98, 1),
-            )
 
             title_label = MDLabel(
                 text=title,
@@ -729,7 +810,6 @@ class StatisticsScreen(MDScreen):
                 text_color=(0.68, 0.65, 0.78, 1),
             )
 
-            title_row.add_widget(icon_label)
             title_row.add_widget(title_label)
             title_row.add_widget(time_label)
 
