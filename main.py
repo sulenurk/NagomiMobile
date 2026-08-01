@@ -22,6 +22,7 @@ class NagomiApp(MDApp):
     app_data = DictProperty({})
     active_page = StringProperty("pomodoro")
     language = StringProperty("tr")
+    translations = DictProperty({})
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -34,6 +35,7 @@ class NagomiApp(MDApp):
         self.ensure_app_data_defaults()
 
         self.language = self.app_data.get("language", "tr")
+        self.load_translations()
 
         # Pomodoro ekranının tasarım dosyası.
         Builder.load_file("kv/pomodoro_screen.kv")
@@ -42,7 +44,104 @@ class NagomiApp(MDApp):
         Builder.load_file("kv/study_plan_screen.kv")
         Builder.load_file("kv/statistics_screen.kv")
         Builder.load_file("kv/settings_screen.kv")
-        
+
+    def load_translations(self) -> None:
+        language_file = (
+            Path(__file__).resolve().parent
+            / "locales"
+            / f"{self.language}.json"
+        )
+
+        fallback_file = (
+            Path(__file__).resolve().parent
+            / "locales"
+            / "tr.json"
+        )
+
+        translations = {}
+
+        try:
+            with fallback_file.open(
+                "r",
+                encoding="utf-8",
+            ) as file:
+                fallback_data = json.load(file)
+
+            if isinstance(fallback_data, dict):
+                translations.update(fallback_data)
+
+        except (OSError, json.JSONDecodeError):
+            pass
+
+        if language_file != fallback_file:
+            try:
+                with language_file.open(
+                    "r",
+                    encoding="utf-8",
+                ) as file:
+                    language_data = json.load(file)
+
+                if isinstance(language_data, dict):
+                    translations.update(language_data)
+
+            except (OSError, json.JSONDecodeError):
+                pass
+
+        self.translations = translations
+
+    def t(self, key: str, **kwargs) -> str:
+        text = str(
+            self.translations.get(
+                key,
+                key,
+            )
+        )
+
+        if not kwargs:
+            return text
+
+        try:
+            return text.format(**kwargs)
+        except (KeyError, ValueError, IndexError):
+            return text
+
+    def set_language(self, language_code: str) -> None:
+        self.language = language_code
+        self.app_data["language"] = language_code
+        self.save_app_data()
+
+        self.load_translations()
+        self.refresh_language_ui()
+
+    def refresh_language_ui(self) -> None:
+        if not self.root:
+            return
+
+        screen_manager = self.root.ids.get(
+            "screen_manager"
+        )
+
+        if not screen_manager:
+            return
+
+        for screen in screen_manager.screens:
+            if hasattr(screen, "refresh_subject_spinner"):
+                screen.refresh_subject_spinner()
+
+            if hasattr(screen, "load_settings"):
+                screen.load_settings()
+
+            if hasattr(screen, "refresh_stats"):
+                screen.refresh_stats()
+
+            if hasattr(screen, "render_tasks"):
+                screen.render_tasks()
+
+            if hasattr(screen, "render_subjects"):
+                screen.render_subjects()
+
+            if hasattr(screen, "refresh_ui"):
+                screen.refresh_ui()
 
     def on_start(self):
         self.show_page("pomodoro")
@@ -178,12 +277,17 @@ class NagomiApp(MDApp):
                 0,
                 {
                     "id": "subject_other",
-                    "name": "Diğer",
                     "name_key": "other_subject",
                     "color": "#A78BFA",
                     "is_default": True,
                 },
             )
+
+        for subject in subjects:
+            if subject.get("id") == "subject_other":
+                subject["name_key"] = "other_subject"
+                subject["is_default"] = True
+                subject.pop("name", None)
 
         self.save_app_data()
 
@@ -237,48 +341,7 @@ class NagomiApp(MDApp):
         except OSError as error:
             print(f"[DATA ERROR] Veriler kaydedilemedi: {error}")
 
-    def t(self, key: str, **kwargs) -> str:
-        translations = {
-            "app_name": "Nagomi",
-            "regular_pomodoro": "Pomodoro",
-            "focus_mode": "Odak",
-            "short_break_mode": "Kısa Mola",
-            "long_break_mode": "Uzun Mola",
-            "current_cycle": "Mevcut Döngü",
-            "paused": "Duraklatıldı",
-            "focus_ready": "Odaklanmaya hazır",
-            "break_ready": "Mola hazır",
-            "pomodoro_cycle_completed": "Pomodoro döngüsü tamamlandı",
-            "other_subject": "Diğer",
-            "subjects": "Dersler",
-            "focus_timer": "Odak Sayacı",
-            "focus_session": "Odak Oturumu",
-            "start": "Başlat",
-            "pause": "Duraklat",
-            "continue": "Devam Et",
-            "reset": "Sıfırla",
-            "finish": "Bitir",
-            "focused_time": "Odak Süresi",
-            "away_time": "Uzakta Geçen Süre",
-            "today": "Bugün",
-            "this_week": "Bu Hafta",
-            "no_active_task": "Serbest Odak",
-            "active_task": "Aktif Görev",
-            "session_completed": "Odak oturumu kaydedildi",
-            "settings": "Ayarlar",
-            "settings_saved": "Ayarlar kaydedildi.",
-            "save": "Kaydet",
-        }
-
-        text = translations.get(key, key)
-
-        if kwargs:
-            try:
-                return text.format(**kwargs)
-            except (KeyError, ValueError):
-                return text
-
-        return text
+    
 
     def stop_alarm(self) -> None:
         # Alarm özelliğini daha sonra ekleyeceğiz.

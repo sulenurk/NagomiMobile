@@ -42,7 +42,7 @@
                     height: dp(34)
 
                 MDLabel:
-                    text: "Sakinleş, odaklan ve küçük adımlarla ilerle."
+                    text: app.t("pomodoro_subtitle")
                     halign: "center"
                     theme_text_color: "Custom"
                     text_color: 0.68, 0.65, 0.78, 1
@@ -221,7 +221,7 @@
                 spacing: dp(8)
 
                 MDLabel:
-                    text: "Pomodoro ayarları"
+                    text: app.t("pomodoro_settings")
                     font_style: "Subtitle1"
                     bold: True
                     theme_text_color: "Custom"
@@ -234,7 +234,7 @@
                     on_release: root.close_settings()
 
             MDLabel:
-                text: "Klasik Pomodoro sürelerini ve döngü yapısını düzenle."
+                text: app.t("pomodoro_settings_description")
                 font_style: "Caption"
                 theme_text_color: "Custom"
                 text_color: 0.66, 0.62, 0.74, 1
@@ -255,7 +255,7 @@
                     MDTextField:
                         id: settings_focus_minutes
                         text: root.settings_focus_minutes
-                        hint_text: "Odak süresi (dk)"
+                        hint_text: app.t("focus_duration_minutes")
                         helper_text_mode: "persistent"
                         input_filter: "int"
                         mode: "fill"
@@ -296,7 +296,7 @@
                     MDTextField:
                         id: settings_short_break_minutes
                         text: root.settings_short_break_minutes
-                        hint_text: "Kısa mola  (dk)"
+                        hint_text: app.t("short_break_minutes")
                         helper_text_mode: "persistent"
                         input_filter: "int"
                         mode: "fill"
@@ -337,7 +337,7 @@
                     MDTextField:
                         id: settings_long_break_minutes
                         text: root.settings_long_break_minutes
-                        hint_text: "Uzun mola (dk)"
+                        hint_text: app.t("long_break_minutes")
                         helper_text_mode: "persistent"
                         input_filter: "int"
                         mode: "fill"
@@ -378,7 +378,7 @@
                     MDTextField:
                         id: settings_long_break_after
                         text: root.settings_long_break_after
-                        hint_text: "Uzun mola aralığı"
+                        hint_text: app.t("long_break_interval")
                         helper_text_mode: "persistent"
                         input_filter: "int"
                         mode: "fill"
@@ -419,8 +419,8 @@
                     MDTextField:
                         id: settings_focus_count
                         text: root.settings_focus_count
-                        hint_text: "Toplam odak döngüsü"
-                        helper_text: "sınırsız döngü için 0"
+                        hint_text: app.t("total_focus_cycles")
+                        helper_text: app.t("zero_for_unlimited_cycles")
                         helper_text_mode: "persistent"
                         input_filter: "int"
                         mode: "fill"
@@ -459,7 +459,7 @@
                             0.65, 0.55, 0.98, 1
 
             MDRaisedButton:
-                text: "Kaydet"
+                text: app.t("save")
                 size_hint_x: 1
                 size_hint_y: None
                 height: dp(50)

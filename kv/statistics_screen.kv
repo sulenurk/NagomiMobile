@@ -7,7 +7,7 @@
         orientation: "vertical"
 
         MDTopAppBar:
-            title: "İstatistikler"
+            title: app.t("statistics")
             anchor_title: "center"
             elevation: 0
             md_bg_color: 0.055, 0.047, 0.09, 1
@@ -27,7 +27,7 @@
                 spacing: dp(14)
 
                 MDLabel:
-                    text: "İstatistikler"
+                    text: app.t("statistics")
                     font_style: "Subtitle1"
                     bold: True
                     theme_text_color: "Custom"
@@ -35,7 +35,7 @@
                     adaptive_height: True
 
                 MDLabel:
-                    text: "Odak sürelerini ve çalışma düzenini takip et."
+                    text: app.t("statistics_subtitle")
                     font_style: "Subtitle2"
                     theme_text_color: "Custom"
                     text_color: 0.68, 0.65, 0.78, 1
@@ -59,7 +59,7 @@
                         md_bg_color: 0.105, 0.09, 0.16, 1
 
                         MDLabel:
-                            text: "Bugün"
+                            text: app.t("today")
                             font_style: "Caption"
                             theme_text_color: "Custom"
                             text_color: 0.68, 0.65, 0.78, 1
@@ -83,7 +83,7 @@
                         md_bg_color: 0.105, 0.09, 0.16, 1
 
                         MDLabel:
-                            text: "Oturum"
+                            text: app.t("sessions")
                             font_style: "Caption"
                             theme_text_color: "Custom"
                             text_color: 0.68, 0.65, 0.78, 1
@@ -107,7 +107,7 @@
                         md_bg_color: 0.105, 0.09, 0.16, 1
 
                         MDLabel:
-                            text: "Uzakta"
+                            text: app.t("away")
                             font_style: "Caption"
                             theme_text_color: "Custom"
                             text_color: 0.68, 0.65, 0.78, 1
@@ -135,7 +135,7 @@
                     md_bg_color: 0.105, 0.09, 0.16, 1
 
                     MDLabel:
-                        text: "Bugünkü odak dağılımı"
+                        text: app.t("today_focus_distribution")
                         font_style: "Subtitle1"
                         bold: True
                         theme_text_color: "Custom"
@@ -147,7 +147,7 @@
                         spacing: dp(8)
 
                         MDLabel:
-                            text: "Çalışma planı"
+                            text: app.t("study_plan")
                             font_style: "Caption"
                             theme_text_color: "Custom"
                             text_color: 0.68, 0.65, 0.78, 1
@@ -166,7 +166,7 @@
                         spacing: dp(8)
 
                         MDLabel:
-                            text: "Klasik Pomodoro"
+                            text: app.t("regular_pomodoro")
                             font_style: "Caption"
                             theme_text_color: "Custom"
                             text_color: 0.68, 0.65, 0.78, 1
@@ -185,7 +185,7 @@
                         spacing: dp(8)
 
                         MDLabel:
-                            text: "Toplam"
+                            text: app.t("total")
                             bold: True
                             theme_text_color: "Custom"
                             text_color: 0.94, 0.92, 1, 1
@@ -213,7 +213,7 @@
                     md_bg_color: 0.105, 0.09, 0.16, 1
 
                     MDLabel:
-                        text: "Günlük hedef"
+                        text: app.t("daily_goal")
                         font_style: "Subtitle1"
                         bold: True
                         theme_text_color: "Custom"
@@ -246,7 +246,7 @@
                     md_bg_color: 0.105, 0.09, 0.16, 1
 
                     MDLabel:
-                        text: "Haftalık görünüm"
+                        text: app.t("weekly_overview")
                         font_style: "Subtitle1"
                         bold: True
                         theme_text_color: "Custom"
@@ -443,7 +443,7 @@
                     md_bg_color: 0.105, 0.09, 0.16, 1
 
                     MDLabel:
-                        text: "Ders dağılımı"
+                        text: app.t("subject_distribution")
                         font_style: "Subtitle1"
                         bold: True
                         theme_text_color: "Custom"
@@ -486,7 +486,7 @@
                     md_bg_color: 0.105, 0.09, 0.16, 1
 
                     MDLabel:
-                        text: "Bugünkü son oturumlar"
+                        text: app.t("today_recent_sessions")
                         font_style: "Subtitle1"
                         bold: True
                         theme_text_color: "Custom"

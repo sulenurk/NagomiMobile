@@ -33,8 +33,9 @@ MDNavigationLayout:
             md_bg_color: 0.055, 0.047, 0.09, 1
 
             MDLabel:
-                text: "Nagomi"
-                font_style: "H4"
+                text: app.t("app_name")
+                font_style: "H5"
+                halign: "center"
                 bold: True
                 theme_text_color: "Custom"
                 text_color: 0.96, 0.94, 1, 1
@@ -42,14 +43,14 @@ MDNavigationLayout:
                 height: dp(90)
 
             MDFlatButton:
-                text: "Pomodoro"
+                text: app.t("regular_pomodoro")
                 size_hint_x: 1
                 theme_text_color: "Custom"
                 text_color: 0.90, 0.87, 0.98, 1
                 on_release: app.show_page("pomodoro")
 
             MDFlatButton:
-                text: "Odak Sayacı"
+                text: app.t("focus_timer")
                 size_hint_x: 1
                 theme_text_color: "Custom"
                 text_color: 0.90, 0.87, 0.98, 1
@@ -70,14 +71,14 @@ MDNavigationLayout:
                 on_release: app.show_page("study")
 
             MDFlatButton:
-                text: "Statistics"
+                text: app.t("statistics")
                 size_hint_x: 1
                 theme_text_color: "Custom"
                 text_color: 0.90, 0.87, 0.98, 1
                 on_release: app.show_page("statistics")
 
             MDFlatButton:
-                text: "Ayarlar"
+                text: app.t("settings")
                 size_hint_x: 1
                 theme_text_color: "Custom"
                 text_color: 0.90, 0.87, 0.98, 1

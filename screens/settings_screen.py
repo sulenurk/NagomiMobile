@@ -85,9 +85,9 @@ class SettingsScreen(MDScreen):
             )
 
             self.week_start_text = (
-                "Pazar"
+                self.app.t("sunday")
                 if week_start_day == "sunday"
-                else "Pazartesi"
+                else self.app.t("monday")
             )
 
             self.status_text = ""
@@ -165,7 +165,7 @@ class SettingsScreen(MDScreen):
 
             daily_goal = self._read_positive_int(
                 self.ids.daily_goal.text,
-                "Günlük hedef",
+                self.app.t("daily_goal"),
             )
 
         except ValueError as error:
@@ -181,9 +181,9 @@ class SettingsScreen(MDScreen):
         self.week_start_text = selected_value
 
         self.get_settings()["week_start_day"] = (
-            "sunday"
+            self.app.t("sunday")
             if selected_value == "Pazar"
-            else "monday"
+            else self.app.t("monday")
         )
 
         self._save_without_message()
@@ -218,7 +218,7 @@ class SettingsScreen(MDScreen):
         self.load_settings()
         self._refresh_timer_screens()
 
-        self.status_text = "Ayarlar varsayılana döndürüldü."
+        self.status_text = self.app.t("settings_reset")
 
     # ---------------------------------------------------------
     # YARDIMCI METOTLAR
@@ -285,6 +285,7 @@ class SettingsScreen(MDScreen):
 
     @staticmethod
     def _read_non_negative_int(
+        self,
         value: str,
         field_name: str,
     ) -> int:
@@ -292,12 +293,18 @@ class SettingsScreen(MDScreen):
             parsed_value = int(value.strip())
         except (TypeError, ValueError):
             raise ValueError(
-                f"{field_name} sayı olmalıdır."
+                self.app.t("field_must_be_number").format(
+                field=field_name
+            )
             )
 
         if parsed_value < 0:
             raise ValueError(
-                f"{field_name} negatif olamaz."
+                self.app.t(
+                "field_must_be_greater_than_zero"
+            ).format(
+                field=field_name
+            )
             )
 
         return parsed_value

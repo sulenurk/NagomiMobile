@@ -116,7 +116,7 @@ class SubjectsScreen(MDScreen):
         name = self.ids.subject_name.text.strip()
 
         if not name:
-            self.status_text = "Ders adı boş bırakılamaz."
+            self.status_text = self.app.t("subject_name_required")
             self.ids.subject_name.focus = True
             return
 
@@ -128,7 +128,7 @@ class SubjectsScreen(MDScreen):
         )
 
         if duplicate_exists:
-            self.status_text = "Bu isimde bir ders zaten var."
+            self.status_text = self.app.t("subject_already_exists")
             return
 
         subjects.append(
@@ -143,7 +143,7 @@ class SubjectsScreen(MDScreen):
         self.app.save_app_data()
         self.ids.subject_name.text = ""
         self.selected_color = self.get_next_subject_color()
-        self.status_text = "Ders eklendi."
+        self.status_text = self.app.t("subject_added")
         self.render_subjects()
 
     def delete_subject(self, subject_id: str):
@@ -162,7 +162,7 @@ class SubjectsScreen(MDScreen):
         self.reassign_deleted_subject_sessions(subject_id)
 
         self.app.save_app_data()
-        self.status_text = "Ders silindi."
+        self.status_text = self.app.t("subject_deleted")
         self.render_subjects()
 
     def change_subject_color(self, subject_id: str, color: str):

@@ -27,7 +27,7 @@ class StudyPlanScreen(MDScreen):
     form_status = StringProperty("")
     summary_text = StringProperty("")
     selected_subject_name = StringProperty("")
-    selected_priority = StringProperty("Orta")
+    selected_priority = StringProperty("")
     editing_task_id = StringProperty("")
 
     @property
@@ -83,24 +83,24 @@ class StudyPlanScreen(MDScreen):
         self.ids.subject_spinner.text = self.selected_subject_name
 
     def add_or_update_task(self):
-        title = self.ids.task_title.text.strip() or "Yeni görev"
+        title = self.ids.task_title.text.strip() or self.app.t("new_task")
 
         try:
             focus_minutes = int(self.ids.focus_minutes.text.strip())
             break_minutes = int(self.ids.break_minutes.text.strip())
         except ValueError:
-            self.form_status = "Süreler sayı olmalıdır."
+            self.form_status = self.app.t("durations_must_be_numbers")
             return
 
         if focus_minutes <= 0 or break_minutes < 0:
-            self.form_status = "Odak süresi pozitif, mola süresi negatif olmayan bir değer olmalıdır."
+            self.form_status = self.app.t("invalid_focus_break_duration")
             return
 
         subject = self.get_subject_by_name(self.ids.subject_spinner.text)
         priority = {
-            "Düşük": "low",
-            "Orta": "medium",
-            "Yüksek": "high",
+            self.app.t("low"): "low",
+            self.app.t("medium"): "medium",
+            self.app.t("high"): "high",
         }.get(self.ids.priority_spinner.text, "medium")
 
         if self.editing_task_id:
@@ -110,18 +110,26 @@ class StudyPlanScreen(MDScreen):
                 return
             task.update({
                 "subject_id": subject.get("id", "subject_other"),
-                "subject_name": self.get_subject_name(subject),
+                "subject_name": (
+                    ""
+                    if subject.get("is_default")
+                    else subject.get("name", "")
+                ),
                 "title": title,
                 "focus_minutes": focus_minutes,
                 "break_minutes": break_minutes,
                 "priority": priority,
             })
-            self.form_status = "Görev güncellendi."
+            self.form_status = self.app.t("task_updated")
         else:
             self.app.app_data["tasks"].append({
                 "id": f"task_{uuid.uuid4().hex[:8]}",
                 "subject_id": subject.get("id", "subject_other"),
-                "subject_name": self.get_subject_name(subject),
+                "subject_name": (
+                    ""
+                    if subject.get("is_default")
+                    else subject.get("name", "")
+                ),
                 "title": title,
                 "focus_minutes": focus_minutes,
                 "break_minutes": break_minutes,
@@ -130,7 +138,7 @@ class StudyPlanScreen(MDScreen):
                 "hidden_from_plan": False,
                 "hidden_from_completed": False,
             })
-            self.form_status = "Görev eklendi."
+            self.form_status = self.app.t("task_added")
 
         self.app.save_app_data()
         self.clear_form()
@@ -147,7 +155,7 @@ class StudyPlanScreen(MDScreen):
         self.ids.task_title.text = ""
         self.ids.focus_minutes.text = "25"
         self.ids.break_minutes.text = "5"
-        self.ids.priority_spinner.text = "Orta"
+        self.ids.priority_spinner.text = self.app.t("medium")
         self.refresh_subject_spinner()
 
     def cancel_edit(self):
@@ -166,11 +174,14 @@ class StudyPlanScreen(MDScreen):
         self.selected_subject_name = task.get("subject_name", self.app.t("other_subject"))
         self.refresh_subject_spinner()
         self.ids.priority_spinner.text = {
-            "low": "Düşük",
-            "medium": "Orta",
-            "high": "Yüksek",
-        }.get(task.get("priority", "medium"), "Orta")
-        self.form_status = "Düzenleme modu"
+            "low": self.app.t("low"),
+            "medium": self.app.t("medium"),
+            "high": self.app.t("high"),
+        }.get(
+            task.get("priority", "medium"),
+            self.app.t("medium"),
+        )
+        self.form_status = self.app.t("edit_mode")
 
     def delete_task(self, task_id):
         active_task_id = self.app.app_data.get("active_task_id")
@@ -213,7 +224,10 @@ class StudyPlanScreen(MDScreen):
         sessions.append({
             "id": f"session_{uuid.uuid4().hex[:8]}",
             "task_id": task.get("id"),
-            "task_title": task.get("title", "Yeni görev"),
+            "task_title": task.get(
+                "title",
+                self.app.t("new_task"),
+            ),
             "subject_id": task.get("subject_id", "subject_other"),
             "subject_name": task.get("subject_name", self.app.t("other_subject")),
             "mode": "focus",
@@ -273,7 +287,7 @@ class StudyPlanScreen(MDScreen):
         if hasattr(self.app, "show_page") and self.app.root.ids.screen_manager.has_screen("focus"):
             self.app.show_page("focus")
         else:
-            self.form_status = "Görev aktif edildi. Focus ekranını sonraki adımda bağlayacağız."
+            self.form_status = self.app.t("task_activated")
 
     def start_plan(self):
         pending = [
@@ -281,14 +295,14 @@ class StudyPlanScreen(MDScreen):
             if t.get("status") != "completed"
         ]
         if not pending:
-            self.form_status = "Başlatılacak görev yok."
+            self.form_status = self.app.t("no_tasks_to_start")
             return
 
         self.app.app_data["queue_mode_active"] = True
         self.app.app_data["queue_task_ids"] = [t.get("id") for t in pending]
         self.app.app_data["active_task_id"] = pending[0].get("id")
         self.app.save_app_data()
-        self.form_status = "Çalışma planı başlatıldı."
+        self.form_status = self.app.t("study_plan_started")
         self.render_tasks()
 
     def set_filter(self, value):
@@ -324,7 +338,12 @@ class StudyPlanScreen(MDScreen):
         active = sum(1 for t in all_tasks if t.get("id") == active_id and t.get("status") != "completed")
         completed = sum(1 for t in all_tasks if t.get("status") == "completed")
         total_minutes = sum(t.get("focus_minutes", 0) for t in all_tasks if t.get("status") != "completed")
-        self.summary_text = f"{pending} bekleyen  •  {active} aktif  •  {completed} tamamlanan  •  {total_minutes} dk"
+        self.summary_text = self.app.t("study_plan_summary").format(
+            pending=pending,
+            active=active,
+            completed=completed,
+            minutes=total_minutes,
+        )
 
         if not tasks:
             self.ids.empty_label.opacity = 1
@@ -335,17 +354,41 @@ class StudyPlanScreen(MDScreen):
         for index, task in enumerate(tasks):
             row = TaskRow(
                 task_id=task.get("id", ""),
-                subject_name=task.get("subject_name", self.app.t("other_subject")),
-                subject_color=self.get_subject_color(task.get("subject_id")),
+                subject_name=task.get(
+                    "subject_name",
+                    self.app.t("other_subject"),
+                ),
+                subject_color=self.get_subject_color(
+                    task.get("subject_id")
+                ),
                 title=task.get("title", ""),
-                detail_text=f"{task.get('focus_minutes', 0)} dk odak  •  {task.get('break_minutes', 0)} dk mola",
-                priority_text={"low": "Düşük", "medium": "Orta", "high": "Yüksek"}.get(task.get("priority"), "Orta"),
-                status_text="Tamamlandı" if task.get("status") == "completed" else ("Aktif" if task.get("id") == active_id else "Bekliyor"),
+                detail_text=self.app.t("task_detail").format(
+                    focus=task.get("focus_minutes", 0),
+                    break_minutes=task.get("break_minutes", 0),
+                ),
+                priority_text={
+                    "low": self.app.t("low"),
+                    "medium": self.app.t("medium"),
+                    "high": self.app.t("high"),
+                }.get(
+                    task.get("priority"),
+                    self.app.t("medium"),
+                ),
+                status_text=(
+                    self.app.t("completed")
+                    if task.get("status") == "completed"
+                    else (
+                        self.app.t("active")
+                        if task.get("id") == active_id
+                        else self.app.t("waiting")
+                    )
+                ),
                 is_completed=task.get("status") == "completed",
                 is_active=task.get("id") == active_id,
                 index=index,
                 total=len(tasks),
             )
+
             container.add_widget(row)
 
     def get_subject_color(self, subject_id):

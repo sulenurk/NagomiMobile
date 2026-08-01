@@ -155,22 +155,16 @@ class StatisticsScreen(MDScreen):
     goal_detail_text = StringProperty("0% · 00:00 / 05:00")
     goal_progress = NumericProperty(0)
 
-    weekly_total_text = StringProperty("Bu hafta: 0 dk")
-    subject_total_text = StringProperty("Bu hafta: 0 dk")
+    weekly_total_text = StringProperty("")
+    subject_total_text = StringProperty("")
 
-    selected_subject_name = StringProperty("Tüm dersler")
-    subject_filter_values = ListProperty(["Tüm dersler"])
+    selected_subject_name = StringProperty("")
+    subject_filter_values = ListProperty([])
 
-    empty_subject_text = StringProperty(
-        "Bu hafta henüz ders istatistiği yok."
-    )
-    empty_recent_text = StringProperty(
-        "Bugün tamamlanmış bir odak oturumu yok."
-    )
+    empty_subject_text = StringProperty("")
+    empty_recent_text = StringProperty("")
 
-    weekly_labels = ListProperty(
-        ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
-    )
+    weekly_labels = ListProperty(["", "", "", "", "", "", ""])
 
     weekly_values = ListProperty([0, 0, 0, 0, 0, 0, 0])
     weekly_value_texts = ListProperty(
@@ -198,6 +192,13 @@ class StatisticsScreen(MDScreen):
     def refresh_stats(self) -> None:
         if not self.ids:
             return
+
+        self.empty_subject_text = self.app.t(
+            "no_subject_statistics_this_week"
+        )
+        self.empty_recent_text = self.app.t(
+            "no_completed_focus_sessions_today"
+        )
 
         self.refresh_subject_filter()
         self.refresh_today_metrics()
@@ -392,7 +393,7 @@ class StatisticsScreen(MDScreen):
         options = [
             {
                 "id": "all",
-                "name": "Tüm dersler",
+                "name": self.app.t("all_subjects"),
             }
         ]
 
@@ -468,23 +469,23 @@ class StatisticsScreen(MDScreen):
 
         if week_start_day == "sunday":
             return [
-                "Paz",
-                "Pzt",
-                "Sal",
-                "Çar",
-                "Per",
-                "Cum",
-                "Cmt",
+                self.app.t("weekday_sun_short"),
+                self.app.t("weekday_mon_short"),
+                self.app.t("weekday_tue_short"),
+                self.app.t("weekday_wed_short"),
+                self.app.t("weekday_thu_short"),
+                self.app.t("weekday_fri_short"),
+                self.app.t("weekday_sat_short"),
             ]
 
         return [
-            "Pzt",
-            "Sal",
-            "Çar",
-            "Per",
-            "Cum",
-            "Cmt",
-            "Paz",
+            self.app.t("weekday_mon_short"),
+            self.app.t("weekday_tue_short"),
+            self.app.t("weekday_wed_short"),
+            self.app.t("weekday_thu_short"),
+            self.app.t("weekday_fri_short"),
+            self.app.t("weekday_sat_short"),
+            self.app.t("weekday_sun_short"),
         ]
 
     def get_weekly_daily_totals(
@@ -550,9 +551,11 @@ class StatisticsScreen(MDScreen):
             for value in values
         ]
 
-        self.weekly_total_text = (
-            f"Bu hafta: {weekly_total} dk · "
-            f"{self.selected_subject_name}"
+        self.weekly_total_text = self.app.t(
+            "this_week_minutes_subject"
+        ).format(
+            minutes=weekly_total,
+            subject=self.selected_subject_name,
         )
 
         if "weekly_bar_chart" in self.ids:
@@ -621,9 +624,9 @@ class StatisticsScreen(MDScreen):
 
         total_minutes = total_seconds // 60
 
-        self.subject_total_text = (
-            f"Bu hafta: {total_minutes} dk"
-        )
+        self.subject_total_text = self.app.t(
+            "this_week_minutes"
+        ).format(minutes=total_minutes)
 
         if total_seconds <= 0:
             self.ids.subject_empty.opacity = 1
@@ -673,7 +676,10 @@ class StatisticsScreen(MDScreen):
             )
 
             value_label = MDLabel(
-                text=f"{minutes} dk · {percent}%",
+                text=self.app.t("subject_distribution_value").format(
+                    minutes=minutes,
+                    percent=percent,
+                ),
                 size_hint_x=None,
                 width=dp(95),
                 halign="right",
@@ -730,15 +736,15 @@ class StatisticsScreen(MDScreen):
             )
 
             if source == "regular_pomodoro":
-                title = "Klasik Pomodoro"
-                source_text = "Pomodoro"
+                title = self.app.t("regular_pomodoro")
+                source_text = self.app.t("pomodoro")
             else:
                 title = str(
                     session.get("task_title")
                     or session.get("subject_name")
-                    or "Odak oturumu"
+                    or self.app.t("focus_session")
                 )
-                source_text = "Çalışma planı"
+                source_text = self.app.t("study_plan")
 
             duration_minutes = (
                 self._safe_seconds(
@@ -799,10 +805,10 @@ class StatisticsScreen(MDScreen):
             )
 
             detail_label = MDLabel(
-                text=(
-                    f"{source_text} · "
-                    f"{duration_minutes} dk odak · "
-                    f"{away_minutes} dk uzakta"
+                text=self.app.t("recent_session_detail").format(
+                    source=source_text,
+                    focus=duration_minutes,
+                    away=away_minutes,
                 ),
                 adaptive_height=True,
                 font_style="Caption",

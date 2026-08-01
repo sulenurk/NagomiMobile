@@ -123,7 +123,7 @@
         orientation: "vertical"
 
         MDTopAppBar:
-            title: "Study Plan"
+            title: app.t("study_plan")
             elevation: 0
             md_bg_color: 0.055, 0.047, 0.09, 1
             specific_text_color: 0.96, 0.94, 1, 1
@@ -141,7 +141,7 @@
                 spacing: dp(16)
 
                 MDLabel:
-                    text: "Günlük çalışma planın"
+                    text: app.t("daily_study_plan")
                     font_style: "H5"
                     bold: True
                     theme_text_color: "Custom"
@@ -164,7 +164,7 @@
                     md_bg_color: 0.105, 0.09, 0.16, 1
 
                     MDLabel:
-                        text: "Görev ekle" if not root.editing_task_id else "Görevi düzenle"
+                        text: app.t("add_task") if not root.editing_task_id else app.t("edit_task")
                         font_style: "H6"
                         bold: True
                         theme_text_color: "Custom"
@@ -266,7 +266,7 @@
                     DarkSpinner:
                         id: priority_spinner
                         text: "Orta"
-                        values: ["Düşük", "Orta", "Yüksek"]
+                        values: [app.t("low"), app.t("medium"), app.t("high")]
                         size_hint_y: None
                         height: dp(46)
 
@@ -305,21 +305,21 @@
                     spacing: dp(6)
 
                     MDFlatButton:
-                        text: "Tümü"
+                        text: app.t("all")
                         on_release: root.set_filter("all")
                     MDFlatButton:
-                        text: "Bekleyen"
+                        text: app.t("pending")
                         on_release: root.set_filter("pending")
                     MDFlatButton:
-                        text: "Aktif"
+                        text: app.t("active")
                         on_release: root.set_filter("active")
                     MDFlatButton:
-                        text: "Biten"
+                        text: app.t("completed")
                         on_release: root.set_filter("completed")
 
                 MDLabel:
                     id: empty_label
-                    text: "Henüz görev yok. İlk görevini yukarıdan ekleyebilirsin."
+                    text: app.t("no_tasks_yet")
                     halign: "center"
                     theme_text_color: "Custom"
                     text_color: 0.68, 0.65, 0.78, 1
