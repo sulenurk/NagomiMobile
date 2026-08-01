@@ -5,7 +5,12 @@ from pathlib import Path
 from typing import Any
 
 from kivy.lang import Builder
-from kivy.properties import DictProperty, StringProperty
+from kivy.properties import (
+    BooleanProperty,
+    DictProperty,
+    NumericProperty,
+    StringProperty,
+)
 from kivymd.app import MDApp
 
 from kivy.utils import get_color_from_hex
@@ -20,9 +25,15 @@ from screens.settings_screen import SettingsScreen
 
 class NagomiApp(MDApp):
     app_data = DictProperty({})
+    translations = DictProperty({}) 
+
     active_page = StringProperty("pomodoro")
-    language = StringProperty("tr")
-    translations = DictProperty({})
+    language = StringProperty("en")
+    translation_version = NumericProperty(0)
+
+    sound_enabled = BooleanProperty(True)
+    dark_mode_enabled = BooleanProperty(True)
+    selected_language_name = StringProperty("English")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -34,8 +45,34 @@ class NagomiApp(MDApp):
         self.app_data = self.load_app_data()
         self.ensure_app_data_defaults()
 
-        self.language = self.app_data.get("language", "tr")
+        self.language = self.app_data.get("language", "en")
         self.load_translations()
+        self.selected_language_name = self.get_language_name(
+            self.language
+        )
+
+        settings = self.app_data.setdefault("settings", {})
+
+        self.sound_enabled = bool(
+            settings.get("sound_enabled", True)
+        )
+
+        appearance_mode = settings.get(
+            "appearance_mode",
+            "dark",
+        )
+
+        self.dark_mode_enabled = appearance_mode == "dark"
+
+        self.theme_cls.theme_style = (
+            "Dark"
+            if self.dark_mode_enabled
+            else "Light"
+        )
+
+        self.selected_language_name = self.get_language_name(
+            self.language
+        )
 
         # Pomodoro ekranının tasarım dosyası.
         Builder.load_file("kv/pomodoro_screen.kv")
@@ -46,19 +83,18 @@ class NagomiApp(MDApp):
         Builder.load_file("kv/settings_screen.kv")
 
     def load_translations(self) -> None:
-        language_file = (
+        locale_directory = (
             Path(__file__).resolve().parent
             / "locales"
+        )
+
+        fallback_file = locale_directory / "en.json"
+        language_file = (
+            locale_directory
             / f"{self.language}.json"
         )
 
-        fallback_file = (
-            Path(__file__).resolve().parent
-            / "locales"
-            / "tr.json"
-        )
-
-        translations = {}
+        translations: dict[str, str] = {}
 
         try:
             with fallback_file.open(
@@ -70,8 +106,8 @@ class NagomiApp(MDApp):
             if isinstance(fallback_data, dict):
                 translations.update(fallback_data)
 
-        except (OSError, json.JSONDecodeError):
-            pass
+        except (OSError, json.JSONDecodeError) as error:
+            print(f"[LANGUAGE ERROR] {error}")
 
         if language_file != fallback_file:
             try:
@@ -84,12 +120,65 @@ class NagomiApp(MDApp):
                 if isinstance(language_data, dict):
                     translations.update(language_data)
 
-            except (OSError, json.JSONDecodeError):
-                pass
+            except (OSError, json.JSONDecodeError) as error:
+                print(f"[LANGUAGE ERROR] {error}")
 
-        self.translations = translations
+        # Önemli: mevcut dict'i update etmek yerine
+        # tamamen yeni bir dict atıyoruz.
+        self.translations = dict(translations)
+        self.translation_version += 1
 
-    def t(self, key: str, **kwargs) -> str:
+    def get_language_name(self, language_code: str) -> str:
+        language_names = {
+            "en": "English",
+            "tr": "Türkçe",
+            "de": "Deutsch",
+            "fr": "Français",
+            "es": "Español",
+            "pt": "Português",
+            "zh": "简体中文",
+            "ja": "日本語",
+        }
+
+        return language_names.get(language_code, "English")
+
+
+    def get_language_code(self, language_name: str) -> str:
+        language_codes = {
+            "English": "en",
+            "Türkçe": "tr",
+            "Deutsch": "de",
+            "Français": "fr",
+            "Español": "es",
+            "Português": "pt",
+            "简体中文": "zh",
+            "日本語": "ja",
+        }
+
+        return language_codes.get(language_name, "en")
+
+
+    def set_language_by_name(self, language_name: str) -> None:
+        language_code = self.get_language_code(language_name)
+
+        if language_code == self.language:
+            return
+
+        self.selected_language_name = language_name
+        self.set_language(language_code)
+
+    def t(
+        self,
+        key: str,
+        _translation_version: int | None = None,
+        **kwargs,
+    ) -> str:
+        """
+        _translation_version KV ifadelerinin dil değişimini izlemesini sağlar.
+
+        Metnin üretilmesinde kullanılmaz; yalnızca Kivy property binding
+        oluşturmak amacıyla metoda verilir.
+        """
         text = str(
             self.translations.get(
                 key,
@@ -106,42 +195,84 @@ class NagomiApp(MDApp):
             return text
 
     def set_language(self, language_code: str) -> None:
+        if language_code == self.language:
+            return
+
         self.language = language_code
+        self.selected_language_name = self.get_language_name(
+            language_code
+        )
+
         self.app_data["language"] = language_code
-        self.save_app_data()
 
         self.load_translations()
+        self.save_app_data()
         self.refresh_language_ui()
 
     def refresh_language_ui(self) -> None:
         if not self.root:
             return
 
-        screen_manager = self.root.ids.get(
-            "screen_manager"
-        )
+        screen_manager = self.root.ids.get("screen_manager")
 
         if not screen_manager:
             return
 
         for screen in screen_manager.screens:
-            if hasattr(screen, "refresh_subject_spinner"):
-                screen.refresh_subject_spinner()
+            refresh_method = getattr(
+                screen,
+                "refresh_ui",
+                None,
+            )
 
-            if hasattr(screen, "load_settings"):
-                screen.load_settings()
+            if callable(refresh_method):
+                refresh_method()
 
-            if hasattr(screen, "refresh_stats"):
-                screen.refresh_stats()
+            refresh_stats_method = getattr(
+                screen,
+                "refresh_stats",
+                None,
+            )
 
-            if hasattr(screen, "render_tasks"):
-                screen.render_tasks()
+            if callable(refresh_stats_method):
+                refresh_stats_method()
 
-            if hasattr(screen, "render_subjects"):
-                screen.render_subjects()
+            load_settings_method = getattr(
+                screen,
+                "load_settings",
+                None,
+            )
 
-            if hasattr(screen, "refresh_ui"):
-                screen.refresh_ui()
+            if callable(load_settings_method):
+                load_settings_method()
+
+    def set_sound_enabled(self, enabled: bool) -> None:
+        self.sound_enabled = bool(enabled)
+
+        settings = self.app_data.setdefault("settings", {})
+        settings["sound_enabled"] = self.sound_enabled
+
+        if not self.sound_enabled:
+            self.stop_alarm()
+
+        self.save_app_data()
+
+
+    def set_dark_mode(self, enabled: bool) -> None:
+        self.dark_mode_enabled = bool(enabled)
+
+        mode = "dark" if enabled else "light"
+
+        self.app_data.setdefault(
+            "settings",
+            {},
+        )["appearance_mode"] = mode
+
+        self.theme_cls.theme_style = (
+            "Dark" if enabled else "Light"
+        )
+
+        self.save_app_data()
 
     def on_start(self):
         self.show_page("pomodoro")
@@ -233,7 +364,7 @@ class NagomiApp(MDApp):
         self.root.ids.nav_drawer.set_state("toggle")
 
     def ensure_app_data_defaults(self) -> None:
-        self.app_data.setdefault("language", "tr")
+        self.app_data.setdefault("language", "en")
         self.app_data.setdefault("subjects", [])
         self.app_data.setdefault("tasks", [])
         self.app_data.setdefault("sessions", [])
@@ -293,7 +424,7 @@ class NagomiApp(MDApp):
 
     def load_app_data(self) -> dict[str, Any]:
         default_data = {
-            "language": "tr",
+            "language": "en",
             "settings": {},
             "subjects": [],
             "tasks": [],

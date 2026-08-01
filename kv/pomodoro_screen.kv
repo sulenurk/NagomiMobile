@@ -32,7 +32,7 @@
                 spacing: dp(8)
 
                 MDLabel:
-                    text: app.t("regular_pomodoro")
+                    text: app.t("pomodoro", app.translation_version)
                     halign: "center"
                     font_style: "H5"
                     bold: True
@@ -42,7 +42,7 @@
                     height: dp(34)
 
                 MDLabel:
-                    text: app.t("pomodoro_subtitle")
+                    text: app.t("pomodoro_subtitle", app.translation_version)
                     halign: "center"
                     theme_text_color: "Custom"
                     text_color: 0.68, 0.65, 0.78, 1
@@ -221,7 +221,7 @@
                 spacing: dp(8)
 
                 MDLabel:
-                    text: app.t("pomodoro_settings")
+                    text: app.t("pomodoro_settings", app.translation_version)
                     font_style: "Subtitle1"
                     bold: True
                     theme_text_color: "Custom"
@@ -234,7 +234,7 @@
                     on_release: root.close_settings()
 
             MDLabel:
-                text: app.t("pomodoro_settings_description")
+                text: app.t("pomodoro_settings_description", app.translation_version)
                 font_style: "Caption"
                 theme_text_color: "Custom"
                 text_color: 0.66, 0.62, 0.74, 1
@@ -296,7 +296,7 @@
                     MDTextField:
                         id: settings_short_break_minutes
                         text: root.settings_short_break_minutes
-                        hint_text: app.t("short_break_minutes")
+                        hint_text: app.t("short_break_minutes", app.translation_version)
                         helper_text_mode: "persistent"
                         input_filter: "int"
                         mode: "fill"
@@ -337,7 +337,7 @@
                     MDTextField:
                         id: settings_long_break_minutes
                         text: root.settings_long_break_minutes
-                        hint_text: app.t("long_break_minutes")
+                        hint_text: app.t("long_break_minutes", app.translation_version)
                         helper_text_mode: "persistent"
                         input_filter: "int"
                         mode: "fill"
@@ -378,7 +378,7 @@
                     MDTextField:
                         id: settings_long_break_after
                         text: root.settings_long_break_after
-                        hint_text: app.t("long_break_interval")
+                        hint_text: app.t("long_break_interval", app.translation_version)
                         helper_text_mode: "persistent"
                         input_filter: "int"
                         mode: "fill"
@@ -419,8 +419,8 @@
                     MDTextField:
                         id: settings_focus_count
                         text: root.settings_focus_count
-                        hint_text: app.t("total_focus_cycles")
-                        helper_text: app.t("zero_for_unlimited_cycles")
+                        hint_text: app.t("total_focus_cycles", app.translation_version)
+                        helper_text: app.t("zero_for_unlimited_cycles", app.translation_version)
                         helper_text_mode: "persistent"
                         input_filter: "int"
                         mode: "fill"
@@ -459,7 +459,7 @@
                             0.65, 0.55, 0.98, 1
 
             MDRaisedButton:
-                text: app.t("save")
+                text: app.t("save", app.translation_version)
                 size_hint_x: 1
                 size_hint_y: None
                 height: dp(50)

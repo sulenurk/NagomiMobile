@@ -182,7 +182,7 @@ class PomodoroScreen(MDScreen):
         settings_data = self.app.app_data.setdefault("settings", {})
 
         settings = PomodoroSettings(
-            focus_minutes=int(settings_data.get("regular_focus_minutes", 25)),
+            focus_duration=int(settings_data.get("regular_focus_minutes", 25)),
             short_break_minutes=int(
                 settings_data.get("regular_short_break_minutes", 5)
             ),
@@ -277,7 +277,7 @@ class PomodoroScreen(MDScreen):
             return
 
         try:
-            focus_minutes = self._read_positive_int(
+            focus_duration = self._read_positive_int(
                 self.ids.settings_focus_minutes.text,
                 "Odak süresi",
             )
@@ -308,7 +308,7 @@ class PomodoroScreen(MDScreen):
 
         settings = self.app.app_data.setdefault("settings", {})
 
-        settings["regular_focus_minutes"] = focus_minutes
+        settings["regular_focus_minutes"] = focus_duration
         settings[
             "regular_short_break_minutes"
         ] = short_break_minutes
@@ -442,7 +442,7 @@ class PomodoroScreen(MDScreen):
             "subject_name": self.app.t("other_subject"),
             "mode": "focus",
             "source": "regular_pomodoro",
-            "duration_seconds": self.timer.settings.focus_minutes * 60,
+            "duration_seconds": self.timer.settings.focus_duration * 60,
             "away_seconds": 0,
             "completed_at": datetime.now().isoformat(timespec="seconds"),
         }

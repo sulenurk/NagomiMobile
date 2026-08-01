@@ -9,7 +9,7 @@ TimerMode = Literal["focus", "short_break", "long_break"]
 
 @dataclass
 class PomodoroSettings:
-    focus_minutes: int = 25
+    focus_duration: int = 25
     short_break_minutes: int = 5
     long_break_minutes: int = 15
     long_break_after: int = 4
@@ -19,7 +19,7 @@ class PomodoroSettings:
 
     def validate(self) -> None:
         positive_values = (
-            self.focus_minutes,
+            self.focus_duration,
             self.short_break_minutes,
             self.long_break_minutes,
             self.long_break_after,
@@ -47,7 +47,7 @@ class PomodoroTimer:
 
     def _duration_for(self, mode: TimerMode) -> int:
         if mode == "focus":
-            return self.settings.focus_minutes * 60
+            return self.settings.focus_duration * 60
         if mode == "short_break":
             return self.settings.short_break_minutes * 60
         return self.settings.long_break_minutes * 60

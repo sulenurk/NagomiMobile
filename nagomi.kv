@@ -33,7 +33,7 @@ MDNavigationLayout:
             md_bg_color: 0.055, 0.047, 0.09, 1
 
             MDLabel:
-                text: app.t("app_name")
+                text: app.t("app_name", app.translation_version)
                 font_style: "H5"
                 halign: "center"
                 bold: True
@@ -43,45 +43,168 @@ MDNavigationLayout:
                 height: dp(90)
 
             MDFlatButton:
-                text: app.t("regular_pomodoro")
+                text: app.t("pomodoro", app.translation_version)
                 size_hint_x: 1
                 theme_text_color: "Custom"
                 text_color: 0.90, 0.87, 0.98, 1
                 on_release: app.show_page("pomodoro")
 
             MDFlatButton:
-                text: app.t("focus_timer")
+                text: app.t("focus_timer", app.translation_version)
                 size_hint_x: 1
                 theme_text_color: "Custom"
                 text_color: 0.90, 0.87, 0.98, 1
                 on_release: app.show_page("focus")
 
             MDFlatButton:
-                text: app.t("subjects")
+                text: app.t("subjects", app.translation_version)
                 size_hint_x: 1
                 theme_text_color: "Custom"
                 text_color: 0.90, 0.87, 0.98, 1
                 on_release: app.show_page("subjects")
 
             MDFlatButton:
-                text: app.t("study_plan")
+                text: app.t("study_plan", app.translation_version)
                 size_hint_x: 1
                 theme_text_color: "Custom"
                 text_color: 0.90, 0.87, 0.98, 1
                 on_release: app.show_page("study")
 
             MDFlatButton:
-                text: app.t("statistics")
+                text: app.t("statistics", app.translation_version)
                 size_hint_x: 1
                 theme_text_color: "Custom"
                 text_color: 0.90, 0.87, 0.98, 1
                 on_release: app.show_page("statistics")
 
             MDFlatButton:
-                text: app.t("settings")
+                text: app.t("settings", app.translation_version)
                 size_hint_x: 1
                 theme_text_color: "Custom"
                 text_color: 0.90, 0.87, 0.98, 1
                 on_release: app.show_page("settings")
 
+            MDSeparator:
+                size_hint_y: None
+                height: dp(1)
+                color: 0.20, 0.18, 0.27, 1
+
+            # -----------------------------------------------
+            # ALARM
+            # -----------------------------------------------
+
+            MDBoxLayout:
+                size_hint_y: None
+                height: dp(52)
+                spacing: dp(8)
+
+                MDIcon:
+                    icon: "bell-outline"
+                    size_hint_x: None
+                    width: dp(34)
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: 0.72, 0.68, 0.84, 1
+
+                MDLabel:
+                    text: app.t("alarm", app.translation_version)
+                    font_style: "Subtitle2"
+                    theme_text_color: "Custom"
+                    text_color: 0.90, 0.87, 0.98, 1
+
+                AnchorLayout:
+                    size_hint_x: None
+                    width: dp(72)
+                    padding: 0, 0, dp(16), 0
+                    anchor_x: "center"
+                    anchor_y: "center"
+
+                    MDSwitch:
+                        active: app.sound_enabled
+                        on_active: app.set_sound_enabled(self.active)
+
+            # -----------------------------------------------
+            # DARK / LIGHT MODE
+            # -----------------------------------------------
+
+            MDBoxLayout:
+                size_hint_y: None
+                height: dp(52)
+                spacing: dp(8)
+
+                MDIcon:
+                    icon: "weather-night" if app.dark_mode_enabled else "white-balance-sunny"
+                    size_hint_x: None
+                    width: dp(34)
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: 0.72, 0.68, 0.84, 1
+
+                MDLabel:
+                    text: app.t("dark_mode", app.translation_version) if app.dark_mode_enabled else app.t("light_mode", app.translation_version)
+                    font_style: "Subtitle2"
+                    theme_text_color: "Custom"
+                    text_color: 0.90, 0.87, 0.98, 1
+
+                AnchorLayout:
+                    size_hint_x: None
+                    width: dp(72)
+                    padding: 0, 0, dp(16), 0
+                    anchor_x: "center"
+                    anchor_y: "center"
+
+                    MDSwitch:
+                        active: app.dark_mode_enabled
+                        on_active: app.set_dark_mode(self.active)
+
+            # Bu Widget dil bölümünü drawer'ın en altına iter.
             Widget:
+
+            MDSeparator:
+                size_hint_y: None
+                height: dp(1)
+                color: 0.20, 0.18, 0.27, 1
+
+            # -----------------------------------------------
+            # DİL
+            # -----------------------------------------------
+
+            MDBoxLayout:
+                size_hint_y: None
+                height: dp(34)
+                spacing: dp(8)
+
+                MDIcon:
+                    icon: "translate"
+                    size_hint_x: None
+                    width: dp(34)
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: 0.72, 0.68, 0.84, 1
+
+                MDLabel:
+                    text: app.t("language", app.translation_version)
+                    font_style: "Subtitle2"
+                    theme_text_color: "Custom"
+                    text_color: 0.90, 0.87, 0.98, 1
+
+            Spinner:
+                text: app.selected_language_name
+                values:
+                    [
+                    "English",
+                    "Türkçe",
+                    "Deutsch",
+                    "Français",
+                    "Español",
+                    "Português",
+                    "简体中文",
+                    "日本語"
+                    ]
+                size_hint_y: None
+                height: dp(46)
+                background_normal: ""
+                background_down: ""
+                background_color: 0.13, 0.11, 0.19, 1
+                color: 0.94, 0.92, 1, 1
+                on_text: app.set_language_by_name(self.text)

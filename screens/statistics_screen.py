@@ -736,7 +736,7 @@ class StatisticsScreen(MDScreen):
             )
 
             if source == "regular_pomodoro":
-                title = self.app.t("regular_pomodoro")
+                title = self.app.t("pomodoro")
                 source_text = self.app.t("pomodoro")
             else:
                 title = str(

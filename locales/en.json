@@ -156,5 +156,10 @@
   "weekday_thu_short": "Thu",
   "weekday_fri_short": "Fri",
   "weekday_sat_short": "Sat",
-  "weekday_sun_short": "Sun"
+  "weekday_sun_short": "Sun",
+
+  "alarm": "Alarm",
+  "dark_mode": "Dark mode",
+  "light_mode": "Light mode",
+  "language": "Language"
 }

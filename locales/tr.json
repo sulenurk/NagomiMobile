@@ -41,6 +41,8 @@
   "no_active_task": "Aktif görev yok",
   "new_task": "Yeni Görev",
   "add_task": "Görev Ekle",
+  "task_name": "Görev Adı",
+  "break_minutes": "Mola Süresi",
   "edit_task": "Görevi Düzenle",
   "edit_mode": "Düzenleme Modu",
   "task_added": "Görev eklendi.",
@@ -156,5 +158,11 @@
   "weekday_thu_short": "Per",
   "weekday_fri_short": "Cum",
   "weekday_sat_short": "Cmt",
-  "weekday_sun_short": "Paz"
+  "weekday_sun_short": "Paz",
+
+  "alarm": "Alarm",
+  "dark_mode": "Koyu mod",
+  "light_mode": "Açık mod",
+  "language": "Dil"
+
 }

@@ -121,8 +121,8 @@ class FocusScreen(MDScreen):
         else:
             self.active_task_name = title
 
-        focus_minutes = self._safe_positive_int(
-            task.get("focus_minutes", 25),
+        focus_duration = self._safe_positive_int(
+            task.get("focus_duration", 25),
             default=25,
         )
 
@@ -131,7 +131,7 @@ class FocusScreen(MDScreen):
             default=5,
         )
 
-        self.focus_seconds = focus_minutes * 60
+        self.focus_seconds = focus_duration * 60
         self.break_seconds = break_minutes * 60
 
         if not self.is_running and not self.is_paused:
@@ -250,7 +250,7 @@ class FocusScreen(MDScreen):
 
         if task:
             self.focus_seconds = self._safe_positive_int(
-                task.get("focus_minutes", 25),
+                task.get("focus_duration", 25),
                 default=25,
             ) * 60
 

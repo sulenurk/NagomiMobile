@@ -32,7 +32,7 @@
                 spacing: dp(8)
 
                 MDLabel:
-                    text: app.t("focus_timer")
+                    text: app.t("focus_timer", app.translation_version)
                     halign: "center"
                     font_style: "H5"
                     bold: True
@@ -42,7 +42,7 @@
                     height: dp(34)
 
                 MDLabel:
-                    text: app.t("focus_subtitle")
+                    text: app.t("focus_subtitle", app.translation_version)
                     halign: "center"
                     theme_text_color: "Custom"
                     text_color: 0.68, 0.65, 0.78, 1
@@ -153,7 +153,7 @@
                             orientation: "vertical"
 
                             MDLabel:
-                                text: app.t("away_time")
+                                text: app.t("away_time", app.translation_version)
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
                                 text_color: 0.68, 0.65, 0.78, 1
@@ -240,7 +240,7 @@
                 spacing: dp(8)
 
                 MDLabel:
-                    text: app.t("focus_settings")
+                    text: app.t("focus_settings", app.translation_version)
                     font_style: "Subtitle1"
                     bold: True
                     theme_text_color: "Custom"
@@ -253,7 +253,7 @@
                     on_release: root.close_settings()
 
             MDLabel:
-                text: app.t("focus_settings_description")
+                text: app.t("focus_settings_description", app.translation_version)
                 font_style: "Caption"
                 theme_text_color: "Custom"
                 text_color: 0.66, 0.62, 0.74, 1
@@ -282,7 +282,7 @@
                             padding: 0, dp(2), dp(8), dp(2)
 
                             MDLabel:
-                                text: app.t("auto_start_break")
+                                text: app.t("auto_start_break", app.translation_version)
                                 font_style: "Subtitle2"
                                 bold: True
                                 theme_text_color: "Custom"
@@ -291,7 +291,7 @@
                                 text_size: self.width, None
 
                             MDLabel:
-                                text: app.t("auto_start_break_description")
+                                text: app.t("auto_start_break_description", app.translation_version)
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
                                 text_color: 0.66, 0.62, 0.74, 1
@@ -322,7 +322,7 @@
                             padding: 0, dp(2), dp(8), dp(2)
 
                             MDLabel:
-                                text: app.t("auto_start_focus")
+                                text: app.t("auto_start_focus", app.translation_version)
                                 font_style: "Subtitle2"
                                 bold: True
                                 theme_text_color: "Custom"
@@ -331,7 +331,7 @@
                                 text_size: self.width, None
 
                             MDLabel:
-                                text: app.t("auto_start_focus_description")
+                                text: app.t("auto_start_focus_description", app.translation_version)
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
                                 text_color: 0.66, 0.62, 0.74, 1
@@ -358,7 +358,7 @@
                         padding: 0, dp(12), 0, 0
 
                         MDLabel:
-                            text: app.t("show_away_time")
+                            text: app.t("show_away_time", app.translation_version)
                             font_style: "Subtitle2"
                             theme_text_color: "Custom"
                             text_color: 0.92, 0.90, 0.98, 1
@@ -384,7 +384,7 @@
                         padding: 0, dp(12), 0, 0
 
                         MDLabel:
-                            text: app.t("show_queue_progress")
+                            text: app.t("show_queue_progress", app.translation_version)
                             font_style: "Subtitle2"
                             theme_text_color: "Custom"
                             text_color: 0.92, 0.90, 0.98, 1
@@ -405,7 +405,7 @@
                                     root.setting_show_queue_progress = self.active
 
             MDRaisedButton:
-                text: app.t("save")
+                text: app.t("save", app.translation_version)
                 size_hint_x: 1
                 size_hint_y: None
                 height: dp(50)
