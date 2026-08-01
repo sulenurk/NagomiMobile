@@ -37,15 +37,24 @@ class FocusScreen(MDScreen):
     is_paused = BooleanProperty(False)
     is_waiting_for_next = BooleanProperty(False)
 
+    settings_panel_open = BooleanProperty(False)
+
+    setting_auto_start_focus = BooleanProperty(False)
+    setting_auto_start_break = BooleanProperty(False)
+    setting_show_queue_progress = BooleanProperty(True)
+    setting_show_away_time = BooleanProperty(True)
+
     session_started_at: Optional[str] = None
 
     _timer_event = None
     _is_restoring = False
 
     def on_kv_post(self, base_widget) -> None:
+        self.load_focus_settings()
         self.refresh_ui()
 
     def on_pre_enter(self, *args) -> None:
+        self.load_focus_settings()
         self.refresh_ui()
         return super().on_pre_enter(*args)
 
@@ -859,18 +868,59 @@ class FocusScreen(MDScreen):
             self._timer_event = None
 
     def open_settings(self) -> None:
-        app = MDApp.get_running_app()
+        self.load_focus_settings()
+        self.settings_panel_open = True
 
-        open_method = getattr(
-            app,
-            "open_focus_settings",
-            None,
+
+    def close_settings(self) -> None:
+        self.settings_panel_open = False
+
+
+    def load_focus_settings(self) -> None:
+        app = MDApp.get_running_app()
+        settings = app.app_data.setdefault("settings", {})
+
+        self.setting_auto_start_focus = bool(
+            settings.get("auto_start_focus", False)
         )
 
-        if callable(open_method):
-            open_method()
-        else:
-            print("Focus ayarları daha sonra eklenecek.")
+        self.setting_auto_start_break = bool(
+            settings.get("auto_start_break", False)
+        )
+
+        self.setting_show_queue_progress = bool(
+            settings.get("show_queue_progress", True)
+        )
+
+        self.setting_show_away_time = bool(
+            settings.get("show_cumulative_away_time", True)
+        )
+
+
+    def save_focus_settings(self) -> None:
+        app = MDApp.get_running_app()
+        settings = app.app_data.setdefault("settings", {})
+
+        settings["auto_start_focus"] = bool(
+            self.setting_auto_start_focus
+        )
+
+        settings["auto_start_break"] = bool(
+            self.setting_auto_start_break
+        )
+
+        settings["show_queue_progress"] = bool(
+            self.setting_show_queue_progress
+        )
+
+        settings["show_cumulative_away_time"] = bool(
+            self.setting_show_away_time
+        )
+
+        app.save_app_data()
+
+        self.settings_panel_open = False
+        self.status_text = "Odak ayarları kaydedildi."
 
     def on_leave(self, *args) -> None:
         """

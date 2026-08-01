@@ -1,0 +1,305 @@
+#:import dp kivy.metrics.dp
+
+<SettingsScreen>:
+    md_bg_color: 0.055, 0.047, 0.09, 1
+
+    MDBoxLayout:
+        orientation: "vertical"
+
+        MDTopAppBar:
+            title: app.t("settings")
+            anchor_title: "center"
+            elevation: 0
+            md_bg_color: 0.055, 0.047, 0.09, 1
+            specific_text_color: 0.96, 0.94, 1, 1
+
+            left_action_items:
+                [["menu", lambda x: app.toggle_navigation_drawer()]]
+
+        ScrollView:
+            do_scroll_x: False
+            bar_width: 0
+
+            MDBoxLayout:
+                orientation: "vertical"
+                adaptive_height: True
+                padding: dp(18), dp(14), dp(18), dp(32)
+                spacing: dp(14)
+
+                # -------------------------------------------------
+                # OTOMATİK BAŞLATMA
+                # -------------------------------------------------
+
+                MDCard:
+                    orientation: "vertical"
+                    adaptive_height: True
+                    padding: dp(16)
+                    spacing: dp(14)
+                    radius: [dp(24), dp(24), dp(24), dp(24)]
+                    elevation: 0
+                    md_bg_color: 0.105, 0.09, 0.16, 1
+
+                    MDLabel:
+                        text: "Otomatik başlatma"
+                        font_style: "Subtitle1"
+                        bold: True
+                        theme_text_color: "Custom"
+                        text_color: 0.96, 0.94, 1, 1
+                        adaptive_height: True
+
+                    MDBoxLayout:
+                        adaptive_height: True
+                        spacing: dp(12)
+
+                        MDBoxLayout:
+                            adaptive_height: True
+                            spacing: dp(10)
+
+                            MDBoxLayout:
+                                orientation: "vertical"
+                                adaptive_height: True
+                                size_hint_x: 1
+                                padding: 0, dp(2), dp(8), dp(2)
+
+                                MDLabel:
+                                    text: "Odak oturumlarını otomatik başlat"
+                                    font_style: "Subtitle2"
+                                    bold: True
+                                    theme_text_color: "Custom"
+                                    text_color: 0.92, 0.90, 0.98, 1
+                                    adaptive_height: True
+                                    text_size: self.width, None
+
+                                MDLabel:
+                                    text: "Mola bittikten sonra sıradaki odak süresini başlatır."
+                                    font_style: "Caption"
+                                    theme_text_color: "Custom"
+                                    text_color: 0.66, 0.62, 0.74, 1
+                                    adaptive_height: True
+                                    text_size: self.width, None
+
+                            AnchorLayout:
+                                size_hint_x: None
+                                width: dp(68)
+                                padding: 0, 0, dp(12), 0
+                                anchor_x: "center"
+                                anchor_y: "center"
+
+                                MDSwitch:
+                                    active: root.auto_start_focus
+                                    on_active: root.set_auto_start_focus(self.active)
+
+                    MDBoxLayout:
+                        adaptive_height: True
+                        spacing: dp(12)
+
+                        MDBoxLayout:
+                            orientation: "vertical"
+                            adaptive_height: True
+                            size_hint_x: 1
+                            padding: 0, dp(2), dp(8), dp(2)
+
+                            MDLabel:
+                                text: "Molaları otomatik başlat"
+                                font_style: "Subtitle2"
+                                bold: True
+                                theme_text_color: "Custom"
+                                text_color: 0.92, 0.90, 0.98, 1
+                                adaptive_height: True
+
+                            MDLabel:
+                                text: "Odak süresi tamamlanınca molayı otomatik başlatır."
+                                font_style: "Caption"
+                                theme_text_color: "Custom"
+                                text_color: 0.66, 0.62, 0.74, 1
+                                adaptive_height: True
+
+                        AnchorLayout:
+                            size_hint_x: None
+                            width: dp(68)
+                            padding: 0, 0, dp(12), 0
+                            anchor_x: "center"
+                            anchor_y: "center"
+
+                            MDSwitch:
+                                active: root.auto_start_break
+                                on_active: root.set_auto_start_break(self.active)
+
+                # -------------------------------------------------
+                # SES
+                # -------------------------------------------------
+
+                MDCard:
+                    orientation: "vertical"
+                    adaptive_height: True
+                    padding: dp(16)
+                    spacing: dp(12)
+                    radius: [dp(24), dp(24), dp(24), dp(24)]
+                    elevation: 0
+                    md_bg_color: 0.105, 0.09, 0.16, 1
+
+                    MDBoxLayout:
+                        adaptive_height: True
+                        spacing: dp(12)
+
+                        MDBoxLayout:
+                            orientation: "vertical"
+                            adaptive_height: True
+
+                            MDLabel:
+                                text: "Sesli bildirim"
+                                font_style: "Subtitle1"
+                                bold: True
+                                theme_text_color: "Custom"
+                                text_color: 0.96, 0.94, 1, 1
+                                adaptive_height: True
+
+                            MDLabel:
+                                text: "Odak veya mola tamamlandığında alarm sesi çalar."
+                                font_style: "Subtitle2"
+                                theme_text_color: "Custom"
+                                text_color: 0.66, 0.62, 0.74, 1
+                                adaptive_height: True
+
+                        AnchorLayout:
+                            size_hint_x: None
+                            width: dp(68)
+                            padding: 0, 0, dp(12), 0
+                            anchor_x: "center"
+                            anchor_y: "center"
+
+                            MDSwitch:
+                                active: root.sound_enabled
+                                on_active: root.set_sound_enabled(self.active)
+
+                # -------------------------------------------------
+                # HEDEF VE GÖRÜNÜRLÜK
+                # -------------------------------------------------
+
+                MDCard:
+                    orientation: "vertical"
+                    adaptive_height: True
+                    padding: dp(16)
+                    spacing: dp(14)
+                    radius: [dp(24), dp(24), dp(24), dp(24)]
+                    elevation: 0
+                    md_bg_color: 0.105, 0.09, 0.16, 1
+
+                    MDLabel:
+                        text: "Plan ve istatistik"
+                        font_style: "Subtitle1"
+                        bold: True
+                        theme_text_color: "Custom"
+                        text_color: 0.96, 0.94, 1, 1
+                        adaptive_height: True
+
+                    MDTextField:
+                        id: daily_goal
+                        text: root.daily_goal_text
+                        hint_text: "Günlük odak hedefi"
+                        helper_text: "dakika"
+                        helper_text_mode: "persistent"
+                        input_filter: "int"
+                        mode: "fill"
+                        size_hint_y: None
+                        height: dp(68)
+
+                    MDBoxLayout:
+                        adaptive_height: True
+                        spacing: dp(12)
+                        padding: 0, dp(14), dp(8), dp(2)
+
+                        MDLabel:
+                            text: "Kuyruk ilerlemesini göster"
+                            font_style: "Subtitle2"
+                            theme_text_color: "Custom"
+                            text_color: 0.92, 0.90, 0.98, 1
+                            adaptive_height: True
+
+                        AnchorLayout:
+                            size_hint_x: None
+                            width: dp(68)
+                            padding: 0, 0, dp(12), 0
+                            anchor_x: "center"
+                            anchor_y: "center"
+
+                            MDSwitch:
+                                active: root.show_queue_progress
+                                on_active: root.set_show_queue_progress(self.active)
+
+                    MDBoxLayout:
+                        adaptive_height: True
+                        spacing: dp(12)
+                        padding: 0, dp(12), dp(8), dp(2)
+
+                        MDLabel:
+                            text: "Toplam uzak kalma süresini göster"
+                            font_style: "Subtitle2"
+                            theme_text_color: "Custom"
+                            text_color: 0.92, 0.90, 0.98, 1
+                            adaptive_height: True
+
+                        AnchorLayout:
+                            size_hint_x: None
+                            width: dp(68)
+                            padding: 0, 0, dp(12), 0
+                            anchor_x: "center"
+                            anchor_y: "center"
+
+                            MDSwitch:
+                                active: root.show_cumulative_away_time
+                                on_active: root.set_show_cumulative_away_time(self.active)
+
+                    MDBoxLayout:
+                        orientation: "vertical"
+                        adaptive_height: True
+                        spacing: dp(6)
+                        padding: 0, dp(10), 0, 0
+
+                        MDLabel:
+                            text: "Haftanın ilk günü"
+                            font_style: "Subtitle2"
+                            bold: True
+                            theme_text_color: "Custom"
+                            text_color: 0.92, 0.90, 0.98, 1
+                            adaptive_height: True
+
+                        MDLabel:
+                            text: "İstatistiklerde haftanın hangi gün başlayacağını seç."
+                            font_style: "Caption"
+                            theme_text_color: "Custom"
+                            text_color: 0.66, 0.62, 0.74, 1
+                            adaptive_height: True
+
+                        Spinner:
+                            text: root.week_start_text
+                            values: ["Pazartesi", "Pazar"]
+                            size_hint_y: None
+                            height: dp(48)
+                            background_normal: ""
+                            background_down: ""
+                            background_color: 0.13, 0.11, 0.19, 1
+                            color: 0.94, 0.92, 1, 1
+                            on_text: root.change_week_start(self.text)
+
+                MDRaisedButton:
+                    text: app.t("save")
+                    size_hint_x: 1
+                    height: dp(50)
+                    md_bg_color: 0.60, 0.45, 0.96, 1
+                    on_release: root.save_numeric_settings()
+
+                MDFlatButton:
+                    text: "Ayarları sıfırla"
+                    size_hint_x: 1
+                    height: dp(48)
+                    theme_text_color: "Custom"
+                    text_color: 0.95, 0.38, 0.46, 1
+                    on_release: root.reset_settings()
+
+                MDLabel:
+                    text: root.status_text
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: 0.95, 0.66, 0.35, 1
+                    adaptive_height: True

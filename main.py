@@ -14,6 +14,8 @@ from screens.pomodoro_screen import PomodoroScreen
 from screens.subjects_screen import SubjectsScreen
 from screens.study_plan_screen import StudyPlanScreen
 from screens.focus_screen import FocusScreen
+from screens.statistics_screen import StatisticsScreen
+from screens.settings_screen import SettingsScreen
 
 
 class NagomiApp(MDApp):
@@ -38,6 +40,8 @@ class NagomiApp(MDApp):
         Builder.load_file("kv/focus_screen.kv")
         Builder.load_file("kv/subjects_screen.kv")
         Builder.load_file("kv/study_plan_screen.kv")
+        Builder.load_file("kv/statistics_screen.kv")
+        Builder.load_file("kv/settings_screen.kv")
         
 
     def on_start(self):
@@ -47,18 +51,29 @@ class NagomiApp(MDApp):
         if not self.root:
             return True
 
-        screen_manager = self.root.ids.get("screen_manager")
+        screen_manager = self.root.ids.get(
+            "screen_manager"
+        )
 
         if not screen_manager:
             return True
 
-        try:
-            focus_screen = screen_manager.get_screen("focus")
-        except Exception:
-            return True
+        for screen_name in ("pomodoro", "focus"):
+            try:
+                screen = screen_manager.get_screen(
+                    screen_name
+                )
+            except Exception:
+                continue
 
-        if hasattr(focus_screen, "handle_app_pause"):
-            focus_screen.handle_app_pause()
+            handler = getattr(
+                screen,
+                "handle_app_pause",
+                None,
+            )
+
+            if callable(handler):
+                handler()
 
         return True
 
@@ -67,18 +82,29 @@ class NagomiApp(MDApp):
         if not self.root:
             return
 
-        screen_manager = self.root.ids.get("screen_manager")
+        screen_manager = self.root.ids.get(
+            "screen_manager"
+        )
 
         if not screen_manager:
             return
 
-        try:
-            focus_screen = screen_manager.get_screen("focus")
-        except Exception:
-            return
+        for screen_name in ("pomodoro", "focus"):
+            try:
+                screen = screen_manager.get_screen(
+                    screen_name
+                )
+            except Exception:
+                continue
 
-        if hasattr(focus_screen, "handle_app_resume"):
-            focus_screen.handle_app_resume()
+            handler = getattr(
+                screen,
+                "handle_app_resume",
+                None,
+            )
+
+            if callable(handler):
+                handler()
 
     def show_page(self, page_name: str) -> None:
         valid_pages = {
@@ -86,6 +112,8 @@ class NagomiApp(MDApp):
             "focus",
             "subjects",
             "study",
+            "statistics",
+            "settings",
         }
 
         if page_name not in valid_pages:
@@ -121,16 +149,18 @@ class NagomiApp(MDApp):
         default_settings = {
             "auto_start_break": False,
             "auto_start_focus": False,
-            "focus_auto_start": False,
             "sound_enabled": True,
+            "daily_focus_goal_minutes": 300,
             "regular_focus_minutes": 25,
             "regular_short_break_minutes": 5,
             "regular_long_break_minutes": 15,
             "regular_long_break_after": 4,
             "regular_focus_count": 4,
+            "show_queue_progress": True,
+            "show_cumulative_away_time": True,
+            "week_start_day": "monday",
             "appearance_mode": "dark",
-            "color_palette": "purple",
-            
+            "color_palette": "purple",   
         }
 
         for key, value in default_settings.items():
@@ -235,6 +265,9 @@ class NagomiApp(MDApp):
             "no_active_task": "Serbest Odak",
             "active_task": "Aktif Görev",
             "session_completed": "Odak oturumu kaydedildi",
+            "settings": "Ayarlar",
+            "settings_saved": "Ayarlar kaydedildi.",
+            "save": "Kaydet",
         }
 
         text = translations.get(key, key)

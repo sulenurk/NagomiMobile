@@ -17,6 +17,12 @@ MDNavigationLayout:
         StudyPlanScreen:
             name: "study"
 
+        StatisticsScreen:
+            name: "statistics"
+
+        SettingsScreen:
+            name: "settings"
+
     MDNavigationDrawer:
         id: nav_drawer
 
@@ -62,5 +68,19 @@ MDNavigationLayout:
                 theme_text_color: "Custom"
                 text_color: 0.90, 0.87, 0.98, 1
                 on_release: app.show_page("study")
+
+            MDFlatButton:
+                text: "Statistics"
+                size_hint_x: 1
+                theme_text_color: "Custom"
+                text_color: 0.90, 0.87, 0.98, 1
+                on_release: app.show_page("statistics")
+
+            MDFlatButton:
+                text: "Ayarlar"
+                size_hint_x: 1
+                theme_text_color: "Custom"
+                text_color: 0.90, 0.87, 0.98, 1
+                on_release: app.show_page("settings")
 
             Widget:

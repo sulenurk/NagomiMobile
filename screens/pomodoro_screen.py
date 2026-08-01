@@ -74,9 +74,18 @@ class PomodoroScreen(MDScreen):
     cycle_text = StringProperty("#1 / 4")
     status_text = StringProperty("")
     primary_action_icon = StringProperty("play")
+
     is_running = BooleanProperty(False)
+    settings_panel_open = BooleanProperty(False)
+
     progress = NumericProperty(0.0)
     mode_color = ListProperty([0.65, 0.55, 0.98, 1])
+
+    settings_focus_minutes = StringProperty("25")
+    settings_short_break_minutes = StringProperty("5")
+    settings_long_break_minutes = StringProperty("15")
+    settings_long_break_after = StringProperty("4")
+    settings_focus_count = StringProperty("4")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -92,15 +101,82 @@ class PomodoroScreen(MDScreen):
         self.load_timer()
         self.refresh_ui()
 
-    def on_enter(self):
-        if self._clock_event is None:
-            self._clock_event = Clock.schedule_interval(self._tick, 0.25)
-
+    def on_enter(self, *args):
         self.load_timer_state()
+
+        if self._clock_event is None:
+            self._clock_event = Clock.schedule_interval(
+                self._tick,
+                1,
+            )
+
+        self._tick(0)
         self.refresh_ui()
 
-    def on_leave(self):
+        return super().on_enter(*args)
+
+    def on_leave(self, *args):
         self.save_timer_state()
+        self._cancel_clock_event()
+
+        return super().on_leave(*args)
+
+    def _cancel_clock_event(self) -> None:
+        if self._clock_event is not None:
+            self._clock_event.cancel()
+            self._clock_event = None
+
+    def handle_app_pause(self) -> None:
+        """
+        Android uygulamayı arka plana aldığında çağrılır.
+
+        Timer durdurulmaz. Yalnızca mevcut durumu kaydeder ve
+        görünmeyen arayüzün yenileme eventini kapatır.
+        """
+        if self.timer is None:
+            return
+
+        self.timer.sync()
+        self.save_timer_state()
+        self._cancel_clock_event()
+
+
+    def handle_app_resume(self) -> None:
+        """
+        Uygulama yeniden görünür olduğunda gerçek saate göre
+        Pomodoro durumunu günceller.
+        """
+        if self.timer is None:
+            self.load_timer()
+
+        self.load_timer_state()
+
+        if self.timer is None:
+            return
+
+        session_finished = self.timer.sync()
+
+        if session_finished:
+            result = self.timer.finish_current_session()
+            self._handle_finished_session(result)
+
+        current_screen = None
+
+        try:
+            current_screen = (
+                self.app.root.ids.screen_manager.current
+            )
+        except (AttributeError, KeyError):
+            pass
+
+        if current_screen == "pomodoro":
+            if self._clock_event is None:
+                self._clock_event = Clock.schedule_interval(
+                    self._tick,
+                    1,
+                )
+
+        self.refresh_ui()
 
     def load_timer(self):
         settings_data = self.app.app_data.setdefault("settings", {})
@@ -161,10 +237,106 @@ class PomodoroScreen(MDScreen):
         self.save_timer_state()
         self.refresh_ui()
 
-    def open_settings(self):
-        # Bir sonraki adımda modal bottom sheet bu metoda bağlanacak.
-        if hasattr(self.app, "open_pomodoro_settings"):
-            self.app.open_pomodoro_settings()
+    def open_settings(self) -> None:
+        self.load_settings_form()
+        self.settings_panel_open = True
+
+
+    def close_settings(self) -> None:
+        self.settings_panel_open = False
+        self.status_text = ""
+
+    def load_settings_form(self) -> None:
+        settings = self.app.app_data.setdefault("settings", {})
+
+        self.settings_focus_minutes = str(
+            settings.get("regular_focus_minutes", 25)
+        )
+
+        self.settings_short_break_minutes = str(
+            settings.get("regular_short_break_minutes", 5)
+        )
+
+        self.settings_long_break_minutes = str(
+            settings.get("regular_long_break_minutes", 15)
+        )
+
+        self.settings_long_break_after = str(
+            settings.get("regular_long_break_after", 4)
+        )
+
+        self.settings_focus_count = str(
+            settings.get("regular_focus_count", 4)
+        )
+
+    def save_pomodoro_settings(self) -> None:
+        if self.timer and self.timer.is_running:
+            self.status_text = (
+                "Ayarları değiştirmek için önce sayacı duraklat."
+            )
+            return
+
+        try:
+            focus_minutes = self._read_positive_int(
+                self.ids.settings_focus_minutes.text,
+                "Odak süresi",
+            )
+
+            short_break_minutes = self._read_non_negative_int(
+                self.ids.settings_short_break_minutes.text,
+                "Kısa mola",
+            )
+
+            long_break_minutes = self._read_non_negative_int(
+                self.ids.settings_long_break_minutes.text,
+                "Uzun mola",
+            )
+
+            long_break_after = self._read_positive_int(
+                self.ids.settings_long_break_after.text,
+                "Uzun mola aralığı",
+            )
+
+            focus_count = self._read_non_negative_int(
+                self.ids.settings_focus_count.text,
+                "Döngü sayısı",
+            )
+
+        except ValueError as error:
+            self.status_text = str(error)
+            return
+
+        settings = self.app.app_data.setdefault("settings", {})
+
+        settings["regular_focus_minutes"] = focus_minutes
+        settings[
+            "regular_short_break_minutes"
+        ] = short_break_minutes
+
+        settings[
+            "regular_long_break_minutes"
+        ] = long_break_minutes
+
+        settings[
+            "regular_long_break_after"
+        ] = long_break_after
+
+        settings["regular_focus_count"] = focus_count
+
+        self.app.save_app_data()
+
+        # Yeni ayarları timer nesnesine aktar.
+        self.load_timer()
+
+        # Çalışmayan sayaç yeni başlangıç süresine döner.
+        if self.timer:
+            self.timer.reset()
+
+        self.save_timer_state()
+        self.refresh_ui()
+
+        self.status_text = "Pomodoro ayarları kaydedildi."
+        self.settings_panel_open = False
 
     def _tick(self, _dt):
         if self.timer is None:
@@ -246,13 +418,20 @@ class PomodoroScreen(MDScreen):
         if self.timer is None:
             self.load_timer()
 
-        state = self.app.app_data.get("regular_pomodoro_state")
+        state = self.app.app_data.get(
+            "regular_pomodoro_state"
+        )
+
         if isinstance(state, dict):
             self.timer.restore_state(state)
 
-            if self.timer.is_running and self.timer.remaining_seconds <= 0:
-                result = self.timer.finish_current_session()
-                self._handle_finished_session(result)
+        session_finished = self.timer.sync()
+
+        if session_finished:
+            result = self.timer.finish_current_session()
+            self._handle_finished_session(result)
+
+        self.refresh_ui()
 
     def log_regular_focus_session(self):
         session = {
@@ -268,3 +447,42 @@ class PomodoroScreen(MDScreen):
             "completed_at": datetime.now().isoformat(timespec="seconds"),
         }
         self.app.app_data.setdefault("sessions", []).append(session)
+
+    @staticmethod
+    def _read_positive_int(
+        value: str,
+        field_name: str,
+    ) -> int:
+        try:
+            parsed_value = int(value.strip())
+        except (TypeError, ValueError):
+            raise ValueError(
+                f"{field_name} sayı olmalıdır."
+            )
+
+        if parsed_value <= 0:
+            raise ValueError(
+                f"{field_name} sıfırdan büyük olmalıdır."
+            )
+
+        return parsed_value
+
+
+    @staticmethod
+    def _read_non_negative_int(
+        value: str,
+        field_name: str,
+    ) -> int:
+        try:
+            parsed_value = int(value.strip())
+        except (TypeError, ValueError):
+            raise ValueError(
+                f"{field_name} sayı olmalıdır."
+            )
+
+        if parsed_value < 0:
+            raise ValueError(
+                f"{field_name} negatif olamaz."
+            )
+
+        return parsed_value

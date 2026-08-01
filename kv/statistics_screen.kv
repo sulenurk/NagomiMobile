@@ -1,0 +1,357 @@
+#:import dp kivy.metrics.dp
+
+<StatisticsScreen>:
+    md_bg_color: 0.055, 0.047, 0.09, 1
+
+    MDBoxLayout:
+        orientation: "vertical"
+
+        MDTopAppBar:
+            title: "İstatistikler"
+            anchor_title: "center"
+            elevation: 0
+            md_bg_color: 0.055, 0.047, 0.09, 1
+            specific_text_color: 0.96, 0.94, 1, 1
+
+            left_action_items:
+                [["menu", lambda x: app.toggle_navigation_drawer()]]
+
+        ScrollView:
+            do_scroll_x: False
+            bar_width: 0
+
+            MDBoxLayout:
+                orientation: "vertical"
+                adaptive_height: True
+                padding: dp(18), dp(14), dp(18), dp(32)
+                spacing: dp(14)
+
+                MDLabel:
+                    text: "İstatistikler"
+                    font_style: "Subtitle1"
+                    bold: True
+                    theme_text_color: "Custom"
+                    text_color: 0.96, 0.94, 1, 1
+                    adaptive_height: True
+
+                MDLabel:
+                    text: "Odak sürelerini ve çalışma düzenini takip et."
+                    font_style: "Subtitle2"
+                    theme_text_color: "Custom"
+                    text_color: 0.68, 0.65, 0.78, 1
+                    adaptive_height: True
+
+                # -----------------------------------------------
+                # BUGÜNÜN METRİKLERİ
+                # -----------------------------------------------
+
+                MDBoxLayout:
+                    adaptive_height: True
+                    spacing: dp(8)
+
+                    MDCard:
+                        orientation: "vertical"
+                        adaptive_height: True
+                        padding: dp(12)
+                        spacing: dp(4)
+                        radius: [dp(18), dp(18), dp(18), dp(18)]
+                        elevation: 0
+                        md_bg_color: 0.105, 0.09, 0.16, 1
+
+                        MDLabel:
+                            text: "Bugün"
+                            font_style: "Caption"
+                            theme_text_color: "Custom"
+                            text_color: 0.68, 0.65, 0.78, 1
+                            adaptive_height: True
+
+                        MDLabel:
+                            text: root.today_focus_text
+                            font_style: "H6"
+                            bold: True
+                            theme_text_color: "Custom"
+                            text_color: 0.13, 0.77, 0.37, 1
+                            adaptive_height: True
+
+                    MDCard:
+                        orientation: "vertical"
+                        adaptive_height: True
+                        padding: dp(12)
+                        spacing: dp(4)
+                        radius: [dp(18), dp(18), dp(18), dp(18)]
+                        elevation: 0
+                        md_bg_color: 0.105, 0.09, 0.16, 1
+
+                        MDLabel:
+                            text: "Oturum"
+                            font_style: "Caption"
+                            theme_text_color: "Custom"
+                            text_color: 0.68, 0.65, 0.78, 1
+                            adaptive_height: True
+
+                        MDLabel:
+                            text: root.completed_sessions_text
+                            font_style: "H6"
+                            bold: True
+                            theme_text_color: "Custom"
+                            text_color: 0.65, 0.55, 0.98, 1
+                            adaptive_height: True
+
+                    MDCard:
+                        orientation: "vertical"
+                        adaptive_height: True
+                        padding: dp(12)
+                        spacing: dp(4)
+                        radius: [dp(18), dp(18), dp(18), dp(18)]
+                        elevation: 0
+                        md_bg_color: 0.105, 0.09, 0.16, 1
+
+                        MDLabel:
+                            text: "Uzakta"
+                            font_style: "Caption"
+                            theme_text_color: "Custom"
+                            text_color: 0.68, 0.65, 0.78, 1
+                            adaptive_height: True
+
+                        MDLabel:
+                            text: root.away_time_text
+                            font_style: "H6"
+                            bold: True
+                            theme_text_color: "Custom"
+                            text_color: 0.95, 0.66, 0.35, 1
+                            adaptive_height: True
+
+                # -----------------------------------------------
+                # KAYNAK DAĞILIMI
+                # -----------------------------------------------
+
+                MDCard:
+                    orientation: "vertical"
+                    adaptive_height: True
+                    padding: dp(16)
+                    spacing: dp(12)
+                    radius: [dp(24), dp(24), dp(24), dp(24)]
+                    elevation: 0
+                    md_bg_color: 0.105, 0.09, 0.16, 1
+
+                    MDLabel:
+                        text: "Bugünkü odak dağılımı"
+                        font_style: "Subtitle1"
+                        bold: True
+                        theme_text_color: "Custom"
+                        text_color: 0.96, 0.94, 1, 1
+                        adaptive_height: True
+
+                    MDBoxLayout:
+                        adaptive_height: True
+                        spacing: dp(8)
+
+                        MDLabel:
+                            text: "Çalışma planı"
+                            font_style: "Caption"
+                            theme_text_color: "Custom"
+                            text_color: 0.68, 0.65, 0.78, 1
+                            adaptive_height: True
+
+                        MDLabel:
+                            text: root.study_plan_focus_text
+                            halign: "right"
+                            bold: True
+                            theme_text_color: "Custom"
+                            text_color: 0.65, 0.55, 0.98, 1
+                            adaptive_height: True
+
+                    MDBoxLayout:
+                        adaptive_height: True
+                        spacing: dp(8)
+
+                        MDLabel:
+                            text: "Klasik Pomodoro"
+                            font_style: "Caption"
+                            theme_text_color: "Custom"
+                            text_color: 0.68, 0.65, 0.78, 1
+                            adaptive_height: True
+
+                        MDLabel:
+                            text: root.regular_pomodoro_focus_text
+                            halign: "right"
+                            bold: True
+                            theme_text_color: "Custom"
+                            text_color: 0.95, 0.66, 0.35, 1
+                            adaptive_height: True
+
+                    MDBoxLayout:
+                        adaptive_height: True
+                        spacing: dp(8)
+
+                        MDLabel:
+                            text: "Toplam"
+                            bold: True
+                            theme_text_color: "Custom"
+                            text_color: 0.94, 0.92, 1, 1
+                            adaptive_height: True
+
+                        MDLabel:
+                            text: root.total_focus_text
+                            halign: "right"
+                            bold: True
+                            theme_text_color: "Custom"
+                            text_color: 0.13, 0.77, 0.37, 1
+                            adaptive_height: True
+
+                # -----------------------------------------------
+                # HEDEF
+                # -----------------------------------------------
+
+                MDCard:
+                    orientation: "vertical"
+                    adaptive_height: True
+                    padding: dp(16)
+                    spacing: dp(10)
+                    radius: [dp(24), dp(24), dp(24), dp(24)]
+                    elevation: 0
+                    md_bg_color: 0.105, 0.09, 0.16, 1
+
+                    MDLabel:
+                        text: "Günlük hedef"
+                        font_style: "Subtitle1"
+                        bold: True
+                        theme_text_color: "Custom"
+                        text_color: 0.96, 0.94, 1, 1
+                        adaptive_height: True
+
+                    MDLabel:
+                        text: root.goal_detail_text
+                        font_style: "Caption"
+                        theme_text_color: "Custom"
+                        text_color: 0.68, 0.65, 0.78, 1
+                        adaptive_height: True
+
+                    MDProgressBar:
+                        value: root.goal_progress
+                        size_hint_y: None
+                        height: dp(10)
+
+                # -----------------------------------------------
+                # HAFTALIK GÖRÜNÜM
+                # -----------------------------------------------
+
+                MDCard:
+                    orientation: "vertical"
+                    adaptive_height: True
+                    padding: dp(16)
+                    spacing: dp(12)
+                    radius: [dp(24), dp(24), dp(24), dp(24)]
+                    elevation: 0
+                    md_bg_color: 0.105, 0.09, 0.16, 1
+
+                    MDLabel:
+                        text: "Haftalık görünüm"
+                        font_style: "Subtitle1"
+                        bold: True
+                        theme_text_color: "Custom"
+                        text_color: 0.96, 0.94, 1, 1
+                        adaptive_height: True
+
+                    Spinner:
+                        text: root.selected_subject_name
+                        values: root.subject_filter_values
+                        size_hint_y: None
+                        height: dp(44)
+                        background_normal: ""
+                        background_down: ""
+                        background_color: 0.13, 0.11, 0.19, 1
+                        color: 0.94, 0.92, 1, 1
+                        on_text: root.change_subject_filter(self.text)
+
+                    MDLabel:
+                        text: root.weekly_total_text
+                        font_style: "Caption"
+                        theme_text_color: "Custom"
+                        text_color: 0.68, 0.65, 0.78, 1
+                        adaptive_height: True
+
+                    MDBoxLayout:
+                        id: weekly_list
+                        orientation: "vertical"
+                        adaptive_height: True
+                        spacing: dp(10)
+
+                # -----------------------------------------------
+                # DERS DAĞILIMI
+                # -----------------------------------------------
+
+                MDCard:
+                    orientation: "vertical"
+                    adaptive_height: True
+                    padding: dp(16)
+                    spacing: dp(12)
+                    radius: [dp(24), dp(24), dp(24), dp(24)]
+                    elevation: 0
+                    md_bg_color: 0.105, 0.09, 0.16, 1
+
+                    MDLabel:
+                        text: "Ders dağılımı"
+                        font_style: "Subtitle1"
+                        bold: True
+                        theme_text_color: "Custom"
+                        text_color: 0.96, 0.94, 1, 1
+                        adaptive_height: True
+
+                    MDLabel:
+                        text: root.subject_total_text
+                        font_style: "Caption"
+                        theme_text_color: "Custom"
+                        text_color: 0.68, 0.65, 0.78, 1
+                        adaptive_height: True
+
+                    MDLabel:
+                        id: subject_empty
+                        text: root.empty_subject_text
+                        font_style: "Caption"
+                        theme_text_color: "Custom"
+                        text_color: 0.68, 0.65, 0.78, 1
+                        adaptive_height: False
+                        height: dp(34)
+
+                    MDBoxLayout:
+                        id: subject_list
+                        orientation: "vertical"
+                        adaptive_height: True
+                        spacing: dp(8)
+
+                # -----------------------------------------------
+                # SON OTURUMLAR
+                # -----------------------------------------------
+
+                MDCard:
+                    orientation: "vertical"
+                    adaptive_height: True
+                    padding: dp(16)
+                    spacing: dp(12)
+                    radius: [dp(24), dp(24), dp(24), dp(24)]
+                    elevation: 0
+                    md_bg_color: 0.105, 0.09, 0.16, 1
+
+                    MDLabel:
+                        text: "Bugünkü son oturumlar"
+                        font_style: "Subtitle1"
+                        bold: True
+                        theme_text_color: "Custom"
+                        text_color: 0.96, 0.94, 1, 1
+                        adaptive_height: True
+
+                    MDLabel:
+                        id: recent_empty
+                        text: root.empty_recent_text
+                        font_style: "Caption"
+                        theme_text_color: "Custom"
+                        text_color: 0.68, 0.65, 0.78, 1
+                        adaptive_height: False
+                        height: dp(42)
+
+                    MDBoxLayout:
+                        id: recent_list
+                        orientation: "vertical"
+                        adaptive_height: True
+                        spacing: dp(8)
