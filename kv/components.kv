@@ -1,0 +1,25 @@
+#:import dp kivy.metrics.dp
+
+<NagomiSwitch@ToggleButton>:
+    size_hint: None, None
+    size: dp(58), dp(32)
+
+    background_normal: ""
+    background_down: ""
+    background_color: 0, 0, 0, 0
+
+    canvas.before:
+        Color:
+            rgba: app.theme_colors["primary_soft"] if root.state == "down" else app.theme_colors["card_border"]
+
+        RoundedRectangle:
+            pos: root.pos
+            size: root.size
+            radius: [dp(16), dp(16), dp(16), dp(16)]
+
+        Color:
+            rgba: app.theme_colors["primary"] if root.state == "down" else app.theme_colors["muted"]
+
+        Ellipse:
+            pos: (root.x + root.width - dp(28), root.y + dp(4)) if root.state == "down" else (root.x + dp(4), root.y + dp(4))
+            size: dp(24), dp(24)

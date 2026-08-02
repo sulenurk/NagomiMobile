@@ -163,6 +163,11 @@
   "alarm": "Alarm",
   "dark_mode": "Koyu mod",
   "light_mode": "Açık mod",
-  "language": "Dil"
+  "language": "Dil",
+
+  "appearance": "Görünüm",
+  "color_palette": "Renk paleti",
+  "color_palette_description": "Uygulama genelinde kullanılacak renkleri seçin.",
+  "palette_preview": "Palet önizlemesi"
 
 }

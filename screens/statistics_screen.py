@@ -26,6 +26,8 @@ class WeeklyBarChart(Widget):
     empty_bar_color = ListProperty([0.23, 0.21, 0.29, 1])
     text_color = ListProperty([0.72, 0.68, 0.84, 1])
 
+    grid_color = ListProperty([0.22, 0.20, 0.28, 1])
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -36,6 +38,8 @@ class WeeklyBarChart(Widget):
             values=self._redraw,
             bar_color=self._redraw,
             empty_bar_color=self._redraw,
+            grid_color=self._redraw,
+            text_color=self._redraw,
         )
 
     def set_data(
@@ -88,7 +92,7 @@ class WeeklyBarChart(Widget):
 
         with self.canvas:
             # Yatay referans çizgileri
-            Color(0.22, 0.20, 0.28, 1)
+            Color(*self.grid_color)
 
             for index in range(4):
                 y = chart_bottom + (
@@ -658,7 +662,7 @@ class StatisticsScreen(MDScreen):
                     dp(16),
                 ],
                 elevation=0,
-                md_bg_color=(0.13, 0.11, 0.19, 1),
+                md_bg_color=self.app.theme_colors["card_soft"],
             )
 
             header = MDBoxLayout(
@@ -672,7 +676,7 @@ class StatisticsScreen(MDScreen):
                 adaptive_height=True,
                 bold=True,
                 theme_text_color="Custom",
-                text_color=(0.94, 0.92, 1, 1),
+                text_color=self.app.theme_colors["text"],
             )
 
             value_label = MDLabel(
@@ -685,13 +689,14 @@ class StatisticsScreen(MDScreen):
                 halign="right",
                 adaptive_height=True,
                 theme_text_color="Custom",
-                text_color=(0.68, 0.65, 0.78, 1),
+                text_color=self.app.theme_colors["muted"],
             )
 
             progress = MDProgressBar(
                 value=ratio * 100,
                 size_hint_y=None,
                 height=dp(8),
+                color=self.app.theme_colors["primary"],
             )
 
             header.add_widget(name_label)
@@ -776,7 +781,7 @@ class StatisticsScreen(MDScreen):
                     dp(16),
                 ],
                 elevation=0,
-                md_bg_color=(0.13, 0.11, 0.19, 1),
+                md_bg_color=self.app.theme_colors["card_soft"],
             )
 
             title_row = MDBoxLayout(
@@ -791,7 +796,7 @@ class StatisticsScreen(MDScreen):
                 bold=True,
                 adaptive_height=True,
                 theme_text_color="Custom",
-                text_color=(0.94, 0.92, 1, 1),
+                text_color=self.app.theme_colors["text"],
             )
 
             time_label = MDLabel(
@@ -801,7 +806,7 @@ class StatisticsScreen(MDScreen):
                 halign="right",
                 adaptive_height=True,
                 theme_text_color="Custom",
-                text_color=(0.68, 0.65, 0.78, 1),
+                text_color=self.app.theme_colors["muted"],
             )
 
             detail_label = MDLabel(
@@ -813,7 +818,7 @@ class StatisticsScreen(MDScreen):
                 adaptive_height=True,
                 font_style="Caption",
                 theme_text_color="Custom",
-                text_color=(0.68, 0.65, 0.78, 1),
+                text_color=self.app.theme_colors["muted"],
             )
 
             title_row.add_widget(title_label)

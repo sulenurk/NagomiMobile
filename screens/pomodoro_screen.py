@@ -178,6 +178,22 @@ class PomodoroScreen(MDScreen):
 
         self.refresh_ui()
 
+    def refresh_theme(self) -> None:
+        from kivy.app import App
+
+        panel = self.ids.get("pomodoro_settings_panel")
+
+        if panel is None:
+            return
+
+        app = App.get_running_app()
+
+        panel.md_bg_color = list(
+            app.theme_colors["sidebar"]
+        )
+
+        panel.canvas.ask_update()
+
     def load_timer(self):
         settings_data = self.app.app_data.setdefault("settings", {})
 
@@ -385,15 +401,15 @@ class PomodoroScreen(MDScreen):
         mode_map = {
             "focus": (
                 self.app.t("focus_mode"),
-                [0.65, 0.55, 0.98, 1],
+                list(self.app.theme_colors["primary"]),
             ),
             "short_break": (
                 self.app.t("short_break_mode"),
-                [0.13, 0.77, 0.37, 1],
+                list(self.app.theme_colors["green"]),
             ),
             "long_break": (
                 self.app.t("long_break_mode"),
-                [0.23, 0.51, 0.96, 1],
+                list(self.app.theme_colors["blue"]),
             ),
         }
         self.mode_text, self.mode_color = mode_map[self.timer.mode]

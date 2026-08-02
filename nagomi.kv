@@ -30,7 +30,7 @@ MDNavigationLayout:
             orientation: "vertical"
             padding: dp(20)
             spacing: dp(8)
-            md_bg_color: 0.055, 0.047, 0.09, 1
+            md_bg_color: app.theme_colors["sidebar"]
 
             MDLabel:
                 text: app.t("app_name", app.translation_version)
@@ -38,7 +38,7 @@ MDNavigationLayout:
                 halign: "center"
                 bold: True
                 theme_text_color: "Custom"
-                text_color: 0.96, 0.94, 1, 1
+                text_color: app.theme_colors["text"]
                 size_hint_y: None
                 height: dp(90)
 
@@ -46,48 +46,48 @@ MDNavigationLayout:
                 text: app.t("pomodoro", app.translation_version)
                 size_hint_x: 1
                 theme_text_color: "Custom"
-                text_color: 0.90, 0.87, 0.98, 1
+                text_color: app.theme_colors["primary"] if app.active_page == "pomodoro" else app.theme_colors["soft"]
                 on_release: app.show_page("pomodoro")
 
             MDFlatButton:
                 text: app.t("focus_timer", app.translation_version)
                 size_hint_x: 1
                 theme_text_color: "Custom"
-                text_color: 0.90, 0.87, 0.98, 1
+                text_color: app.theme_colors["primary"] if app.active_page == "pomodoro" else app.theme_colors["soft"]
                 on_release: app.show_page("focus")
 
             MDFlatButton:
                 text: app.t("subjects", app.translation_version)
                 size_hint_x: 1
                 theme_text_color: "Custom"
-                text_color: 0.90, 0.87, 0.98, 1
+                text_color: app.theme_colors["primary"] if app.active_page == "pomodoro" else app.theme_colors["soft"]
                 on_release: app.show_page("subjects")
 
             MDFlatButton:
                 text: app.t("study_plan", app.translation_version)
                 size_hint_x: 1
                 theme_text_color: "Custom"
-                text_color: 0.90, 0.87, 0.98, 1
+                text_color: app.theme_colors["primary"] if app.active_page == "pomodoro" else app.theme_colors["soft"]
                 on_release: app.show_page("study")
 
             MDFlatButton:
                 text: app.t("statistics", app.translation_version)
                 size_hint_x: 1
                 theme_text_color: "Custom"
-                text_color: 0.90, 0.87, 0.98, 1
+                text_color: app.theme_colors["primary"] if app.active_page == "pomodoro" else app.theme_colors["soft"]
                 on_release: app.show_page("statistics")
 
             MDFlatButton:
                 text: app.t("settings", app.translation_version)
                 size_hint_x: 1
                 theme_text_color: "Custom"
-                text_color: 0.90, 0.87, 0.98, 1
+                text_color: app.theme_colors["primary"] if app.active_page == "pomodoro" else app.theme_colors["soft"]
                 on_release: app.show_page("settings")
 
             MDSeparator:
                 size_hint_y: None
                 height: dp(1)
-                color: 0.20, 0.18, 0.27, 1
+                color: app.theme_colors["card_border"]
 
             # -----------------------------------------------
             # ALARM
@@ -104,13 +104,13 @@ MDNavigationLayout:
                     width: dp(34)
                     halign: "center"
                     theme_text_color: "Custom"
-                    text_color: 0.72, 0.68, 0.84, 1
+                    text_color: app.theme_colors["muted"]
 
                 MDLabel:
                     text: app.t("alarm", app.translation_version)
                     font_style: "Subtitle2"
                     theme_text_color: "Custom"
-                    text_color: 0.90, 0.87, 0.98, 1
+                    text_color: app.theme_colors["text"]
 
                 AnchorLayout:
                     size_hint_x: None
@@ -119,9 +119,10 @@ MDNavigationLayout:
                     anchor_x: "center"
                     anchor_y: "center"
 
-                    MDSwitch:
-                        active: app.sound_enabled
-                        on_active: app.set_sound_enabled(self.active)
+                    NagomiSwitch:
+                        id: sound_switch
+                        state: "down" if app.sound_enabled else "normal"
+                        on_state: app.set_sound_enabled(self.state == "down")
 
             # -----------------------------------------------
             # DARK / LIGHT MODE
@@ -138,13 +139,13 @@ MDNavigationLayout:
                     width: dp(34)
                     halign: "center"
                     theme_text_color: "Custom"
-                    text_color: 0.72, 0.68, 0.84, 1
+                    text_color: app.theme_colors["muted"]
 
                 MDLabel:
                     text: app.t("dark_mode", app.translation_version) if app.dark_mode_enabled else app.t("light_mode", app.translation_version)
                     font_style: "Subtitle2"
                     theme_text_color: "Custom"
-                    text_color: 0.90, 0.87, 0.98, 1
+                    text_color: app.theme_colors["text"]
 
                 AnchorLayout:
                     size_hint_x: None
@@ -153,9 +154,10 @@ MDNavigationLayout:
                     anchor_x: "center"
                     anchor_y: "center"
 
-                    MDSwitch:
-                        active: app.dark_mode_enabled
-                        on_active: app.set_dark_mode(self.active)
+                    NagomiSwitch:
+                        id: dark_mode_switch
+                        state: "down" if app.dark_mode_enabled else "normal"
+                        on_state: app.set_dark_mode(self.state == "down")
 
             # Bu Widget dil bölümünü drawer'ın en altına iter.
             Widget:
@@ -163,7 +165,7 @@ MDNavigationLayout:
             MDSeparator:
                 size_hint_y: None
                 height: dp(1)
-                color: 0.20, 0.18, 0.27, 1
+                color: app.theme_colors["card_border"]
 
             # -----------------------------------------------
             # DİL
@@ -190,21 +192,11 @@ MDNavigationLayout:
 
             Spinner:
                 text: app.selected_language_name
-                values:
-                    [
-                    "English",
-                    "Türkçe",
-                    "Deutsch",
-                    "Français",
-                    "Español",
-                    "Português",
-                    "简体中文",
-                    "日本語"
-                    ]
+                values: ["English", "Türkçe", "Deutsch", "Français", "Español", "Português", "简体中文", "日本語"]
                 size_hint_y: None
                 height: dp(46)
                 background_normal: ""
                 background_down: ""
-                background_color: 0.13, 0.11, 0.19, 1
-                color: 0.94, 0.92, 1, 1
+                background_color: app.theme_colors["surface_light"]
+                color: app.theme_colors["text"]
                 on_text: app.set_language_by_name(self.text)

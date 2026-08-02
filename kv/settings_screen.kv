@@ -1,7 +1,7 @@
 #:import dp kivy.metrics.dp
 
 <SettingsScreen>:
-    md_bg_color: 0.055, 0.047, 0.09, 1
+    md_bg_color: app.theme_colors["bg"]
 
     MDBoxLayout:
         orientation: "vertical"
@@ -10,8 +10,8 @@
             title: app.t("settings", app.translation_version)
             anchor_title: "center"
             elevation: 0
-            md_bg_color: 0.055, 0.047, 0.09, 1
-            specific_text_color: 0.96, 0.94, 1, 1
+            md_bg_color: app.theme_colors["bg"]
+            specific_text_color: app.theme_colors["text"]
 
             left_action_items:
                 [["menu", lambda x: app.toggle_navigation_drawer()]]
@@ -37,14 +37,14 @@
                     spacing: dp(14)
                     radius: [dp(24), dp(24), dp(24), dp(24)]
                     elevation: 0
-                    md_bg_color: 0.105, 0.09, 0.16, 1
+                    md_bg_color: app.theme_colors["card"]
 
                     MDLabel:
                         text: app.t("auto_start", app.translation_version)
                         font_style: "Subtitle1"
                         bold: True
                         theme_text_color: "Custom"
-                        text_color: 0.96, 0.94, 1, 1
+                        text_color: app.theme_colors["text"]
                         adaptive_height: True
 
                     MDBoxLayout:
@@ -66,7 +66,7 @@
                                     font_style: "Subtitle2"
                                     bold: True
                                     theme_text_color: "Custom"
-                                    text_color: 0.92, 0.90, 0.98, 1
+                                    text_color: app.theme_colors["text"]
                                     adaptive_height: True
                                     text_size: self.width, None
 
@@ -74,7 +74,7 @@
                                     text: app.t("auto_start_focus_sessions_description", app.translation_version)
                                     font_style: "Caption"
                                     theme_text_color: "Custom"
-                                    text_color: 0.66, 0.62, 0.74, 1
+                                    text_color: app.theme_colors["muted"]
                                     adaptive_height: True
                                     text_size: self.width, None
 
@@ -85,9 +85,10 @@
                                 anchor_x: "center"
                                 anchor_y: "center"
 
-                                MDSwitch:
-                                    active: root.auto_start_focus
-                                    on_active: root.set_auto_start_focus(self.active)
+                                NagomiSwitch:
+                                    state: "down" if root.auto_start_focus else "normal"
+                                    on_state: root.set_auto_start_focus(self.state == "down")
+                                    
 
                     MDBoxLayout:
                         adaptive_height: True
@@ -104,14 +105,14 @@
                                 font_style: "Subtitle2"
                                 bold: True
                                 theme_text_color: "Custom"
-                                text_color: 0.92, 0.90, 0.98, 1
+                                text_color: app.theme_colors["text"]
                                 adaptive_height: True
 
                             MDLabel:
                                 text: app.t("auto_start_breaks_description", app.translation_version)
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
-                                text_color: 0.66, 0.62, 0.74, 1
+                                text_color: app.theme_colors["muted"]
                                 adaptive_height: True
 
                         AnchorLayout:
@@ -121,10 +122,10 @@
                             anchor_x: "center"
                             anchor_y: "center"
 
-                            MDSwitch:
-                                active: root.auto_start_break
-                                on_active: root.set_auto_start_break(self.active)
-
+                            NagomiSwitch:
+                                state: "down" if root.auto_start_break else "normal"
+                                on_state: root.set_auto_start_break(self.state == "down")
+                                
                 # -------------------------------------------------
                 # SES
                 # -------------------------------------------------
@@ -136,7 +137,7 @@
                     spacing: dp(12)
                     radius: [dp(24), dp(24), dp(24), dp(24)]
                     elevation: 0
-                    md_bg_color: 0.105, 0.09, 0.16, 1
+                    md_bg_color: app.theme_colors["card"]
 
                     MDBoxLayout:
                         adaptive_height: True
@@ -151,14 +152,14 @@
                                 font_style: "Subtitle1"
                                 bold: True
                                 theme_text_color: "Custom"
-                                text_color: 0.96, 0.94, 1, 1
+                                text_color: app.theme_colors["text"]
                                 adaptive_height: True
 
                             MDLabel:
                                 text: app.t("sound_notifications_description", app.translation_version)
                                 font_style: "Subtitle2"
                                 theme_text_color: "Custom"
-                                text_color: 0.66, 0.62, 0.74, 1
+                                text_color: app.theme_colors["muted"]
                                 adaptive_height: True
 
                         AnchorLayout:
@@ -168,9 +169,87 @@
                             anchor_x: "center"
                             anchor_y: "center"
 
-                            MDSwitch:
-                                active: root.sound_enabled
-                                on_active: root.set_sound_enabled(self.active)
+                            NagomiSwitch:
+                                state: "down" if root.sound_enabled else "normal"
+                                on_state: root.set_sound_enabled(self.state == "down")
+                                
+                # -------------------------------------------------
+                # GÖRÜNÜM VE RENK PALETİ
+                # -------------------------------------------------
+
+                MDCard:
+                    orientation: "vertical"
+                    adaptive_height: True
+                    padding: dp(16)
+                    spacing: dp(14)
+                    radius: [dp(24), dp(24), dp(24), dp(24)]
+                    elevation: 0
+                    md_bg_color: app.theme_colors["card"]
+
+                    MDLabel:
+                        text: app.t("appearance", app.translation_version)
+                        font_style: "Subtitle1"
+                        bold: True
+                        theme_text_color: "Custom"
+                        text_color: app.theme_colors["text"]
+                        adaptive_height: True
+
+                    MDLabel:
+                        text: app.t("color_palette_description", app.translation_version)
+                        font_style: "Caption"
+                        theme_text_color: "Custom"
+                        text_color: app.theme_colors["muted"]
+                        adaptive_height: True
+                        text_size: self.width, None
+
+                    Spinner:
+                        id: color_palette_spinner
+                        text: app.selected_palette_name
+                        values: app.palette_display_values
+                        size_hint_y: None
+                        height: dp(48)
+
+                        background_normal: ""
+                        background_down: ""
+                        background_color: app.theme_colors["surface_light"] if app.theme_version >= 0 else (1, 1, 1, 1)
+                        color: app.theme_colors["text"] if app.theme_version >= 0 else (0, 0, 0, 1)
+
+                        on_text:
+                            app.set_color_palette_by_name(self.text)
+
+                    MDBoxLayout:
+                        adaptive_height: True
+                        spacing: dp(8)
+
+                        MDLabel:
+                            text: app.t("palette_preview", app.translation_version)
+                            font_style: "Caption"
+                            theme_text_color: "Custom"
+                            text_color: app.theme_colors["muted"]
+                            adaptive_height: True
+
+                        Widget:
+
+                        MDCard:
+                            size_hint: None, None
+                            size: dp(24), dp(24)
+                            radius: [dp(12), dp(12), dp(12), dp(12)]
+                            elevation: 0
+                            md_bg_color: app.theme_colors["primary"] if app.theme_version >= 0 else (1, 1, 1, 1)
+
+                        MDCard:
+                            size_hint: None, None
+                            size: dp(24), dp(24)
+                            radius: [dp(12), dp(12), dp(12), dp(12)]
+                            elevation: 0
+                            md_bg_color: app.theme_colors["primary_soft"] if app.theme_version >= 0 else (1, 1, 1, 1)
+
+                        MDCard:
+                            size_hint: None, None
+                            size: dp(24), dp(24)
+                            radius: [dp(12), dp(12), dp(12), dp(12)]
+                            elevation: 0
+                            md_bg_color: app.theme_colors["card_soft"] if app.theme_version >= 0 else (1, 1, 1, 1)
 
                 # -------------------------------------------------
                 # HEDEF VE GÖRÜNÜRLÜK
@@ -183,14 +262,14 @@
                     spacing: dp(14)
                     radius: [dp(24), dp(24), dp(24), dp(24)]
                     elevation: 0
-                    md_bg_color: 0.105, 0.09, 0.16, 1
+                    md_bg_color: app.theme_colors["card"]
 
                     MDLabel:
                         text: app.t("plan_and_statistics", app.translation_version)
                         font_style: "Subtitle1"
                         bold: True
                         theme_text_color: "Custom"
-                        text_color: 0.96, 0.94, 1, 1
+                        text_color: app.theme_colors["text"]
                         adaptive_height: True
 
                     MDTextField:
@@ -213,7 +292,7 @@
                             text: app.t("show_queue_progress", app.translation_version)
                             font_style: "Subtitle2"
                             theme_text_color: "Custom"
-                            text_color: 0.92, 0.90, 0.98, 1
+                            text_color: app.theme_colors["text"]
                             adaptive_height: True
 
                         AnchorLayout:
@@ -223,10 +302,10 @@
                             anchor_x: "center"
                             anchor_y: "center"
 
-                            MDSwitch:
-                                active: root.show_queue_progress
-                                on_active: root.set_show_queue_progress(self.active)
-
+                            NagomiSwitch:
+                                state: "down" if root.show_queue_progress else "normal"
+                                on_state: root.set_show_queue_progress(self.state == "down")
+                                
                     MDBoxLayout:
                         adaptive_height: True
                         spacing: dp(12)
@@ -236,7 +315,7 @@
                             text: app.t("show_total_away_time", app.translation_version)
                             font_style: "Subtitle2"
                             theme_text_color: "Custom"
-                            text_color: 0.92, 0.90, 0.98, 1
+                            text_color: app.theme_colors["text"]
                             adaptive_height: True
 
                         AnchorLayout:
@@ -246,10 +325,10 @@
                             anchor_x: "center"
                             anchor_y: "center"
 
-                            MDSwitch:
-                                active: root.show_cumulative_away_time
-                                on_active: root.set_show_cumulative_away_time(self.active)
-
+                            NagomiSwitch:
+                                state: "down" if root.show_cumulative_away_time else "normal"
+                                on_state: root.set_show_cumulative_away_time(self.state == "down")
+                                
                     MDBoxLayout:
                         orientation: "vertical"
                         adaptive_height: True
@@ -261,14 +340,14 @@
                             font_style: "Subtitle2"
                             bold: True
                             theme_text_color: "Custom"
-                            text_color: 0.92, 0.90, 0.98, 1
+                            text_color: app.theme_colors["text"]
                             adaptive_height: True
 
                         MDLabel:
                             text: app.t("first_day_of_week_description", app.translation_version)
                             font_style: "Caption"
                             theme_text_color: "Custom"
-                            text_color: 0.66, 0.62, 0.74, 1
+                            text_color: app.theme_colors["muted"]
                             adaptive_height: True
 
                         Spinner:
@@ -278,15 +357,15 @@
                             height: dp(48)
                             background_normal: ""
                             background_down: ""
-                            background_color: 0.13, 0.11, 0.19, 1
-                            color: 0.94, 0.92, 1, 1
+                            background_color: app.theme_colors["surface_light"]
+                            color: app.theme_colors["text"]
                             on_text: root.change_week_start(self.text)
 
                 MDRaisedButton:
                     text: app.t("save", app.translation_version)
                     size_hint_x: 1
                     height: dp(50)
-                    md_bg_color: 0.60, 0.45, 0.96, 1
+                    md_bg_color: app.theme_colors["primary"]
                     on_release: root.save_numeric_settings()
 
                 MDFlatButton:
@@ -294,12 +373,12 @@
                     size_hint_x: 1
                     height: dp(48)
                     theme_text_color: "Custom"
-                    text_color: 0.95, 0.38, 0.46, 1
+                    text_color: app.theme_colors["red"]
                     on_release: root.reset_settings()
 
                 MDLabel:
                     text: root.status_text
                     halign: "center"
                     theme_text_color: "Custom"
-                    text_color: 0.95, 0.66, 0.35, 1
+                    text_color: app.theme_colors["orange"]
                     adaptive_height: True

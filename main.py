@@ -8,12 +8,20 @@ from kivy.lang import Builder
 from kivy.properties import (
     BooleanProperty,
     DictProperty,
+    ListProperty,
     NumericProperty,
     StringProperty,
 )
 from kivymd.app import MDApp
+from kivy.clock import Clock
 
 from kivy.utils import get_color_from_hex
+
+from core.theme import (
+    PALETTE_NAMES,
+    THEME_PALETTES,
+    build_theme,
+)
 
 from screens.pomodoro_screen import PomodoroScreen
 from screens.subjects_screen import SubjectsScreen
@@ -35,26 +43,71 @@ class NagomiApp(MDApp):
     dark_mode_enabled = BooleanProperty(True)
     selected_language_name = StringProperty("English")
 
+    theme_colors = DictProperty({})
+    theme_version = NumericProperty(0)
+
+    color_palette = StringProperty("purple")
+    selected_palette_name = StringProperty("Purple")
+
+    sidebar_color = ListProperty([0.03, 0.04, 0.07, 1])
+
+    palette_display_values = ListProperty(
+        [
+            "Purple",
+            "Pinky",
+            "Ocean Blue",
+            "Forest Green",
+            "Monochrome",
+            "Slate",
+            "Sunset Amber",
+            "Nordic Mint",
+        ]
+    )
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "DeepPurple"
 
-        self.data_path = Path(self.user_data_dir) / "app_data.json"
+        self.data_path = (
+            Path(self.user_data_dir)
+            / "app_data.json"
+        )
+
         self.app_data = self.load_app_data()
         self.ensure_app_data_defaults()
 
-        self.language = self.app_data.get("language", "en")
-        self.load_translations()
-        self.selected_language_name = self.get_language_name(
-            self.language
+        # -----------------------------------------------
+        # DİL
+        # -----------------------------------------------
+
+        self.language = self.app_data.get(
+            "language",
+            "en",
         )
 
-        settings = self.app_data.setdefault("settings", {})
+        self.load_translations()
+
+        self.selected_language_name = (
+            self.get_language_name(
+                self.language
+            )
+        )
+
+        # -----------------------------------------------
+        # AYARLAR
+        # -----------------------------------------------
+
+        settings = self.app_data.setdefault(
+            "settings",
+            {},
+        )
 
         self.sound_enabled = bool(
-            settings.get("sound_enabled", True)
+            settings.get(
+                "sound_enabled",
+                True,
+            )
         )
 
         appearance_mode = settings.get(
@@ -62,7 +115,58 @@ class NagomiApp(MDApp):
             "dark",
         )
 
-        self.dark_mode_enabled = appearance_mode == "dark"
+        self.dark_mode_enabled = (
+            appearance_mode == "dark"
+        )
+
+        self.color_palette = settings.get(
+            "color_palette",
+            "purple",
+        )
+
+        if self.color_palette not in PALETTE_NAMES:
+            self.color_palette = "purple"
+
+        self.selected_palette_name = (
+            PALETTE_NAMES[
+                self.color_palette
+            ]
+        )
+
+        # KV dosyaları yüklenmeden önce tema renkleri hazır olmalı.
+        self.apply_theme()
+
+        # -----------------------------------------------
+        # KV DOSYALARI
+        # -----------------------------------------------
+
+        Builder.load_file("kv/components.kv")
+
+        Builder.load_file(
+            "kv/pomodoro_screen.kv"
+        )
+        Builder.load_file(
+            "kv/focus_screen.kv"
+        )
+        Builder.load_file(
+            "kv/subjects_screen.kv"
+        )
+        Builder.load_file(
+            "kv/study_plan_screen.kv"
+        )
+        Builder.load_file(
+            "kv/statistics_screen.kv"
+        )
+        Builder.load_file(
+            "kv/settings_screen.kv"
+        )
+
+    def apply_theme(self) -> None:
+        appearance_mode = (
+            "dark"
+            if self.dark_mode_enabled
+            else "light"
+        )
 
         self.theme_cls.theme_style = (
             "Dark"
@@ -70,18 +174,56 @@ class NagomiApp(MDApp):
             else "Light"
         )
 
-        self.selected_language_name = self.get_language_name(
-            self.language
+        new_theme_colors = build_theme(
+            palette_key=self.color_palette,
+            appearance_mode=appearance_mode,
         )
 
-        # Pomodoro ekranının tasarım dosyası.
-        Builder.load_file("kv/pomodoro_screen.kv")
-        Builder.load_file("kv/focus_screen.kv")
-        Builder.load_file("kv/subjects_screen.kv")
-        Builder.load_file("kv/study_plan_screen.kv")
-        Builder.load_file("kv/statistics_screen.kv")
-        Builder.load_file("kv/settings_screen.kv")
+        self.theme_colors = dict(
+            new_theme_colors
+        )
 
+        self.sidebar_color = list(
+            new_theme_colors["sidebar"]
+        )
+
+        self.theme_version += 1
+
+        # Uygulama ilk açılırken root henüz oluşmamış olabilir.
+        if not self.root:
+            return
+
+        Clock.schedule_once(
+            self.refresh_open_settings_panels,
+            0,
+        )
+
+    def refresh_open_settings_panels(self, _dt=0) -> None:
+        if not self.root:
+            return
+
+        try:
+            screen_manager = self.root.ids.screen_manager
+        except (AttributeError, KeyError):
+            return
+
+        for screen_name in ("pomodoro", "focus"):
+            try:
+                screen = screen_manager.get_screen(
+                    screen_name
+                )
+            except Exception:
+                continue
+
+            refresh_theme = getattr(
+                screen,
+                "refresh_theme",
+                None,
+            )
+
+            if callable(refresh_theme):
+                refresh_theme()
+        
     def load_translations(self) -> None:
         locale_directory = (
             Path(__file__).resolve().parent
@@ -247,35 +389,123 @@ class NagomiApp(MDApp):
                 load_settings_method()
 
     def set_sound_enabled(self, enabled: bool) -> None:
-        self.sound_enabled = bool(enabled)
+        enabled = bool(enabled)
+
+        self.sound_enabled = enabled
 
         settings = self.app_data.setdefault("settings", {})
-        settings["sound_enabled"] = self.sound_enabled
+        settings["sound_enabled"] = enabled
 
-        if not self.sound_enabled:
+        if not enabled:
             self.stop_alarm()
 
         self.save_app_data()
 
 
     def set_dark_mode(self, enabled: bool) -> None:
-        self.dark_mode_enabled = bool(enabled)
+        enabled = bool(enabled)
 
-        mode = "dark" if enabled else "light"
+        if self.dark_mode_enabled == enabled:
+            return
 
-        self.app_data.setdefault(
-            "settings",
-            {},
-        )["appearance_mode"] = mode
+        self.dark_mode_enabled = enabled
 
-        self.theme_cls.theme_style = (
-            "Dark" if enabled else "Light"
+        appearance_mode = (
+            "dark"
+            if enabled
+            else "light"
         )
 
+        settings = self.app_data.setdefault(
+            "settings",
+            {},
+        )
+
+        settings["appearance_mode"] = appearance_mode
+
+        self.apply_theme()
         self.save_app_data()
 
-    def on_start(self):
+    def get_palette_key(self, palette_name: str) -> str:
+        normalized_name = str(palette_name).strip()
+
+        for palette_key, display_name in PALETTE_NAMES.items():
+            if display_name == normalized_name:
+                return palette_key
+
+    def set_color_palette_by_name(
+        self,
+        palette_name: str,
+    ) -> None:
+        palette_key = self.get_palette_key(
+            palette_name
+        )
+
+        self.set_color_palette(palette_key)
+
+
+    def set_color_palette(
+        self,
+        palette_key: str,
+    ) -> None:
+        if palette_key not in THEME_PALETTES:
+            print(
+                "[PALETTE ERROR] Bulunamadı:",
+                palette_key,
+            )
+            palette_key = "purple"
+
+        self.color_palette = palette_key
+        self.selected_palette_name = (
+            PALETTE_NAMES.get(
+                palette_key,
+                "Purple",
+            )
+        )
+
+        settings = self.app_data.setdefault(
+            "settings",
+            {},
+        )
+        settings["color_palette"] = palette_key
+
+        self.apply_theme()
+        self.save_app_data()
+        self.refresh_theme_ui()
+
+    def refresh_theme_ui(self) -> None:
+        if not self.root:
+            return
+
+        screen_manager = self.root.ids.get(
+            "screen_manager"
+        )
+
+        if not screen_manager:
+            return
+
+        for screen in screen_manager.screens:
+            refresh_ui = getattr(
+                screen,
+                "refresh_ui",
+                None,
+            )
+
+            if callable(refresh_ui):
+                refresh_ui()
+
+            refresh_stats = getattr(
+                screen,
+                "refresh_stats",
+                None,
+            )
+
+            if callable(refresh_stats):
+                refresh_stats()
+
+    def on_start(self) -> None:
         self.show_page("pomodoro")
+
 
     def on_pause(self) -> bool:
         if not self.root:

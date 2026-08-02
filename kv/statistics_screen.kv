@@ -1,7 +1,7 @@
 #:import dp kivy.metrics.dp
 
 <StatisticsScreen>:
-    md_bg_color: 0.055, 0.047, 0.09, 1
+    md_bg_color: app.theme_colors["bg"]
 
     MDBoxLayout:
         orientation: "vertical"
@@ -10,8 +10,8 @@
             title: app.t("statistics", app.translation_version)
             anchor_title: "center"
             elevation: 0
-            md_bg_color: 0.055, 0.047, 0.09, 1
-            specific_text_color: 0.96, 0.94, 1, 1
+            md_bg_color: app.theme_colors["bg"]
+            specific_text_color: app.theme_colors["text"]
 
             left_action_items:
                 [["menu", lambda x: app.toggle_navigation_drawer()]]
@@ -31,14 +31,14 @@
                     font_style: "Subtitle1"
                     bold: True
                     theme_text_color: "Custom"
-                    text_color: 0.96, 0.94, 1, 1
+                    text_color: app.theme_colors["text"]
                     adaptive_height: True
 
                 MDLabel:
                     text: app.t("statistics_subtitle" , app.translation_version)
                     font_style: "Subtitle2"
                     theme_text_color: "Custom"
-                    text_color: 0.68, 0.65, 0.78, 1
+                    text_color: app.theme_colors["muted"]
                     adaptive_height: True
 
                 # -----------------------------------------------
@@ -56,13 +56,13 @@
                         spacing: dp(4)
                         radius: [dp(18), dp(18), dp(18), dp(18)]
                         elevation: 0
-                        md_bg_color: 0.105, 0.09, 0.16, 1
+                        md_bg_color: app.theme_colors["card"]
 
                         MDLabel:
                             text: app.t("today", app.translation_version)
                             font_style: "Caption"
                             theme_text_color: "Custom"
-                            text_color: 0.68, 0.65, 0.78, 1
+                            text_color: app.theme_colors["muted"]
                             adaptive_height: True
 
                         MDLabel:
@@ -70,7 +70,7 @@
                             font_style: "H6"
                             bold: True
                             theme_text_color: "Custom"
-                            text_color: 0.13, 0.77, 0.37, 1
+                            text_color: app.theme_colors["green"]
                             adaptive_height: True
 
                     MDCard:
@@ -80,13 +80,13 @@
                         spacing: dp(4)
                         radius: [dp(18), dp(18), dp(18), dp(18)]
                         elevation: 0
-                        md_bg_color: 0.105, 0.09, 0.16, 1
+                        md_bg_color: app.theme_colors["card"]
 
                         MDLabel:
                             text: app.t("sessions", app.translation_version)
                             font_style: "Caption"
                             theme_text_color: "Custom"
-                            text_color: 0.68, 0.65, 0.78, 1
+                            text_color: app.theme_colors["muted"]
                             adaptive_height: True
 
                         MDLabel:
@@ -94,7 +94,7 @@
                             font_style: "H6"
                             bold: True
                             theme_text_color: "Custom"
-                            text_color: 0.65, 0.55, 0.98, 1
+                            text_color: app.theme_colors["primary"]
                             adaptive_height: True
 
                     MDCard:
@@ -104,13 +104,13 @@
                         spacing: dp(4)
                         radius: [dp(18), dp(18), dp(18), dp(18)]
                         elevation: 0
-                        md_bg_color: 0.105, 0.09, 0.16, 1
+                        md_bg_color: app.theme_colors["card"]
 
                         MDLabel:
                             text: app.t("away", app.translation_version)
                             font_style: "Caption"
                             theme_text_color: "Custom"
-                            text_color: 0.68, 0.65, 0.78, 1
+                            text_color: app.theme_colors["muted"]
                             adaptive_height: True
 
                         MDLabel:
@@ -118,7 +118,7 @@
                             font_style: "H6"
                             bold: True
                             theme_text_color: "Custom"
-                            text_color: 0.95, 0.66, 0.35, 1
+                            text_color: app.theme_colors["orange"]
                             adaptive_height: True
 
                 # -----------------------------------------------
@@ -132,14 +132,14 @@
                     spacing: dp(12)
                     radius: [dp(24), dp(24), dp(24), dp(24)]
                     elevation: 0
-                    md_bg_color: 0.105, 0.09, 0.16, 1
+                    md_bg_color: app.theme_colors["card"]
 
                     MDLabel:
                         text: app.t("today_focus_distribution", app.translation_version)
                         font_style: "Subtitle1"
                         bold: True
                         theme_text_color: "Custom"
-                        text_color: 0.96, 0.94, 1, 1
+                        text_color: app.theme_colors["text"]
                         adaptive_height: True
 
                     MDBoxLayout:
@@ -150,7 +150,7 @@
                             text: app.t("study_plan", app.translation_version)
                             font_style: "Caption"
                             theme_text_color: "Custom"
-                            text_color: 0.68, 0.65, 0.78, 1
+                            text_color: app.theme_colors["muted"]
                             adaptive_height: True
 
                         MDLabel:
@@ -158,7 +158,7 @@
                             halign: "right"
                             bold: True
                             theme_text_color: "Custom"
-                            text_color: 0.65, 0.55, 0.98, 1
+                            text_color: app.theme_colors["primary"]
                             adaptive_height: True
 
                     MDBoxLayout:
@@ -169,7 +169,7 @@
                             text: app.t("pomodoro", app.translation_version)
                             font_style: "Caption"
                             theme_text_color: "Custom"
-                            text_color: 0.68, 0.65, 0.78, 1
+                            text_color: app.theme_colors["muted"]
                             adaptive_height: True
 
                         MDLabel:
@@ -177,7 +177,7 @@
                             halign: "right"
                             bold: True
                             theme_text_color: "Custom"
-                            text_color: 0.95, 0.66, 0.35, 1
+                            text_color: app.theme_colors["orange"]
                             adaptive_height: True
 
                     MDBoxLayout:
@@ -188,7 +188,7 @@
                             text: app.t("total", app.translation_version)
                             bold: True
                             theme_text_color: "Custom"
-                            text_color: 0.94, 0.92, 1, 1
+                            text_color: app.theme_colors["text"]
                             adaptive_height: True
 
                         MDLabel:
@@ -196,7 +196,7 @@
                             halign: "right"
                             bold: True
                             theme_text_color: "Custom"
-                            text_color: 0.13, 0.77, 0.37, 1
+                            text_color: app.theme_colors["green"]
                             adaptive_height: True
 
                 # -----------------------------------------------
@@ -210,27 +210,28 @@
                     spacing: dp(10)
                     radius: [dp(24), dp(24), dp(24), dp(24)]
                     elevation: 0
-                    md_bg_color: 0.105, 0.09, 0.16, 1
+                    md_bg_color: app.theme_colors["card"]
 
                     MDLabel:
                         text: app.t("daily_goal", app.translation_version)
                         font_style: "Subtitle1"
                         bold: True
                         theme_text_color: "Custom"
-                        text_color: 0.96, 0.94, 1, 1
+                        text_color: app.theme_colors["text"]
                         adaptive_height: True
 
                     MDLabel:
                         text: root.goal_detail_text
                         font_style: "Caption"
                         theme_text_color: "Custom"
-                        text_color: 0.68, 0.65, 0.78, 1
+                        text_color: app.theme_colors["muted"]
                         adaptive_height: True
 
                     MDProgressBar:
                         value: root.goal_progress
                         size_hint_y: None
                         height: dp(10)
+                        color: app.theme_colors["primary"]
 
                 # -----------------------------------------------
                 # HAFTALIK GÖRÜNÜM
@@ -243,14 +244,14 @@
                     spacing: dp(12)
                     radius: [dp(24), dp(24), dp(24), dp(24)]
                     elevation: 0
-                    md_bg_color: 0.105, 0.09, 0.16, 1
+                    md_bg_color: app.theme_colors["card"]
 
                     MDLabel:
                         text: app.t("weekly_overview", app.translation_version)
                         font_style: "Subtitle1"
                         bold: True
                         theme_text_color: "Custom"
-                        text_color: 0.96, 0.94, 1, 1
+                        text_color: app.theme_colors["text"]
                         adaptive_height: True
 
                     Spinner:
@@ -260,15 +261,15 @@
                         height: dp(44)
                         background_normal: ""
                         background_down: ""
-                        background_color: 0.13, 0.11, 0.19, 1
-                        color: 0.94, 0.92, 1, 1
+                        background_color: app.theme_colors["surface_light"]
+                        color: app.theme_colors["text"]
                         on_text: root.change_subject_filter(self.text)
 
                     MDLabel:
                         text: root.weekly_total_text
                         font_style: "Caption"
                         theme_text_color: "Custom"
-                        text_color: 0.68, 0.65, 0.78, 1
+                        text_color: app.theme_colors["muted"]
                         adaptive_height: True
 
                     MDBoxLayout:
@@ -293,7 +294,7 @@
 
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
-                                text_color: 0.72, 0.68, 0.84, 1
+                                text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_value_texts[1]
@@ -305,7 +306,7 @@
 
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
-                                text_color: 0.72, 0.68, 0.84, 1
+                                text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_value_texts[2]
@@ -317,7 +318,7 @@
 
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
-                                text_color: 0.72, 0.68, 0.84, 1
+                                text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_value_texts[3]
@@ -329,7 +330,7 @@
 
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
-                                text_color: 0.72, 0.68, 0.84, 1
+                                text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_value_texts[4]
@@ -341,7 +342,7 @@
 
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
-                                text_color: 0.72, 0.68, 0.84, 1
+                                text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_value_texts[5]
@@ -353,7 +354,7 @@
 
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
-                                text_color: 0.72, 0.68, 0.84, 1
+                                text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_value_texts[6]
@@ -365,12 +366,16 @@
 
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
-                                text_color: 0.72, 0.68, 0.84, 1
+                                text_color: app.theme_colors["muted"]
 
                         WeeklyBarChart:
                             id: weekly_bar_chart
                             labels: root.weekly_labels
                             values: root.weekly_values
+                            bar_color: app.theme_colors["primary"]
+                            empty_bar_color: app.theme_colors["surface_light"]
+                            grid_color: app.theme_colors["card_border"]
+                            text_color: app.theme_colors["muted"]
                             size_hint_y: None
                             height: dp(175)
 
@@ -385,49 +390,49 @@
                                 halign: "center"
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
-                                text_color: 0.72, 0.68, 0.84, 1
+                                text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_labels[1]
                                 halign: "center"
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
-                                text_color: 0.72, 0.68, 0.84, 1
+                                text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_labels[2]
                                 halign: "center"
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
-                                text_color: 0.72, 0.68, 0.84, 1
+                                text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_labels[3]
                                 halign: "center"
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
-                                text_color: 0.72, 0.68, 0.84, 1
+                                text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_labels[4]
                                 halign: "center"
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
-                                text_color: 0.72, 0.68, 0.84, 1
+                                text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_labels[5]
                                 halign: "center"
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
-                                text_color: 0.72, 0.68, 0.84, 1
+                                text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_labels[6]
                                 halign: "center"
                                 font_style: "Caption"
                                 theme_text_color: "Custom"
-                                text_color: 0.72, 0.68, 0.84, 1
+                                text_color: app.theme_colors["muted"]
 
                 # -----------------------------------------------
                 # DERS DAĞILIMI
@@ -440,21 +445,21 @@
                     spacing: dp(12)
                     radius: [dp(24), dp(24), dp(24), dp(24)]
                     elevation: 0
-                    md_bg_color: 0.105, 0.09, 0.16, 1
+                    md_bg_color: app.theme_colors["card"]
 
                     MDLabel:
                         text: app.t("subject_distribution", app.translation_version)
                         font_style: "Subtitle1"
                         bold: True
                         theme_text_color: "Custom"
-                        text_color: 0.96, 0.94, 1, 1
+                        text_color: app.theme_colors["text"]
                         adaptive_height: True
 
                     MDLabel:
                         text: root.subject_total_text
                         font_style: "Caption"
                         theme_text_color: "Custom"
-                        text_color: 0.68, 0.65, 0.78, 1
+                        text_color: app.theme_colors["muted"]
                         adaptive_height: True
 
                     MDLabel:
@@ -462,7 +467,7 @@
                         text: root.empty_subject_text
                         font_style: "Caption"
                         theme_text_color: "Custom"
-                        text_color: 0.68, 0.65, 0.78, 1
+                        text_color: app.theme_colors["muted"]
                         adaptive_height: False
                         height: dp(34)
 
@@ -483,14 +488,14 @@
                     spacing: dp(12)
                     radius: [dp(24), dp(24), dp(24), dp(24)]
                     elevation: 0
-                    md_bg_color: 0.105, 0.09, 0.16, 1
+                    md_bg_color: app.theme_colors["card"]
 
                     MDLabel:
                         text: app.t("today_recent_sessions", app.translation_version)
                         font_style: "Subtitle1"
                         bold: True
                         theme_text_color: "Custom"
-                        text_color: 0.96, 0.94, 1, 1
+                        text_color: app.theme_colors["text"]
                         adaptive_height: True
 
                     MDLabel:
@@ -498,7 +503,7 @@
                         text: root.empty_recent_text
                         font_style: "Caption"
                         theme_text_color: "Custom"
-                        text_color: 0.68, 0.65, 0.78, 1
+                        text_color: app.theme_colors["muted"]
                         adaptive_height: False
                         height: dp(42)
 

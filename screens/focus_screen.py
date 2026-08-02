@@ -76,6 +76,22 @@ class FocusScreen(MDScreen):
 
         self._update_display()
 
+    def refresh_theme(self) -> None:
+        from kivy.app import App
+
+        panel = self.ids.get("focus_settings_panel")
+
+        if panel is None:
+            return
+
+        app = App.get_running_app()
+
+        panel.md_bg_color = list(
+            app.theme_colors["sidebar"]
+        )
+
+        panel.canvas.ask_update()
+
     def load_active_task(self) -> None:
         """
         Study Plan ekranında aktif hale getirilen görevi bulur ve

@@ -161,5 +161,10 @@
   "alarm": "Alarm",
   "dark_mode": "Dark mode",
   "light_mode": "Light mode",
-  "language": "Language"
+  "language": "Language",
+
+  "appearance": "Appearance",
+  "color_palette": "Color palette",
+  "color_palette_description": "Choose the colors used throughout the application.",
+  "palette_preview": "Palette preview"
 }

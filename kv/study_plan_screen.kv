@@ -4,9 +4,9 @@
 <DarkSpinner@Spinner>:
     background_normal: ""
     background_down: ""
-    background_color: 0.10, 0.085, 0.15, 1
+    background_color: app.theme_colors["surface_light"]
 
-    color: 0.94, 0.92, 1, 1
+    color: app.theme_colors["text"]
     font_size: sp(15)
 
     size_hint_y: None
@@ -17,8 +17,8 @@
 <SpinnerOption>:
     background_normal: ""
     background_down: ""
-    background_color: 0.11, 0.095, 0.16, 1
-    color: 0.94, 0.92, 1, 1
+    background_color: app.theme_colors["card"]
+    color: app.theme_colors["text"]
     font_size: sp(15)
     height: dp(46)
 
@@ -29,7 +29,7 @@
     spacing: dp(10)
     radius: [dp(22), dp(22), dp(22), dp(22)]
     elevation: 0
-    md_bg_color: 0.12, 0.10, 0.17, 1
+    md_bg_color: app.theme_colors["card"]
     line_color: app.hex_to_rgba(root.subject_color) if root.is_active else (0, 0, 0, 0)
     line_width: dp(2)
 
@@ -55,7 +55,7 @@
             text: root.status_text
             halign: "right"
             theme_text_color: "Custom"
-            text_color: 0.72, 0.68, 0.84, 1
+            text_color: app.theme_colors["muted"]
             adaptive_height: True
 
     MDLabel:
@@ -63,13 +63,13 @@
         font_style: "H6"
         bold: True
         theme_text_color: "Custom"
-        text_color: (0.58, 0.55, 0.64, 1) if root.is_completed else (0.96, 0.94, 1, 1)
+        text_color: app.theme_colors["muted"] if root.is_completed else app.theme_colors["text"]
         adaptive_height: True
 
     MDLabel:
         text: root.detail_text + "  •  " + root.priority_text
         theme_text_color: "Custom"
-        text_color: 0.68, 0.65, 0.78, 1
+        text_color: app.theme_colors["muted"]
         adaptive_height: True
 
     MDBoxLayout:
@@ -113,11 +113,11 @@
         MDIconButton:
             icon: "delete-outline"
             theme_icon_color: "Custom"
-            icon_color: 0.95, 0.38, 0.46, 1
+            icon_color: app.theme_colors["red"]
             on_release: app.root.ids.screen_manager.get_screen("study").delete_task(root.task_id)
 
 <StudyPlanScreen>:
-    md_bg_color: 0.055, 0.047, 0.09, 1
+    md_bg_color: app.theme_colors["bg"]
 
     MDBoxLayout:
         orientation: "vertical"
@@ -125,8 +125,8 @@
         MDTopAppBar:
             title: app.t("study_plan", app.translation_version)
             elevation: 0
-            md_bg_color: 0.055, 0.047, 0.09, 1
-            specific_text_color: 0.96, 0.94, 1, 1
+            md_bg_color: app.theme_colors["bg"]
+            specific_text_color: app.theme_colors["text"]
             left_action_items: [["menu", lambda x: app.toggle_navigation_drawer()]]
             right_action_items: [["play", lambda x: root.start_plan()]]
 
@@ -145,13 +145,13 @@
                     font_style: "H5"
                     bold: True
                     theme_text_color: "Custom"
-                    text_color: 0.96, 0.94, 1, 1
+                    text_color: app.theme_colors["bg"]
                     adaptive_height: True
 
                 MDLabel:
                     text: root.summary_text
                     theme_text_color: "Custom"
-                    text_color: 0.68, 0.65, 0.78, 1
+                    text_color: app.theme_colors["muted"]
                     adaptive_height: True
 
                 MDCard:
@@ -161,14 +161,14 @@
                     spacing: dp(16)
                     radius: [dp(24), dp(24), dp(24), dp(24)]
                     elevation: 0
-                    md_bg_color: 0.105, 0.09, 0.16, 1
+                    md_bg_color: app.theme_colors["card"]
 
                     MDLabel:
                         text: app.t("add_task", app.translation_version) if not root.editing_task_id else app.t("edit_task", app.translation_version)
                         font_style: "H6"
                         bold: True
                         theme_text_color: "Custom"
-                        text_color: 0.96, 0.94, 1, 1
+                        text_color: app.theme_colors["text"]
                         adaptive_height: True
 
                     DarkSpinner:
@@ -186,17 +186,20 @@
                         size_hint_y: None
                         height: dp(64)
 
-                        fill_color_normal: 0.075, 0.065, 0.115, 1
-                        fill_color_focus: 0.09, 0.075, 0.14, 1
+                        fill_color_normal: app.theme_colors["input"]
+                        fill_color_focus: app.theme_colors["input"]
 
-                        text_color_normal: 0.96, 0.94, 1, 1
-                        text_color_focus: 0.96, 0.94, 1, 1
+                        text_color_normal: app.theme_colors["input_text"]
+                        text_color_focus: app.theme_colors["input_text"]
 
-                        hint_text_color_normal: 0.55, 0.52, 0.66, 1
-                        hint_text_color_focus: 0.68, 0.60, 0.96, 1
+                        hint_text_color_normal: app.theme_colors["muted"]
+                        hint_text_color_focus: app.theme_colors["primary"]
+
+                        helper_text_color_normal: app.theme_colors["muted"]
+                        helper_text_color_focus: app.theme_colors["primary"]
 
                         line_color_normal: 0, 0, 0, 0
-                        line_color_focus: 0.65, 0.55, 0.98, 1
+                        line_color_focus: app.theme_colors["primary"]
 
                         on_text_validate: root.add_or_update_task()
 
@@ -221,20 +224,20 @@
                                 size_hint_y: None
                                 height: dp(68)
 
-                                fill_color_normal: 0.075, 0.065, 0.115, 1
-                                fill_color_focus: 0.09, 0.075, 0.14, 1
+                                fill_color_normal: app.theme_colors["input"]
+                                fill_color_focus: app.theme_colors["input"]
 
-                                text_color_normal: 0.96, 0.94, 1, 1
-                                text_color_focus: 0.96, 0.94, 1, 1
+                                text_color_normal: app.theme_colors["input_text"]
+                                text_color_focus: app.theme_colors["input_text"]
 
-                                hint_text_color_normal: 0.55, 0.52, 0.66, 1
-                                hint_text_color_focus: 0.68, 0.60, 0.96, 1
+                                hint_text_color_normal: app.theme_colors["muted"]
+                                hint_text_color_focus: app.theme_colors["primary"]
 
-                                helper_text_color_normal: 0.52, 0.49, 0.63, 1
-                                helper_text_color_focus: 0.68, 0.60, 0.96, 1
+                                helper_text_color_normal: app.theme_colors["muted"]
+                                helper_text_color_focus: app.theme_colors["primary"]
 
                                 line_color_normal: 0, 0, 0, 0
-                                line_color_focus: 0.65, 0.55, 0.98, 1
+                                line_color_focus: app.theme_colors["primary"]
 
                             MDTextField:
                                 id: break_minutes
@@ -248,21 +251,20 @@
                                 size_hint_y: None
                                 height: dp(68)
 
-                                fill_color_normal: 0.075, 0.065, 0.115, 1
-                                fill_color_focus: 0.09, 0.075, 0.14, 1
+                                fill_color_normal: app.theme_colors["input"]
+                                fill_color_focus: app.theme_colors["input"]
 
-                                text_color_normal: 0.96, 0.94, 1, 1
-                                text_color_focus: 0.96, 0.94, 1, 1
+                                text_color_normal: app.theme_colors["input_text"]
+                                text_color_focus: app.theme_colors["input_text"]
 
-                                hint_text_color_normal: 0.55, 0.52, 0.66, 1
-                                hint_text_color_focus: 0.68, 0.60, 0.96, 1
+                                hint_text_color_normal: app.theme_colors["muted"]
+                                hint_text_color_focus: app.theme_colors["primary"]
 
-                                helper_text_color_normal: 0.52, 0.49, 0.63, 1
-                                helper_text_color_focus: 0.68, 0.60, 0.96, 1
+                                helper_text_color_normal: app.theme_colors["muted"]
+                                helper_text_color_focus: app.theme_colors["primary"]
 
                                 line_color_normal: 0, 0, 0, 0
-                                line_color_focus: 0.65, 0.55, 0.98, 1
-
+                                line_color_focus: app.theme_colors["primary"]
                     DarkSpinner:
                         id: priority_spinner
                         text: app.t(root.selected_priority, app.translation_version)
@@ -284,21 +286,21 @@
                             opacity: 1 if root.editing_task_id else 0
                             disabled: not root.editing_task_id
                             theme_text_color: "Custom"
-                            text_color: 0.72, 0.68, 0.84, 1
+                            text_color: app.theme_colors["muted"]
                             on_release: root.cancel_edit()
 
                         MDRaisedButton:
                             text: app.t("save", app.translation_version)
                             size_hint_x: 0.65 if root.editing_task_id else 1
                             height: dp(48)
-                            md_bg_color: 0.60, 0.45, 0.96, 1
+                            md_bg_color: app.theme_colors["primary"]
                             on_release: root.add_or_update_task()
 
                     MDLabel:
                         text: root.form_status
                         halign: "center"
                         theme_text_color: "Custom"
-                        text_color: 0.95, 0.66, 0.35, 1
+                        text_color: app.theme_colors["orange"]
                         adaptive_height: True
 
                 MDBoxLayout:
@@ -323,7 +325,7 @@
                     text: app.t("no_tasks_yet", app.translation_version)
                     halign: "center"
                     theme_text_color: "Custom"
-                    text_color: 0.68, 0.65, 0.78, 1
+                    text_color: app.theme_colors["text"]
                     adaptive_height: True
 
                 MDBoxLayout:

@@ -17,7 +17,7 @@
     spacing: dp(12)
     radius: [dp(20), dp(20), dp(20), dp(20)]
     elevation: 0
-    md_bg_color: 0.105, 0.09, 0.16, 1
+    md_bg_color: app.theme_colors["card"]
 
     MDCard:
         size_hint: None, None
@@ -31,7 +31,7 @@
         text: root.subject_name
         bold: True
         theme_text_color: "Custom"
-        text_color: 0.96, 0.94, 1, 1
+        text_color: app.theme_colors["text"]
         shorten: True
         shorten_from: "right"
 
@@ -48,7 +48,7 @@
         font_style: "Caption"
         halign: "center"
         theme_text_color: "Custom"
-        text_color: 0.72, 0.68, 0.84, 1
+        text_color: app.theme_colors["muted"]
 
     MDIconButton:
         icon: "delete-outline"
@@ -59,7 +59,7 @@
         on_release: app.root.ids.screen_manager.get_screen("subjects").delete_subject(root.subject_id)
 
 <SubjectsScreen>:
-    md_bg_color: 0.055, 0.047, 0.09, 1
+    md_bg_color: app.theme_colors["bg"]
 
     MDBoxLayout:
         orientation: "vertical"
@@ -67,8 +67,8 @@
         MDTopAppBar:
             title: app.t("subjects", app.translation_version)
             elevation: 0
-            md_bg_color: 0.055, 0.047, 0.09, 1
-            specific_text_color: 0.96, 0.94, 1, 1
+            md_bg_color: app.theme_colors["bg"]
+            specific_text_color: app.theme_colors["text"]
             left_action_items: [["menu", lambda x: app.toggle_navigation_drawer()]]
 
         ScrollView:
@@ -86,13 +86,13 @@
                     font_style: "H5"
                     bold: True
                     theme_text_color: "Custom"
-                    text_color: 0.96, 0.94, 1, 1
+                    text_color: app.theme_colors["text"]
                     adaptive_height: True
 
                 MDLabel:
                     text: app.t("subjects_description", app.translation_version)
                     theme_text_color: "Custom"
-                    text_color: 0.68, 0.65, 0.78, 1
+                    text_color: app.theme_colors["muted"]
                     adaptive_height: True
 
                 MDCard:
@@ -102,28 +102,45 @@
                     spacing: dp(14)
                     radius: [dp(26), dp(26), dp(26), dp(26)]
                     elevation: 0
-                    md_bg_color: 0.105, 0.09, 0.16, 1
+                    md_bg_color: app.theme_colors["card"]
 
                     MDLabel:
                         text: app.t("new_subject", app.translation_version)
                         font_style: "H6"
                         bold: True
                         theme_text_color: "Custom"
-                        text_color: 0.96, 0.94, 1, 1
+                        text_color: app.theme_colors["text"]
                         adaptive_height: True
 
                     MDTextField:
                         id: subject_name
+
                         hint_text: app.t("subject_name_example", app.translation_version)
-                        mode: "rectangle"
+
+                        mode: "fill"
+
                         multiline: False
-                        on_text_validate: root.add_subject()
+
+                        fill_color_normal: app.theme_colors["input"]
+                        fill_color_focus: app.theme_colors["input"]
+
+                        text_color_normal: app.theme_colors["input_text"]
+                        text_color_focus: app.theme_colors["input_text"]
+
+                        hint_text_color_normal: app.theme_colors["muted"]
+                        hint_text_color_focus: app.theme_colors["primary"]
+
+                        line_color_normal: 0,0,0,0
+                        line_color_focus: app.theme_colors["primary"]
+
+                        on_text_validate:
+                            root.add_subject()
 
                     MDLabel:
                         text: app.t("select_color", app.translation_version)
                         bold: True
                         theme_text_color: "Custom"
-                        text_color: 0.72, 0.68, 0.84, 1
+                        text_color: app.theme_colors["muted"]
                         adaptive_height: True
 
                     MDGridLayout:
@@ -173,7 +190,7 @@
                         text: root.status_text
                         halign: "center"
                         theme_text_color: "Custom"
-                        text_color: 0.95, 0.66, 0.35, 1
+                        text_color: app.theme_colors["orange"]
                         adaptive_height: True
 
                 MDLabel:
@@ -181,7 +198,7 @@
                     font_style: "H6"
                     bold: True
                     theme_text_color: "Custom"
-                    text_color: 0.96, 0.94, 1, 1
+                    text_color: app.theme_colors["text"]
                     adaptive_height: True
 
                 MDBoxLayout:
