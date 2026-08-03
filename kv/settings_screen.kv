@@ -134,11 +134,12 @@
                     orientation: "vertical"
                     adaptive_height: True
                     padding: dp(16)
-                    spacing: dp(12)
+                    spacing: dp(16)
                     radius: [dp(24), dp(24), dp(24), dp(24)]
                     elevation: 0
                     md_bg_color: app.theme_colors["card"]
 
+                    # Ses aç / kapat
                     MDBoxLayout:
                         adaptive_height: True
                         spacing: dp(12)
@@ -161,6 +162,7 @@
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["muted"]
                                 adaptive_height: True
+                                text_size: self.width, None
 
                         AnchorLayout:
                             size_hint_x: None
@@ -171,8 +173,52 @@
 
                             NagomiSwitch:
                                 state: "down" if root.sound_enabled else "normal"
-                                on_state: root.set_sound_enabled(self.state == "down")
-                                
+                                on_release: root.set_sound_enabled(self.state == "down")
+
+                    MDSeparator:
+                        size_hint_y: None
+                        height: dp(1)
+                        color: app.theme_colors["card_border"]
+
+                    # Alarm tonu seçimi
+                    MDBoxLayout:
+                        orientation: "vertical"
+                        adaptive_height: True
+                        spacing: dp(8)
+
+                        MDLabel:
+                            text: app.t("alarm_tone", app.translation_version)
+                            font_style: "Subtitle2"
+                            bold: True
+                            theme_text_color: "Custom"
+                            text_color: app.theme_colors["text"]
+                            adaptive_height: True
+
+                        MDLabel:
+                            text: app.t("alarm_tone_description", app.translation_version)
+                            font_style: "Caption"
+                            theme_text_color: "Custom"
+                            text_color: app.theme_colors["muted"]
+                            adaptive_height: True
+                            text_size: self.width, None
+
+                        Spinner:
+                            id: alarm_sound_spinner
+                            text: root.selected_alarm_name
+                            values: root.alarm_display_values
+                            size_hint_y: None
+                            height: dp(48)
+                            background_normal: ""
+                            background_down: ""
+                            background_color: app.theme_colors["surface_light"]
+                            color: app.theme_colors["text"]
+
+                            disabled: not root.sound_enabled
+                            opacity: 1 if root.sound_enabled else 0.45
+
+                            on_text: root.set_alarm_sound_by_name(self.text)
+
+               
                 # -------------------------------------------------
                 # GÖRÜNÜM VE RENK PALETİ
                 # -------------------------------------------------

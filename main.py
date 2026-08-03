@@ -11,11 +11,13 @@ from kivy.properties import (
     ListProperty,
     NumericProperty,
     StringProperty,
+    ObjectProperty
 )
 from kivymd.app import MDApp
-from kivy.clock import Clock
 
-from kivy.utils import get_color_from_hex
+from kivy.clock import Clock
+from kivy.core.audio import SoundLoader
+from kivy.utils import get_color_from_hex, platform
 
 from core.theme import (
     PALETTE_NAMES,
@@ -63,6 +65,12 @@ class NagomiApp(MDApp):
             "Nordic Mint",
         ]
     )
+    preview_sound = ObjectProperty(
+        None,
+        allownone=True,
+    )
+    alarm_active = BooleanProperty(False)
+    alarm_sound = ObjectProperty(None, allownone=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -109,6 +117,7 @@ class NagomiApp(MDApp):
                 True,
             )
         )
+        self._preview_stop_event = None
 
         appearance_mode = settings.get(
             "appearance_mode",
@@ -135,6 +144,8 @@ class NagomiApp(MDApp):
 
         # KV dosyaları yüklenmeden önce tema renkleri hazır olmalı.
         self.apply_theme()
+
+        self._alarm_stop_event = None
 
         # -----------------------------------------------
         # KV DOSYALARI
@@ -393,13 +404,25 @@ class NagomiApp(MDApp):
 
         self.sound_enabled = enabled
 
-        settings = self.app_data.setdefault("settings", {})
+        settings = self.app_data.setdefault(
+            "settings",
+            {},
+        )
         settings["sound_enabled"] = enabled
+
+        self.save_app_data()
 
         if not enabled:
             self.stop_alarm()
+            self.stop_alarm_preview()
 
-        self.save_app_data()
+        print(
+            "[SOUND SETTING]",
+            "property:",
+            self.sound_enabled,
+            "saved:",
+            settings["sound_enabled"],
+        )
 
 
     def set_dark_mode(self, enabled: bool) -> None:
@@ -506,7 +529,6 @@ class NagomiApp(MDApp):
     def on_start(self) -> None:
         self.show_page("pomodoro")
 
-
     def on_pause(self) -> bool:
         if not self.root:
             return True
@@ -605,6 +627,8 @@ class NagomiApp(MDApp):
         self.app_data.setdefault("focus_state", {})
 
         settings = self.app_data.setdefault("settings", {})
+        settings.setdefault(
+            "alarm_sound", "beep")
 
         default_settings = {
             "auto_start_break": False,
@@ -702,23 +726,225 @@ class NagomiApp(MDApp):
         except OSError as error:
             print(f"[DATA ERROR] Veriler kaydedilemedi: {error}")
 
-    
+    """ def hex_to_rgba(self, value: str):
+        return get_color_from_hex(value) """
+
+    # Alarm kodları
+    def get_alarm_path(self, alarm_name: str) -> Path:
+        alarm_files = {
+            "analog": "analog.mp3",
+            "beep": "beep.mp3",
+            "birdy": "birdy.mp3",
+            "buzz": "buzz.mp3",
+            "dance": "dans.mp3",
+            "galaxy": "galaxy.mp3",
+        }
+
+        # Bilinmeyen veya boş bir değer gelirse beep kullanılır.
+        filename = alarm_files.get(
+            str(alarm_name).strip().lower(),
+            "beep.mp3",
+        )
+
+        return (
+            Path(__file__).resolve().parent
+            / "assets"
+            / "sounds"
+            / filename
+        )
+
+
+    def play_alarm(self) -> None:
+        print("[ALARM 1] play_alarm çağrıldı")
+        print("[ALARM 2] sound_enabled:", self.sound_enabled)
+
+        if not self.sound_enabled:
+            print("[ALARM STOP] Ses ayarı kapalı.")
+            return
+
+        self.stop_alarm_preview()
+        self.stop_alarm()
+
+        settings = self.app_data.setdefault(
+            "settings",
+            {},
+        )
+
+        selected_alarm = str(
+            settings.get("alarm_sound", "beep")
+        ).strip().lower()
+
+        print("[ALARM 3] selected_alarm:", selected_alarm)
+
+        self.stop_alarm()
+
+        alarm_path = self.get_alarm_path(selected_alarm)
+
+        print("[ALARM 4] path:", alarm_path)
+        print("[ALARM 5] exists:", alarm_path.exists())
+
+        if not alarm_path.exists():
+            print("[ALARM ERROR] Dosya bulunamadı.")
+            return
+
+        sound = SoundLoader.load(str(alarm_path))
+
+        print("[ALARM 6] SoundLoader sonucu:", sound)
+
+        if sound is None:
+            print("[ALARM ERROR] Alarm yüklenemedi.")
+            return
+
+        self.alarm_sound = sound
+        self.alarm_sound.loop = True
+        self.alarm_sound.volume = 1.0
+
+        self.alarm_active = True
+        self.alarm_sound.play()
+
+        self.start_alarm_vibration()
+
+        self._alarm_stop_event = Clock.schedule_once(
+            self._auto_stop_alarm,
+            15,
+        )
+
+
+    def _auto_stop_alarm(self, _dt) -> None:
+        self._alarm_stop_event = None
+        self.stop_alarm()
+
 
     def stop_alarm(self) -> None:
-        # Alarm özelliğini daha sonra ekleyeceğiz.
-        pass
+        # Bekleyen otomatik durdurma çağrısını iptal et.
+        if self._alarm_stop_event is not None:
+            self._alarm_stop_event.cancel()
+            self._alarm_stop_event = None
 
-    def play_alarm(self, source: str) -> bool:
-        # Alarm özelliğini daha sonra ekleyeceğiz.
-        print(f"Alarm tetiklendi: {source}")
-        return True
+        if self.alarm_sound is not None:
+            try:
+                self.alarm_sound.stop()
+            except Exception as error:
+                print("[ALARM STOP ERROR]", error)
 
-    def open_pomodoro_settings(self) -> None:
-        # Alt ayar panelini sonraki adımda oluşturacağız.
-        print("Pomodoro ayarları açılacak.")
+            self.alarm_sound = None
 
-    def hex_to_rgba(self, value: str):
-        return get_color_from_hex(value)
+        self.stop_alarm_vibration()
+        self.alarm_active = False
+
+    def start_alarm_vibration(self) -> None:
+        settings = self.app_data.setdefault("settings", {})
+
+        if not bool(settings.get("vibration_enabled", True)):
+            return
+
+        if platform != "android":
+            return
+
+        try:
+            from plyer import vibrator
+
+            if vibrator.exists():
+                vibrator.pattern(
+                    pattern=[
+                        0,
+                        0.4,
+                        0.25,
+                        0.4,
+                        0.6,
+                    ],
+                    repeat=0,
+                )
+
+        except Exception as error:
+            print("[VIBRATION ERROR]", error)
+
+
+    def stop_alarm_vibration(self) -> None:
+        if platform != "android":
+            return
+
+        try:
+            from plyer import vibrator
+            vibrator.cancel()
+
+        except Exception as error:
+            print("[VIBRATION STOP ERROR]", error)
+
+    @staticmethod
+    def hex_to_rgba(hex_color: str) -> list[float]:
+        try:
+            return list(get_color_from_hex(str(hex_color)))
+        except (TypeError, ValueError):
+            return [0.4, 0.45, 0.55, 1]
+
+
+    def preview_alarm(
+        self,
+        alarm_name: str,
+    ) -> None:
+        if not self.sound_enabled:
+            return
+
+        self.stop_alarm_preview()
+
+        alarm_path = self.get_alarm_path(
+            alarm_name
+        )
+
+        if not alarm_path.exists():
+            print(
+                "[ALARM PREVIEW ERROR] Dosya bulunamadı:",
+                alarm_path,
+            )
+            return
+
+        sound = SoundLoader.load(
+            str(alarm_path)
+        )
+
+        if sound is None:
+            print(
+                "[ALARM PREVIEW ERROR] Ses yüklenemedi:",
+                alarm_path,
+            )
+            return
+
+        self.preview_sound = sound
+        self.preview_sound.loop = False
+        self.preview_sound.volume = 1.0
+        self.preview_sound.play()
+
+        # Önizlemeyi en fazla 3 saniye çal.
+        self._preview_stop_event = Clock.schedule_once(
+            self._stop_alarm_preview_event,
+            3,
+        )
+
+
+    def _stop_alarm_preview_event(
+        self,
+        _dt,
+    ) -> None:
+        self._preview_stop_event = None
+        self.stop_alarm_preview()
+
+
+    def stop_alarm_preview(self) -> None:
+        if self._preview_stop_event is not None:
+            self._preview_stop_event.cancel()
+            self._preview_stop_event = None
+
+        if self.preview_sound is not None:
+            try:
+                self.preview_sound.stop()
+            except Exception as error:
+                print(
+                    "[ALARM PREVIEW STOP ERROR]",
+                    error,
+                )
+
+            self.preview_sound = None
 
 
 if __name__ == "__main__":

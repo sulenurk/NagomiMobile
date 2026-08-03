@@ -367,7 +367,7 @@ class PomodoroScreen(MDScreen):
         self.refresh_ui()
 
     def _handle_finished_session(self, result: dict[str, object]):
-        self.app.play_alarm("pomodoro")
+        self.app.play_alarm()
 
         if bool(result.get("focus_completed")):
             self.log_regular_focus_session()

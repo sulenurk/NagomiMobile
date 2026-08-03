@@ -168,6 +168,10 @@
   "appearance": "Görünüm",
   "color_palette": "Renk paleti",
   "color_palette_description": "Uygulama genelinde kullanılacak renkleri seçin.",
-  "palette_preview": "Palet önizlemesi"
+  "palette_preview": "Palet önizlemesi",
+
+  "stop_alarm": "Alarmı sustur",
+  "alarm_tone": "Alarm tonu",
+  "alarm_tone_description": "Sayaç sona erdiğinde çalacak sesi seçin."
 
 }

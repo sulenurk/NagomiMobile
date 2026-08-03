@@ -100,6 +100,20 @@
                             size_hint_y: None
                             height: dp(34)
 
+                        MDRaisedButton:
+                            text: app.t("stop_alarm", app.translation_version)
+                            size_hint_x: 1
+                            size_hint_y: None
+
+                            height: dp(48) if app.alarm_active else 0
+                            opacity: 1 if app.alarm_active else 0
+                            disabled: not app.alarm_active
+
+                            md_bg_color: app.theme_colors["red"]
+
+                            on_release:
+                                app.stop_alarm()
+
                         Widget:
                             size_hint_y: 0.3
 
@@ -372,7 +386,7 @@
                             NagomiSwitch:
                                 state: "down" if root.setting_show_away_time else "normal"
                                 on_state:
-                                    root.setting_show_away_time = self.active == "down"
+                                    root.setting_show_away_time = self.state == "down"
 
                     MDBoxLayout:
                         adaptive_height: True
@@ -398,7 +412,7 @@
                             NagomiSwitch:
                                 state: "down" if root.setting_show_queue_progress else "normal"
                                 on_state:
-                                    root.setting_show_queue_progress = self.active == "down"
+                                    root.setting_show_queue_progress = self.state == "down"
 
             MDRaisedButton:
                 text: app.t("save", app.translation_version)

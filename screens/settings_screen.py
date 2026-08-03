@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from kivy.properties import (
+    ListProperty,
     BooleanProperty,
     StringProperty,
 )
@@ -13,6 +14,19 @@ class SettingsScreen(MDScreen):
     auto_start_focus = BooleanProperty(False)
     auto_start_break = BooleanProperty(False)
     sound_enabled = BooleanProperty(True)
+
+    selected_alarm_name = StringProperty("Beep")
+
+    alarm_display_values = ListProperty(
+        [
+            "Analog",
+            "Beep",
+            "Birdy",
+            "Buzz",
+            "Dance",
+            "Galaxy",
+        ]
+    )
 
     show_queue_progress = BooleanProperty(True)
     show_cumulative_away_time = BooleanProperty(True)
@@ -61,6 +75,17 @@ class SettingsScreen(MDScreen):
                 settings.get("sound_enabled", True)
             )
 
+            alarm_key = str(
+                settings.get(
+                    "alarm_sound",
+                    "beep",
+                )
+            )
+
+            self.selected_alarm_name = (
+                self.get_alarm_display_name(alarm_key)
+            )
+
             self.show_queue_progress = bool(
                 settings.get("show_queue_progress", True)
             )
@@ -95,6 +120,36 @@ class SettingsScreen(MDScreen):
         finally:
             self._is_loading = False
 
+    def set_alarm_sound_by_name(
+        self,
+        display_name: str,
+    ) -> None:
+        if self._is_loading:
+            return
+
+        alarm_key = self.get_alarm_key(display_name)
+
+        settings = self.get_settings()
+
+        current_alarm = str(
+            settings.get("alarm_sound", "beep")
+        ).strip().lower()
+
+        self.selected_alarm_name = (
+            self.get_alarm_display_name(alarm_key)
+        )
+
+        # Spinner ilk yüklenirken mevcut değeri tekrar gönderirse
+        # kayıt veya önizleme yapma.
+        if alarm_key == current_alarm:
+            return
+
+        settings["alarm_sound"] = alarm_key
+        self.app.save_app_data()
+
+        if self.app.sound_enabled:
+            self.app.preview_alarm(alarm_key)
+
     # ---------------------------------------------------------
     # SWITCH AYARLARI
     # ---------------------------------------------------------
@@ -119,13 +174,49 @@ class SettingsScreen(MDScreen):
         if self._is_loading:
             return
 
-        self.sound_enabled = bool(enabled)
-        self.get_settings()["sound_enabled"] = bool(enabled)
+        enabled = bool(enabled)
+
+        self.sound_enabled = enabled
+        self.app.sound_enabled = enabled
+
+        self.get_settings()["sound_enabled"] = enabled
 
         if not enabled:
             self.app.stop_alarm()
+            self.app.stop_alarm_preview()
 
         self._save_without_message()
+
+    def get_alarm_display_name(self, alarm_key: str) -> str:
+        alarm_names = {
+            "analog": "Analog",
+            "beep": "Beep",
+            "birdy": "Birdy",
+            "buzz": "Buzz",
+            "dance": "Dance",
+            "galaxy": "Galaxy",
+        }
+
+        return alarm_names.get(
+            str(alarm_key).strip().lower(),
+            "Beep",
+        )
+
+
+    def get_alarm_key(self, display_name: str) -> str:
+        alarm_keys = {
+            "Analog": "analog",
+            "Beep": "beep",
+            "Birdy": "birdy",
+            "Buzz": "buzz",
+            "Dance": "dance",
+            "Galaxy": "galaxy",
+        }
+
+        return alarm_keys.get(
+            str(display_name).strip(),
+            "beep",
+        )
 
     def set_show_queue_progress(self, enabled: bool) -> None:
         if self._is_loading:
@@ -181,9 +272,9 @@ class SettingsScreen(MDScreen):
         self.week_start_text = selected_value
 
         self.get_settings()["week_start_day"] = (
-            self.app.t("sunday")
-            if selected_value == "Pazar"
-            else self.app.t("monday")
+            "sunday"
+            if selected_value == self.app.t("sunday")
+            else "monday"
         )
 
         self._save_without_message()
@@ -200,6 +291,7 @@ class SettingsScreen(MDScreen):
                 "auto_start_break": False,
                 "auto_start_focus": False,
                 "sound_enabled": True,
+                "alarm_sound": "beep",
                 "daily_focus_goal_minutes": 300,
                 "regular_focus_minutes": 25,
                 "regular_short_break_minutes": 5,

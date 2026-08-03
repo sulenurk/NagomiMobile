@@ -149,6 +149,20 @@
                         size_hint_y: None
                         height: dp(28)
 
+                    MDRaisedButton:
+                        text: app.t("stop_alarm", app.translation_version)
+                        size_hint_x: 1
+                        size_hint_y: None
+
+                        height: dp(48) if app.alarm_active else 0
+                        opacity: 1 if app.alarm_active else 0
+                        disabled: not app.alarm_active
+
+                        md_bg_color: app.theme_colors["red"]
+
+                        on_release:
+                            app.stop_alarm()
+
                 Widget:
                     size_hint_y: 0.75
 

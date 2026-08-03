@@ -122,7 +122,8 @@ MDNavigationLayout:
                     NagomiSwitch:
                         id: sound_switch
                         state: "down" if app.sound_enabled else "normal"
-                        on_state: app.set_sound_enabled(self.state == "down")
+                        on_release:
+                            app.set_sound_enabled(self.state == "down")
 
             # -----------------------------------------------
             # DARK / LIGHT MODE
@@ -182,12 +183,14 @@ MDNavigationLayout:
                     width: dp(34)
                     halign: "center"
                     theme_text_color: "Custom"
+                    text_color: app.theme_colors["muted"]
                     text_color: 0.72, 0.68, 0.84, 1
 
                 MDLabel:
                     text: app.t("language", app.translation_version)
                     font_style: "Subtitle2"
                     theme_text_color: "Custom"
+                    text_color: app.theme_colors["text"]
                     text_color: 0.90, 0.87, 0.98, 1
 
             Spinner:

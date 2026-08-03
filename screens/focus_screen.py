@@ -165,6 +165,8 @@ class FocusScreen(MDScreen):
     # ---------------------------------------------------------
 
     def toggle_timer(self) -> None:
+        self.app.stop_alarm()
+
         if self.is_running:
             self.pause_timer()
         else:
@@ -246,6 +248,7 @@ class FocusScreen(MDScreen):
         self._update_display()
 
     def reset_timer(self) -> None:
+        self.app.stop_alarm()
         app = MDApp.get_running_app()
 
         self._cancel_timer_event()
@@ -288,10 +291,8 @@ class FocusScreen(MDScreen):
 
     def finish_session(self) -> None:
         """
-        KV dosyasındaki stop butonu için kullanılır.
-
-        Mevcut odak oturumu erkenden durdurulur. Görev tamamlanmış
-        sayılmaz. Geçen süre varsa tamamlanmamış oturum olarak kaydedilir.
+        Kullanıcı stop butonuna bastığında mevcut oturumu erken bitirir.
+        Görev tamamlanmış sayılmaz.
         """
         if self.is_running:
             self._sync_remaining_seconds()
@@ -329,7 +330,12 @@ class FocusScreen(MDScreen):
         self._update_display()
 
         if self.remaining_seconds <= 0:
-            self.complete_current_mode()
+            self.remaining_seconds = 0
+            self._update_display()
+
+            self.complete_current_mode(
+                completed_automatically=True
+            )
 
     def _sync_remaining_seconds(self) -> None:
         """
@@ -348,7 +354,10 @@ class FocusScreen(MDScreen):
             int(self.timer_end_timestamp - time.time()),
         )
 
-    def complete_current_mode(self) -> None:
+    def complete_current_mode(
+        self,
+        completed_automatically: bool = False,
+    ) -> None:
         """
         Mevcut odak veya mola geri sayımı sıfıra ulaştığında çalışır.
         """
@@ -367,8 +376,9 @@ class FocusScreen(MDScreen):
 
         self._update_display()
 
-        app = MDApp.get_running_app()
-        app.play_alarm("focus")
+        # Alarm yalnızca sayaç kendiliğinden sona erdiyse çalsın.
+        if completed_automatically:
+            self.app.play_alarm()
 
         if self.current_mode == "focus":
             self._complete_focus_mode()
@@ -719,7 +729,9 @@ class FocusScreen(MDScreen):
 
                 if self.remaining_seconds <= 0:
                     Clock.schedule_once(
-                        lambda dt: self.complete_current_mode(),
+                        lambda _dt: self.complete_current_mode(
+                            completed_automatically=True
+                        ),
                         0,
                     )
                 else:
@@ -963,3 +975,8 @@ class FocusScreen(MDScreen):
             return ", ".join(str(item) for item in value)
 
         return str(value)
+
+    @property
+    def app(self):
+        from kivy.app import App
+        return App.get_running_app()

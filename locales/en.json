@@ -166,5 +166,9 @@
   "appearance": "Appearance",
   "color_palette": "Color palette",
   "color_palette_description": "Choose the colors used throughout the application.",
-  "palette_preview": "Palette preview"
+  "palette_preview": "Palette preview",
+
+  "stop_alarm": "Stop alarm",
+  "alarm_tone": "Alarm tone",
+  "alarm_tone_description": "Choose the sound played when a timer ends."
 }
