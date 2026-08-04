@@ -1,4 +1,11 @@
 from __future__ import annotations
+
+from kivy.config import Config
+
+Config.set("graphics", "width", "320")
+Config.set("graphics", "height", "568")
+Config.set("graphics", "resizable", "0")
+
 from core.responsive import ResponsiveMixin
 from kivy.core.window import Window
 
@@ -77,9 +84,9 @@ class NagomiApp(ResponsiveMixin, MDApp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-         # Yalnızca bilgisayarda responsive tasarım testi için
+        """  # Yalnızca bilgisayarda responsive tasarım testi için
         if platform != "android":
-            Window.size = (800, 360)
+            Window.size = (320, 568) """
 
         self.setup_responsive_layout()
 

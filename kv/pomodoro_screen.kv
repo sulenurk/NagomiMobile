@@ -1,4 +1,5 @@
 #:import dp kivy.metrics.dp
+#:import sp kivy.metrics.sp
 
 <PomodoroScreen>:
     md_bg_color: app.theme_colors["bg"]
@@ -19,6 +20,8 @@
                 elevation: 0
                 md_bg_color: app.theme_colors["bg"]
                 specific_text_color: app.theme_colors["text"]
+                size_hint_y: None
+                height: dp(app.responsive(46, 54, 44, 64, 58))
 
                 left_action_items:
                     [["menu", lambda x: app.toggle_navigation_drawer()]]
@@ -28,36 +31,26 @@
 
             MDBoxLayout:
                 orientation: "vertical"
-                padding: dp(18), dp(12), dp(18), dp(24)
-                spacing: dp(8)
+                padding: dp(app.responsive(10, 14, 8, 28, 20)), dp(app.responsive(6, 10, 4, 16, 10)), dp(app.responsive(10, 14, 8, 28, 20)), dp(app.responsive(10, 20, 8, 28, 16))
+                spacing: dp(app.responsive(8, 10, 6, 14, 10))
 
                 MDLabel:
                     text: app.t("pomodoro", app.translation_version)
                     halign: "center"
-                    font_style: "H5"
                     bold: True
+                    font_size: sp(app.responsive(18, 24, 17, 32, 28))
                     theme_text_color: "Custom"
                     text_color: app.theme_colors["text"]
                     size_hint_y: None
-                    height: dp(34)
+                    height: dp(app.responsive(26, 34, 24, 44, 38))
 
-                MDLabel:
-                    text: app.t("pomodoro_subtitle", app.translation_version)
-                    halign: "center"
-                    theme_text_color: "Custom"
-                    text_color: app.theme_colors["muted"]
-                    size_hint_y: None
-                    height: dp(30)
-
-                Widget:
-                    size_hint_y: 0.25
 
                 MDCard:
                     orientation: "vertical"
                     size_hint_y: None
-                    height: dp(485)
-                    padding: dp(18), dp(20), dp(18), dp(20)
-                    spacing: dp(8)
+                    height: dp(app.responsive(390, 425, 335, 580, 505))
+                    padding: (dp(app.responsive(10, 16, 8, 24, 20)), dp(app.responsive(18, 22, 14, 30, 24)), dp(app.responsive(10, 16, 8, 24, 20)), dp(app.responsive(10, 16, 8, 22, 18)))
+                    spacing: dp(app.responsive(6, 8, 5, 10, 8))
                     radius: [dp(30), dp(30), dp(30), dp(30)]
                     elevation: 0
                     md_bg_color: app.theme_colors["card"]
@@ -65,58 +58,68 @@
                     MDLabel:
                         text: root.mode_text
                         halign: "center"
-                        font_style: "H6"
+                        valign: "middle"
                         bold: True
+                        font_size: sp(app.responsive(13, 18, 14, 25, 22))
                         theme_text_color: "Custom"
                         text_color: root.mode_color
                         size_hint_y: None
-                        height: dp(36)
+                        height: dp(app.responsive(24, 30, 22, 42, 36))
+                        text_size: self.width, self.height
 
-                    FloatLayout:
+                    Widget:
                         size_hint_y: None
-                        height: dp(305)
+                        height: dp(app.responsive(18, 20, 12, 28, 22))
 
-                        CircularProgress:
-                            progress: root.progress
-                            progress_color: root.mode_color
-                            track_color: app.theme_colors["card_soft"]
-                            line_width: dp(11)
+                    AnchorLayout:
+                        anchor_x: "center"
+                        anchor_y: "center"
+                        size_hint_y: None
+                        height: dp(app.responsive(170, 220, 165, 350, 320))
 
+                        FloatLayout:
                             size_hint: None, None
-                            size: dp(275), dp(275)
+                            size: dp(app.responsive(170, 210, 155, 330, 300)), dp(app.responsive(170, 210, 155, 330, 300))
 
-                            pos_hint:
-                                {"center_x": 0.5, "center_y": 0.5}
+                            CircularProgress:
+                                progress: root.progress
+                                progress_color: root.mode_color
+                                track_color: app.theme_colors["card_soft"]
+                                line_width: dp(app.responsive(7, 8, 6, 12, 10))
+                                size_hint: 1, 1
+                                pos: self.parent.pos
 
-                        MDBoxLayout:
-                            orientation: "vertical"
-                            size_hint: None, None
-                            size: dp(220), dp(110)
-                            spacing: dp(2)
+                            MDBoxLayout:
+                                orientation: "vertical"
+                                size_hint: None, None
+                                size: dp(app.responsive(130, 160, 120, 260, 230)), dp(app.responsive(60, 78, 56, 115, 100))
+                                spacing: 0
+                                pos_hint: {"center_x": 0.5, "center_y": 0.5}
 
-                            pos_hint:
-                                {"center_x": 0.5, "center_y": 0.5}
+                                MDLabel:
+                                    text: root.timer_text
+                                    halign: "center"
+                                    bold: True
+                                    font_size: sp(app.responsive(28, 40, 30, 64, 56))
+                                    theme_text_color: "Custom"
+                                    text_color: app.theme_colors["text"]
 
-                            MDLabel:
-                                text: root.timer_text
-                                halign: "center"
-                                font_style: "H2"
-                                bold: True
-                                theme_text_color: "Custom"
-                                text_color: app.theme_colors["text"]
+                                MDLabel:
+                                    text: root.cycle_text
+                                    halign: "center"
+                                    font_size: sp(app.responsive(10, 12, 9, 17, 15))
+                                    theme_text_color: "Custom"
+                                    text_color: app.theme_colors["muted"]
 
-                            MDLabel:
-                                text: root.cycle_text
-                                halign: "center"
-                                font_style: "Subtitle1"
-                                theme_text_color: "Custom"
-                                text_color: app.theme_colors["muted"]
-
+                    Widget:
+                        size_hint_y: None
+                        height: dp(app.responsive(12, 14, 8, 20, 16))
+                    
                     MDBoxLayout:
                         size_hint_y: None
-                        height: dp(76)
-                        spacing: dp(16)
-                        padding: dp(10), 0
+                        height: dp(app.responsive(56, 68, 52, 94, 84))
+                        spacing: dp(app.responsive(6, 12, 5, 20, 16))
+                        padding: dp(app.responsive(6, 10, 4, 16, 12)), 0
 
                         Widget:
 
@@ -128,7 +131,7 @@
 
                         MDFloatingActionButton:
                             icon: root.primary_action_icon
-                            type: "large"
+                            type: "standard" if app.is_phone else "large"
                             md_bg_color: root.mode_color
                             on_release: root.toggle_timer()
 
@@ -140,31 +143,35 @@
 
                         Widget:
 
-                    MDLabel:
-                        text: root.status_text
-                        halign: "center"
-                        bold: True
-                        theme_text_color: "Custom"
-                        text_color: app.theme_colors["orange"]
+                    MDBoxLayout:
+                        orientation: "vertical"
                         size_hint_y: None
-                        height: dp(28)
+                        height: dp(app.responsive(64, 72, 60, 96, 84))
+                        spacing: dp(4)
 
-                    MDRaisedButton:
-                        text: app.t("stop_alarm", app.translation_version)
-                        size_hint_x: 1
-                        size_hint_y: None
+                        MDLabel:
+                            text: root.status_text
+                            halign: "center"
+                            bold: True
+                            theme_text_color: "Custom"
+                            text_color: app.theme_colors["orange"]
+                            size_hint_y: None
+                            height: dp(app.responsive(18, 22, 17, 30, 26))
+                            font_size: sp(app.responsive(9, 10, 8, 14, 12))
+                            opacity: 1 if root.status_text else 0
 
-                        height: dp(48) if app.alarm_active else 0
-                        opacity: 1 if app.alarm_active else 0
-                        disabled: not app.alarm_active
-
-                        md_bg_color: app.theme_colors["red"]
-
-                        on_release:
-                            app.stop_alarm()
+                        MDRaisedButton:
+                            text: app.t("stop_alarm", app.translation_version)
+                            size_hint_x: 1
+                            size_hint_y: None
+                            height: dp(app.responsive(42, 46, 40, 54, 50))
+                            opacity: 1 if app.alarm_active else 0
+                            disabled: not app.alarm_active
+                            md_bg_color: app.theme_colors["red"]
+                            on_release: app.stop_alarm()
 
                 Widget:
-                    size_hint_y: 0.75
+                    size_hint_y: 0.5
 
         # =====================================================
         # PANEL AÇIKKEN ARKA PLANI KARARTAN KATMAN
