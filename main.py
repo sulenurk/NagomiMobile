@@ -1,4 +1,6 @@
 from __future__ import annotations
+from core.responsive import ResponsiveMixin
+from kivy.core.window import Window
 
 import json
 from pathlib import Path
@@ -33,7 +35,7 @@ from screens.statistics_screen import StatisticsScreen
 from screens.settings_screen import SettingsScreen
 
 
-class NagomiApp(MDApp):
+class NagomiApp(ResponsiveMixin, MDApp):
     app_data = DictProperty({})
     translations = DictProperty({}) 
 
@@ -74,6 +76,12 @@ class NagomiApp(MDApp):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+         # Yalnızca bilgisayarda responsive tasarım testi için
+        if platform != "android":
+            Window.size = (800, 360)
+
+        self.setup_responsive_layout()
 
         self.theme_cls.primary_palette = "DeepPurple"
 

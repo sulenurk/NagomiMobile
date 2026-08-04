@@ -1,4 +1,5 @@
 #:import dp kivy.metrics.dp
+#:import sp kivy.metrics.sp
 
 MDNavigationLayout:
 
@@ -25,181 +26,376 @@ MDNavigationLayout:
 
     MDNavigationDrawer:
         id: nav_drawer
+        size_hint_x: None
+        width: dp(app.responsive(260, 290, 245, 350, 330))
 
         MDBoxLayout:
             orientation: "vertical"
-            padding: dp(20)
-            spacing: dp(8)
             md_bg_color: app.theme_colors["sidebar"]
 
-            MDLabel:
-                text: app.t("app_name", app.translation_version)
-                font_style: "H5"
-                halign: "center"
-                bold: True
-                theme_text_color: "Custom"
-                text_color: app.theme_colors["text"]
-                size_hint_y: None
-                height: dp(90)
+            ScrollView:
+                do_scroll_x: False
+                do_scroll_y: True
+                bar_width: dp(4)
 
-            MDFlatButton:
-                text: app.t("pomodoro", app.translation_version)
-                size_hint_x: 1
-                theme_text_color: "Custom"
-                text_color: app.theme_colors["primary"] if app.active_page == "pomodoro" else app.theme_colors["soft"]
-                on_release: app.show_page("pomodoro")
+                MDBoxLayout:
+                    orientation: "vertical"
+                    adaptive_height: True
+                    padding: dp(app.responsive(14, 20, 12, 28, 22))
+                    spacing: dp(app.responsive(4, 8, 3, 10, 8))
 
-            MDFlatButton:
-                text: app.t("focus_timer", app.translation_version)
-                size_hint_x: 1
-                theme_text_color: "Custom"
-                text_color: app.theme_colors["primary"] if app.active_page == "pomodoro" else app.theme_colors["soft"]
-                on_release: app.show_page("focus")
+                    # -------------------------------------------------
+                    # UYGULAMA ADI
+                    # -------------------------------------------------
 
-            MDFlatButton:
-                text: app.t("subjects", app.translation_version)
-                size_hint_x: 1
-                theme_text_color: "Custom"
-                text_color: app.theme_colors["primary"] if app.active_page == "pomodoro" else app.theme_colors["soft"]
-                on_release: app.show_page("subjects")
+                    MDLabel:
+                        text: app.t("app_name", app.translation_version)
+                        halign: "center"
+                        bold: True
 
-            MDFlatButton:
-                text: app.t("study_plan", app.translation_version)
-                size_hint_x: 1
-                theme_text_color: "Custom"
-                text_color: app.theme_colors["primary"] if app.active_page == "pomodoro" else app.theme_colors["soft"]
-                on_release: app.show_page("study")
+                        font_size:
+                            sp(28) if app.is_tablet else sp(22)
 
-            MDFlatButton:
-                text: app.t("statistics", app.translation_version)
-                size_hint_x: 1
-                theme_text_color: "Custom"
-                text_color: app.theme_colors["primary"] if app.active_page == "pomodoro" else app.theme_colors["soft"]
-                on_release: app.show_page("statistics")
+                        theme_text_color: "Custom"
+                        text_color: app.theme_colors["text"]
 
-            MDFlatButton:
-                text: app.t("settings", app.translation_version)
-                size_hint_x: 1
-                theme_text_color: "Custom"
-                text_color: app.theme_colors["primary"] if app.active_page == "pomodoro" else app.theme_colors["soft"]
-                on_release: app.show_page("settings")
+                        size_hint_y: None
 
-            MDSeparator:
-                size_hint_y: None
-                height: dp(1)
-                color: app.theme_colors["card_border"]
+                        height:
+                            dp(104) if app.is_tablet else dp(84)
 
-            # -----------------------------------------------
-            # ALARM
-            # -----------------------------------------------
+                    # -------------------------------------------------
+                    # SAYFALAR
+                    # -------------------------------------------------
 
-            MDBoxLayout:
-                size_hint_y: None
-                height: dp(52)
-                spacing: dp(8)
+                    MDFlatButton:
+                        text: app.t("pomodoro", app.translation_version)
+                        size_hint_x: 1
+                        size_hint_y: None
 
-                MDIcon:
-                    icon: "bell-outline"
-                    size_hint_x: None
-                    width: dp(34)
-                    halign: "center"
-                    theme_text_color: "Custom"
-                    text_color: app.theme_colors["muted"]
+                        height:
+                            dp(54) if app.is_tablet else dp(46)
 
-                MDLabel:
-                    text: app.t("alarm", app.translation_version)
-                    font_style: "Subtitle2"
-                    theme_text_color: "Custom"
-                    text_color: app.theme_colors["text"]
+                        font_size:
+                            sp(17) if app.is_tablet else sp(14)
 
-                AnchorLayout:
-                    size_hint_x: None
-                    width: dp(72)
-                    padding: 0, 0, dp(16), 0
-                    anchor_x: "center"
-                    anchor_y: "center"
+                        theme_text_color: "Custom"
 
-                    NagomiSwitch:
-                        id: sound_switch
-                        state: "down" if app.sound_enabled else "normal"
+                        text_color:
+                            app.theme_colors["primary"] \
+                            if app.active_page == "pomodoro" \
+                            else app.theme_colors["soft"]
+
                         on_release:
-                            app.set_sound_enabled(self.state == "down")
+                            app.show_page("pomodoro")
 
-            # -----------------------------------------------
-            # DARK / LIGHT MODE
-            # -----------------------------------------------
+                    MDFlatButton:
+                        text: app.t("focus_timer", app.translation_version)
+                        size_hint_x: 1
+                        size_hint_y: None
 
-            MDBoxLayout:
-                size_hint_y: None
-                height: dp(52)
-                spacing: dp(8)
+                        height:
+                            dp(54) if app.is_tablet else dp(46)
 
-                MDIcon:
-                    icon: "weather-night" if app.dark_mode_enabled else "white-balance-sunny"
-                    size_hint_x: None
-                    width: dp(34)
-                    halign: "center"
-                    theme_text_color: "Custom"
-                    text_color: app.theme_colors["muted"]
+                        font_size:
+                            sp(17) if app.is_tablet else sp(14)
 
-                MDLabel:
-                    text: app.t("dark_mode", app.translation_version) if app.dark_mode_enabled else app.t("light_mode", app.translation_version)
-                    font_style: "Subtitle2"
-                    theme_text_color: "Custom"
-                    text_color: app.theme_colors["text"]
+                        theme_text_color: "Custom"
 
-                AnchorLayout:
-                    size_hint_x: None
-                    width: dp(72)
-                    padding: 0, 0, dp(16), 0
-                    anchor_x: "center"
-                    anchor_y: "center"
+                        text_color:
+                            app.theme_colors["primary"] \
+                            if app.active_page == "focus" \
+                            else app.theme_colors["soft"]
 
-                    NagomiSwitch:
-                        id: dark_mode_switch
-                        state: "down" if app.dark_mode_enabled else "normal"
-                        on_state: app.set_dark_mode(self.state == "down")
+                        on_release:
+                            app.show_page("focus")
 
-            # Bu Widget dil bölümünü drawer'ın en altına iter.
-            Widget:
+                    MDFlatButton:
+                        text: app.t("subjects", app.translation_version)
+                        size_hint_x: 1
+                        size_hint_y: None
 
-            MDSeparator:
-                size_hint_y: None
-                height: dp(1)
-                color: app.theme_colors["card_border"]
+                        height:
+                            dp(54) if app.is_tablet else dp(46)
 
-            # -----------------------------------------------
-            # DİL
-            # -----------------------------------------------
+                        font_size:
+                            sp(17) if app.is_tablet else sp(14)
 
-            MDBoxLayout:
-                size_hint_y: None
-                height: dp(34)
-                spacing: dp(8)
+                        theme_text_color: "Custom"
 
-                MDIcon:
-                    icon: "translate"
-                    size_hint_x: None
-                    width: dp(34)
-                    halign: "center"
-                    theme_text_color: "Custom"
-                    text_color: app.theme_colors["muted"]
-                    text_color: 0.72, 0.68, 0.84, 1
+                        text_color:
+                            app.theme_colors["primary"] \
+                            if app.active_page == "subjects" \
+                            else app.theme_colors["soft"]
 
-                MDLabel:
-                    text: app.t("language", app.translation_version)
-                    font_style: "Subtitle2"
-                    theme_text_color: "Custom"
-                    text_color: app.theme_colors["text"]
-                    text_color: 0.90, 0.87, 0.98, 1
+                        on_release:
+                            app.show_page("subjects")
 
-            Spinner:
-                text: app.selected_language_name
-                values: ["English", "Türkçe", "Deutsch", "Français", "Español", "Português", "简体中文", "日本語"]
-                size_hint_y: None
-                height: dp(46)
-                background_normal: ""
-                background_down: ""
-                background_color: app.theme_colors["surface_light"]
-                color: app.theme_colors["text"]
-                on_text: app.set_language_by_name(self.text)
+                    MDFlatButton:
+                        text: app.t("study_plan", app.translation_version)
+                        size_hint_x: 1
+                        size_hint_y: None
+
+                        height:
+                            dp(54) if app.is_tablet else dp(46)
+
+                        font_size:
+                            sp(17) if app.is_tablet else sp(14)
+
+                        theme_text_color: "Custom"
+
+                        text_color:
+                            app.theme_colors["primary"] \
+                            if app.active_page == "study" \
+                            else app.theme_colors["soft"]
+
+                        on_release:
+                            app.show_page("study")
+
+                    MDFlatButton:
+                        text: app.t("statistics", app.translation_version)
+                        size_hint_x: 1
+                        size_hint_y: None
+
+                        height:
+                            dp(54) if app.is_tablet else dp(46)
+
+                        font_size:
+                            sp(17) if app.is_tablet else sp(14)
+
+                        theme_text_color: "Custom"
+
+                        text_color:
+                            app.theme_colors["primary"] \
+                            if app.active_page == "statistics" \
+                            else app.theme_colors["soft"]
+
+                        on_release:
+                            app.show_page("statistics")
+
+                    MDFlatButton:
+                        text: app.t("settings", app.translation_version)
+                        size_hint_x: 1
+                        size_hint_y: None
+
+                        height:
+                            dp(54) if app.is_tablet else dp(46)
+
+                        font_size:
+                            sp(17) if app.is_tablet else sp(14)
+
+                        theme_text_color: "Custom"
+
+                        text_color:
+                            app.theme_colors["primary"] \
+                            if app.active_page == "settings" \
+                            else app.theme_colors["soft"]
+
+                        on_release:
+                            app.show_page("settings")
+
+                    MDSeparator:
+                        size_hint_y: None
+                        height: dp(1)
+                        color: app.theme_colors["card_border"]
+
+                    Widget:
+                        size_hint_y: None
+                        height: dp(app.responsive(8, 12, 5, 18, 12))
+
+                    # -------------------------------------------------
+                    # ALARM
+                    # -------------------------------------------------
+
+                    MDBoxLayout:
+                        size_hint_y: None
+
+                        height:
+                            dp(58) if app.is_tablet else dp(52)
+
+                        spacing:
+                            dp(10) if app.is_tablet else dp(8)
+
+                        MDIcon:
+                            icon: "bell-outline"
+                            size_hint_x: None
+
+                            width:
+                                dp(38) if app.is_tablet else dp(34)
+
+                            halign: "center"
+                            theme_text_color: "Custom"
+                            text_color: app.theme_colors["muted"]
+
+                        MDLabel:
+                            text: app.t("alarm", app.translation_version)
+                            font_style: "Subtitle2"
+
+                            font_size:
+                                sp(16) if app.is_tablet else sp(14)
+
+                            theme_text_color: "Custom"
+                            text_color: app.theme_colors["text"]
+
+                        AnchorLayout:
+                            size_hint_x: None
+
+                            width:
+                                dp(78) if app.is_tablet else dp(72)
+
+                            padding: 0, 0, dp(16), 0
+                            anchor_x: "center"
+                            anchor_y: "center"
+
+                            NagomiSwitch:
+                                id: sound_switch
+
+                                state:
+                                    "down" if app.sound_enabled else "normal"
+
+                                on_release:
+                                    app.set_sound_enabled(
+                                    self.state == "down"
+                                    )
+
+                    # -------------------------------------------------
+                    # DARK / LIGHT MODE
+                    # -------------------------------------------------
+
+                    MDBoxLayout:
+                        size_hint_y: None
+
+                        height:
+                            dp(58) if app.is_tablet else dp(52)
+
+                        spacing:
+                            dp(10) if app.is_tablet else dp(8)
+
+                        MDIcon:
+                            icon:
+                                "weather-night" \
+                                if app.dark_mode_enabled \
+                                else "white-balance-sunny"
+
+                            size_hint_x: None
+
+                            width:
+                                dp(38) if app.is_tablet else dp(34)
+
+                            halign: "center"
+                            theme_text_color: "Custom"
+                            text_color: app.theme_colors["muted"]
+
+                        MDLabel:
+                            text:
+                                app.t(
+                                "dark_mode",
+                                app.translation_version
+                                ) \
+                                if app.dark_mode_enabled \
+                                else app.t(
+                                "light_mode",
+                                app.translation_version
+                                )
+
+                            font_style: "Subtitle2"
+
+                            font_size:
+                                sp(16) if app.is_tablet else sp(14)
+
+                            theme_text_color: "Custom"
+                            text_color: app.theme_colors["text"]
+
+                        AnchorLayout:
+                            size_hint_x: None
+
+                            width:
+                                dp(78) if app.is_tablet else dp(72)
+
+                            padding: 0, 0, dp(16), 0
+                            anchor_x: "center"
+                            anchor_y: "center"
+
+                            NagomiSwitch:
+                                id: dark_mode_switch
+
+                                state:
+                                    "down" \
+                                    if app.dark_mode_enabled \
+                                    else "normal"
+
+                                on_release:
+                                    app.set_dark_mode(
+                                    self.state == "down"
+                                    )
+
+                    MDSeparator:
+                        size_hint_y: None
+                        height: dp(1)
+                        color: app.theme_colors["card_border"]
+
+                    # -------------------------------------------------
+                    # DİL
+                    # -------------------------------------------------
+
+                    MDBoxLayout:
+                        size_hint_y: None
+
+                        height:
+                            dp(40) if app.is_tablet else dp(34)
+
+                        spacing:
+                            dp(10) if app.is_tablet else dp(8)
+
+                        MDIcon:
+                            icon: "translate"
+                            size_hint_x: None
+
+                            width:
+                                dp(38) if app.is_tablet else dp(34)
+
+                            halign: "center"
+                            theme_text_color: "Custom"
+                            text_color: app.theme_colors["muted"]
+
+                        MDLabel:
+                            text: app.t("language", app.translation_version)
+
+                            font_style: "Subtitle2"
+
+                            font_size:
+                                sp(16) if app.is_tablet else sp(14)
+
+                            theme_text_color: "Custom"
+                            text_color: app.theme_colors["text"]
+
+                    Spinner:
+                        text: app.selected_language_name
+
+                        values:
+                            [
+                            "English",
+                            "Türkçe",
+                            "Deutsch",
+                            "Français",
+                            "Español",
+                            "Português",
+                            "简体中文",
+                            "日本語"
+                            ]
+
+                        size_hint_y: None
+
+                        height:
+                            dp(52) if app.is_tablet else dp(46)
+
+                        font_size:
+                            sp(16) if app.is_tablet else sp(14)
+
+                        background_normal: ""
+                        background_down: ""
+                        background_color: app.theme_colors["surface_light"]
+                        color: app.theme_colors["text"]
+
+                        on_text:
+                            app.set_language_by_name(self.text)
