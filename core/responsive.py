@@ -129,3 +129,109 @@ class ResponsiveMixin:
                 phone_portrait,
             )
         )
+
+    def typography(
+        self,
+        style_name: str,
+        _layout_profile: str | None = None,
+    ) -> float:
+        styles = {
+            # Ana ekran başlıkları:
+            # Pomodoro, Focus Timer, Subjects, Settings...
+            "page_title": (
+                18,
+                24,
+                17,
+                32,
+                28,
+            ),
+
+            # Kart veya bölüm başlıkları:
+            # Focus Time, Short Break, Appearance...
+            "section_title": (
+                13,
+                18,
+                14,
+                25,
+                22,
+            ),
+
+            # Normal önemli metin
+            "body": (
+                12,
+                14,
+                12,
+                17,
+                15,
+            ),
+
+            # Açıklamalar ve ikincil bilgiler
+            "body_small": (
+                10,
+                12,
+                10,
+                15,
+                13,
+            ),
+
+            # Menü butonları
+            "navigation": (
+                13,
+                14,
+                12,
+                17,
+                15,
+            ),
+
+            # Input ve Spinner yazıları
+            "input": (
+                12,
+                14,
+                12,
+                16,
+                15,
+            ),
+
+            # Küçük etiketler
+            "caption": (
+                9,
+                10,
+                8,
+                14,
+                12,
+            ),
+
+            # Timer'a özel
+            "timer": (
+                28,
+                40,
+                30,
+                64,
+                56,
+            ),
+
+            # Cycle'a özel
+            "cycle": (
+                10,
+                12,
+                9,
+                17,
+                15,
+            ),
+
+            # Durum mesajları
+            "status": (
+                9,
+                10,
+                8,
+                14,
+                12,
+            ),
+        }
+
+        values = styles.get(
+            style_name,
+            styles["body"],
+        )
+
+        return self.responsive(*values)

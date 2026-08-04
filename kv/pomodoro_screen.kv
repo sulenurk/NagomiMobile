@@ -38,7 +38,7 @@
                     text: app.t("pomodoro", app.translation_version)
                     halign: "center"
                     bold: True
-                    font_size: sp(app.responsive(18, 24, 17, 32, 28))
+                    font_size: sp(app.typography("page_title", app.layout_profile))
                     theme_text_color: "Custom"
                     text_color: app.theme_colors["text"]
                     size_hint_y: None
@@ -60,7 +60,7 @@
                         halign: "center"
                         valign: "middle"
                         bold: True
-                        font_size: sp(app.responsive(13, 18, 14, 25, 22))
+                        font_size: sp(app.typography("section_title", app.layout_profile))
                         theme_text_color: "Custom"
                         text_color: root.mode_color
                         size_hint_y: None
@@ -100,14 +100,14 @@
                                     text: root.timer_text
                                     halign: "center"
                                     bold: True
-                                    font_size: sp(app.responsive(28, 40, 30, 64, 56))
+                                    font_size: sp(app.typography("timer", app.layout_profile))
                                     theme_text_color: "Custom"
                                     text_color: app.theme_colors["text"]
 
                                 MDLabel:
                                     text: root.cycle_text
                                     halign: "center"
-                                    font_size: sp(app.responsive(10, 12, 9, 17, 15))
+                                    font_size: sp(app.typography("cycle", app.layout_profile))
                                     theme_text_color: "Custom"
                                     text_color: app.theme_colors["muted"]
 
@@ -157,7 +157,7 @@
                             text_color: app.theme_colors["orange"]
                             size_hint_y: None
                             height: dp(app.responsive(18, 22, 17, 30, 26))
-                            font_size: sp(app.responsive(9, 10, 8, 14, 12))
+                            font_size: sp(app.typography("status", app.layout_profile))
                             opacity: 1 if root.status_text else 0
 
                         MDRaisedButton:
@@ -236,7 +236,7 @@
 
                 MDLabel:
                     text: app.t("pomodoro_settings", app.translation_version)
-                    font_style: "Subtitle1"
+                    font_size: sp(app.typography("section_title", app.layout_profile))
                     bold: True
                     theme_text_color: "Custom"
                     text_color: app.theme_colors["text"] if app.theme_version >= 0 else (1, 1, 1, 1)
@@ -249,7 +249,7 @@
 
             MDLabel:
                 text: app.t("pomodoro_settings_description", app.translation_version)
-                font_style: "Caption"
+                font_size: sp(app.typography("body_small", app.layout_profile))
                 theme_text_color: "Custom"
                 text_color: app.theme_colors["muted"] if app.theme_version >= 0 else (1, 1, 1, 1)
                 size_hint_y: None
@@ -273,6 +273,7 @@
                         helper_text_mode: "persistent"
                         input_filter: "int"
                         mode: "fill"
+                        font_size: sp(app.typography("input", app.layout_profile))
 
                         size_hint_y: None
                         height: dp(68)
@@ -301,6 +302,7 @@
                         helper_text_mode: "persistent"
                         input_filter: "int"
                         mode: "fill"
+                        font_size: sp(app.typography("input", app.layout_profile))
 
                         size_hint_y: None
                         height: dp(68)
@@ -329,6 +331,7 @@
                         helper_text_mode: "persistent"
                         input_filter: "int"
                         mode: "fill"
+                        font_size: sp(app.typography("input", app.layout_profile))
 
                         size_hint_y: None
                         height: dp(68)
@@ -357,6 +360,7 @@
                         helper_text_mode: "persistent"
                         input_filter: "int"
                         mode: "fill"
+                        font_size: sp(app.typography("input", app.layout_profile))
 
                         size_hint_y: None
                         height: dp(68)
@@ -386,6 +390,7 @@
                         helper_text_mode: "persistent"
                         input_filter: "int"
                         mode: "fill"
+                        font_size: sp(app.typography("input", app.layout_profile))
 
                         size_hint_y: None
                         height: dp(68)
@@ -412,5 +417,6 @@
                 size_hint_x: 1
                 size_hint_y: None
                 height: dp(50)
+                font_size: sp(app.typography("body", app.layout_profile))
                 md_bg_color: app.theme_colors["primary"] if app.theme_version >= 0 else (0.5, 0.4, 0.9, 1)
                 on_release: root.save_pomodoro_settings()
