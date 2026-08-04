@@ -53,8 +53,7 @@ MDNavigationLayout:
                         halign: "center"
                         bold: True
 
-                        font_size:
-                            sp(28) if app.is_tablet else sp(22)
+                        font_size: sp(app.typography("page_title", app.layout_profile))
 
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["text"]
@@ -76,8 +75,7 @@ MDNavigationLayout:
                         height:
                             dp(54) if app.is_tablet else dp(46)
 
-                        font_size:
-                            sp(17) if app.is_tablet else sp(14)
+                        font_size: sp(app.typography("navigation", app.layout_profile))
 
                         theme_text_color: "Custom"
 
@@ -97,8 +95,7 @@ MDNavigationLayout:
                         height:
                             dp(54) if app.is_tablet else dp(46)
 
-                        font_size:
-                            sp(17) if app.is_tablet else sp(14)
+                        font_size: sp(app.typography("navigation", app.layout_profile))
 
                         theme_text_color: "Custom"
 
@@ -118,8 +115,7 @@ MDNavigationLayout:
                         height:
                             dp(54) if app.is_tablet else dp(46)
 
-                        font_size:
-                            sp(17) if app.is_tablet else sp(14)
+                        font_size: sp(app.typography("navigation", app.layout_profile))
 
                         theme_text_color: "Custom"
 
@@ -139,8 +135,7 @@ MDNavigationLayout:
                         height:
                             dp(54) if app.is_tablet else dp(46)
 
-                        font_size:
-                            sp(17) if app.is_tablet else sp(14)
+                        font_size: sp(app.typography("navigation", app.layout_profile))
 
                         theme_text_color: "Custom"
 
@@ -160,8 +155,7 @@ MDNavigationLayout:
                         height:
                             dp(54) if app.is_tablet else dp(46)
 
-                        font_size:
-                            sp(17) if app.is_tablet else sp(14)
+                        font_size: sp(app.typography("navigation", app.layout_profile))
 
                         theme_text_color: "Custom"
 
@@ -181,8 +175,7 @@ MDNavigationLayout:
                         height:
                             dp(54) if app.is_tablet else dp(46)
 
-                        font_size:
-                            sp(17) if app.is_tablet else sp(14)
+                        font_size: sp(app.typography("navigation", app.layout_profile))
 
                         theme_text_color: "Custom"
 
@@ -216,23 +209,32 @@ MDNavigationLayout:
                         spacing:
                             dp(10) if app.is_tablet else dp(8)
 
-                        MDIcon:
-                            icon: "bell-outline"
+                        AnchorLayout:
                             size_hint_x: None
 
                             width:
                                 dp(38) if app.is_tablet else dp(34)
 
-                            halign: "center"
-                            theme_text_color: "Custom"
-                            text_color: app.theme_colors["muted"]
+                            anchor_x: "center"
+                            anchor_y: "center"
 
+                            MDIcon:
+                                icon: "bell-outline"
+                                size_hint: None, None
+                                size: dp(28), dp(28)
+                                halign: "center"
+                                valign: "middle"
+                                text_size: self.size
+                                y: self.parent.center_y - self.height / 2 + dp(3)
+
+                                theme_text_color: "Custom"
+                                text_color: app.theme_colors["muted"]
                         MDLabel:
                             text: app.t("alarm", app.translation_version)
-                            font_style: "Subtitle2"
-
-                            font_size:
-                                sp(16) if app.is_tablet else sp(14)
+                            font_size: sp(app.typography("body", app.layout_profile))
+                            
+                            valign: "middle"
+                            text_size: self.width, self.height
 
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["text"]
@@ -249,6 +251,9 @@ MDNavigationLayout:
 
                             NagomiSwitch:
                                 id: sound_switch
+
+                                size_hint: None, None
+                                size: dp(app.responsive(52, 58, 48, 68, 62)), dp(app.responsive(28, 32, 26, 38, 34))
 
                                 state:
                                     "down" if app.sound_enabled else "normal"
@@ -271,20 +276,26 @@ MDNavigationLayout:
                         spacing:
                             dp(10) if app.is_tablet else dp(8)
 
-                        MDIcon:
-                            icon:
-                                "weather-night" \
-                                if app.dark_mode_enabled \
-                                else "white-balance-sunny"
-
+                        AnchorLayout:
                             size_hint_x: None
 
                             width:
                                 dp(38) if app.is_tablet else dp(34)
 
-                            halign: "center"
-                            theme_text_color: "Custom"
-                            text_color: app.theme_colors["muted"]
+                            anchor_x: "center"
+                            anchor_y: "center"
+
+                            MDIcon:
+                                icon:"weather-night" if app.dark_mode_enabled else "white-balance-sunny"
+                                size_hint: None, None
+                                size: dp(28), dp(28)
+                                halign: "center"
+                                valign: "middle"
+                                text_size: self.size
+                                y: self.parent.center_y - self.height / 2 + dp(3)
+
+                                theme_text_color: "Custom"
+                                text_color: app.theme_colors["muted"]
 
                         MDLabel:
                             text:
@@ -298,10 +309,10 @@ MDNavigationLayout:
                                 app.translation_version
                                 )
 
-                            font_style: "Subtitle2"
+                            font_size: sp(app.typography("body", app.layout_profile))
 
-                            font_size:
-                                sp(16) if app.is_tablet else sp(14)
+                            valign: "middle"
+                            text_size: self.width, self.height
 
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["text"]
@@ -318,6 +329,9 @@ MDNavigationLayout:
 
                             NagomiSwitch:
                                 id: dark_mode_switch
+
+                                size_hint: None, None
+                                size: dp(app.responsive(52, 58, 48, 68, 62)), dp(app.responsive(28, 32, 26, 38, 34))
 
                                 state:
                                     "down" \
@@ -347,24 +361,33 @@ MDNavigationLayout:
                         spacing:
                             dp(10) if app.is_tablet else dp(8)
 
-                        MDIcon:
-                            icon: "translate"
+                        AnchorLayout:
                             size_hint_x: None
 
                             width:
                                 dp(38) if app.is_tablet else dp(34)
 
-                            halign: "center"
-                            theme_text_color: "Custom"
-                            text_color: app.theme_colors["muted"]
+                            anchor_x: "center"
+                            anchor_y: "center"
+
+                            MDIcon:
+                                icon: "translate"
+                                size_hint: None, None
+                                size: dp(28), dp(28)
+                                halign: "center"
+                                valign: "middle"
+                                text_size: self.size
+                                y: self.parent.center_y - self.height / 2 + dp(3)
+
+                                theme_text_color: "Custom"
+                                text_color: app.theme_colors["muted"]
 
                         MDLabel:
                             text: app.t("language", app.translation_version)
+                            font_size: sp(app.typography("body", app.layout_profile))
 
-                            font_style: "Subtitle2"
-
-                            font_size:
-                                sp(16) if app.is_tablet else sp(14)
+                            valign: "middle"
+                            text_size: self.width, self.height
 
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["text"]
