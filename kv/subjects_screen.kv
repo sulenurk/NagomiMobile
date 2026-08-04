@@ -1,4 +1,5 @@
 #:import dp kivy.metrics.dp
+#:import sp kivy.metrics.sp
 
 <ColorDot>:
     size_hint: None, None
@@ -30,6 +31,7 @@
     MDLabel:
         text: root.subject_name
         bold: True
+        font_size: sp(app.typography("body", app.layout_profile))
         theme_text_color: "Custom"
         text_color: app.theme_colors["text"]
         shorten: True
@@ -45,7 +47,7 @@
         text: app.t("default", app.translation_version) if root.is_default else ""
         size_hint_x: None
         width: dp(72) if root.is_default else 0
-        font_style: "Caption"
+        font_size: sp(app.typography("caption", app.layout_profile))
         halign: "center"
         theme_text_color: "Custom"
         text_color: app.theme_colors["muted"]
@@ -83,7 +85,7 @@
 
                 MDLabel:
                     text: app.t("manage_subjects", app.translation_version)
-                    font_style: "H5"
+                    font_size: sp(app.typography("page_title", app.layout_profile))
                     bold: True
                     theme_text_color: "Custom"
                     text_color: app.theme_colors["text"]
@@ -92,6 +94,7 @@
                 MDLabel:
                     text: app.t("subjects_description", app.translation_version)
                     theme_text_color: "Custom"
+                    font_size: sp(app.typography("body_small", app.layout_profile))
                     text_color: app.theme_colors["muted"]
                     adaptive_height: True
 
@@ -106,7 +109,7 @@
 
                     MDLabel:
                         text: app.t("new_subject", app.translation_version)
-                        font_style: "H6"
+                        font_size: sp(app.typography("section_title", app.layout_profile))
                         bold: True
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["text"]
@@ -114,9 +117,8 @@
 
                     MDTextField:
                         id: subject_name
-
                         hint_text: app.t("subject_name_example", app.translation_version)
-
+                        font_size: sp(app.typography("input", app.layout_profile))
                         mode: "fill"
 
                         multiline: False
@@ -139,6 +141,7 @@
                     MDLabel:
                         text: app.t("select_color", app.translation_version)
                         bold: True
+                        font_size: sp(app.typography("body", app.layout_profile))
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["muted"]
                         adaptive_height: True
@@ -183,11 +186,13 @@
                     MDRaisedButton:
                         text: app.t("add_subject", app.translation_version)
                         size_hint_x: 1
+                        font_size: sp(app.typography("body", app.layout_profile))
                         md_bg_color: app.hex_to_rgba(root.selected_color)
                         on_release: root.add_subject()
 
                     MDLabel:
                         text: root.status_text
+                        font_size: sp(app.typography("body", app.layout_profile))
                         halign: "center"
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["orange"]
@@ -195,7 +200,7 @@
 
                 MDLabel:
                     text: app.t("subjects", app.translation_version)
-                    font_style: "H6"
+                    font_size: sp(app.typography("section_title", app.layout_profile))
                     bold: True
                     theme_text_color: "Custom"
                     text_color: app.theme_colors["text"]
