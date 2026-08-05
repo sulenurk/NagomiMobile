@@ -40,7 +40,8 @@
                     theme_text_color: "Custom"
                     text_color: app.theme_colors["text"]
                     size_hint_y: None
-                    height: dp(34)
+                    height: 0 if app.layout_profile == "phone_landscape" else dp(34)
+                    opacity: 0 if app.layout_profile == "phone_landscape" else 1
 
                 MDLabel:
                     text: app.t("focus_subtitle", app.translation_version)
@@ -49,16 +50,21 @@
                     font_size: sp(app.typography("body_small", app.layout_profile))
                     text_color: app.theme_colors["muted"]
                     size_hint_y: None
-                    height: dp(30)
+                    height: 0 if app.layout_profile == "phone_landscape" else dp(30)
+                    opacity: 0 if app.layout_profile == "phone_landscape" else 1
 
                 Widget:
                     size_hint_y: None
-                    height: dp(app.responsive(8, 16, 6, 24, 18))
+                    height: 0 if app.layout_profile == "phone_landscape" else dp(app.responsive(8, 16, 6, 24, 18))
 
                 MDCard:
                     orientation: "vertical"
-                    size_hint_y: 1
-                    height: dp(app.responsive(390, 440, 330, 560, 500))
+
+                    size_hint_y: 0 if app.layout_profile == "phone_landscape" else 1
+                    height: 0 if app.layout_profile == "phone_landscape" else dp(app.responsive(390, 440, 330, 560, 500))
+
+                    opacity: 0 if app.layout_profile == "phone_landscape" else 1
+                    disabled: app.layout_profile == "phone_landscape"
                     padding: dp(app.responsive(12, 18, 10, 24, 20)), dp(app.responsive(14, 20, 10, 26, 22))
                     spacing: dp(10)
                     radius: [dp(30), dp(30), dp(30), dp(30)]
@@ -197,6 +203,116 @@
                             size_hint_x: None
                             width: dp(42)
 
+                MDCard:
+                    orientation: "horizontal"
+
+                    size_hint_y: 1 if app.layout_profile == "phone_landscape" else 0
+                    height: 0
+
+                    opacity: 1 if app.layout_profile == "phone_landscape" else 0
+                    disabled: app.layout_profile != "phone_landscape"
+
+                    padding: dp(18), dp(12)
+                    spacing: dp(16)
+
+                    radius: [dp(24), dp(24), dp(24), dp(24)]
+                    elevation: 0
+                    md_bg_color: app.theme_colors["card"]
+
+                    MDBoxLayout:
+                        orientation: "vertical"
+                        size_hint_x: 1
+                        spacing: dp(6)
+
+                        MDLabel:
+                            text: str(root.active_task_name)
+                            halign: "center"
+                            valign: "middle"
+                            bold: True
+                            font_size: sp(app.typography("section_title", app.layout_profile))
+                            theme_text_color: "Custom"
+                            text_color: app.theme_colors["primary"]
+                            size_hint_y: None
+                            height: dp(30)
+                            text_size: self.width, self.height
+
+                        Widget:
+
+                        MDLabel:
+                            text: str(root.timer_text)
+                            halign: "center"
+                            bold: True
+                            font_size: sp(app.typography("timer", app.layout_profile))
+                            theme_text_color: "Custom"
+                            text_color: app.theme_colors["text"]
+                            size_hint_y: None
+                            height: dp(70)
+
+                        MDLabel:
+                            text: str(root.status_text)
+                            halign: "center"
+                            font_size: sp(app.typography("body_small", app.layout_profile))
+                            theme_text_color: "Custom"
+                            text_color: app.theme_colors["muted"]
+                            size_hint_y: None
+                            height: dp(26)
+
+                        Widget:
+
+                    AnchorLayout:
+                        size_hint_x: None
+                        width: dp(130)
+                        anchor_x: "center"
+                        anchor_y: "center"
+
+                        MDFillRoundFlatButton:
+                            text: app.t("stop_alarm", app.translation_version)
+                            size_hint: None, None
+                            width: dp(118)
+                            height: dp(38)
+
+                            opacity: 1 if app.alarm_active else 0
+                            disabled: not app.alarm_active
+
+                            font_size: sp(app.typography("caption", app.layout_profile))
+                            md_bg_color: app.theme_colors["red"]
+                            text_color: 1, 1, 1, 1
+
+                            on_release: app.stop_alarm()
+
+                    AnchorLayout:
+                        size_hint_x: None
+                        width: dp(120)
+                        anchor_x: "center"
+                        anchor_y: "center"
+
+                        MDBoxLayout:
+                            orientation: "vertical"
+                            size_hint: None, None
+                            width: dp(78)
+                            height: dp(190)
+                            spacing: dp(10)
+
+                            MDFloatingActionButton:
+                                icon: "restore"
+                                type: "small"
+                                pos_hint: {"center_x": 0.5}
+                                md_bg_color: app.theme_colors["card_soft"]
+                                on_release: root.reset_timer()
+
+                            MDFloatingActionButton:
+                                icon: root.primary_action_icon
+                                type: "standard"
+                                pos_hint: {"center_x": 0.5}
+                                md_bg_color: app.theme_colors["primary"]
+                                on_release: root.toggle_timer()
+
+                            MDFloatingActionButton:
+                                icon: "stop"
+                                type: "small"
+                                pos_hint: {"center_x": 0.5}
+                                md_bg_color: app.theme_colors["card_soft"]
+                                on_release: root.finish_session()
 
         # =====================================================
         # PANEL AÇIKKEN ARKA PLANI KARARTAN KATMAN
@@ -401,38 +517,15 @@
                                 size_hint: None, None
                                 size: dp(app.responsive(52, 58, 48, 68, 62)), dp(app.responsive(28, 32, 26, 38, 34))
 
-                                state: "down" if root.setting_show_away_time else "normal"
+                                disabled: app.layout_profile == "phone_landscape"
+
+                                state:
+                                    "normal" if app.layout_profile == "phone_landscape" else \
+                                    ("down" if root.setting_show_away_time else "normal")
+
                                 on_state:
-                                    root.setting_show_away_time = self.state == "down"
-
-                    MDBoxLayout:
-                        adaptive_height: True
-                        spacing: dp(10)
-                        padding: 0, dp(12), 0, 0
-
-                        MDLabel:
-                            text: app.t("show_queue_progress", app.translation_version)
-                            font_size: sp(app.typography("body", app.layout_profile))
-                            theme_text_color: "Custom"
-                            text_color: app.theme_colors["text"]
-                            adaptive_height: True
-                            text_size: self.width, None
-                            size_hint_x: 1
-
-                        AnchorLayout:
-                            size_hint_x: None
-                            width: dp(58)
-                            padding: 0, 0, dp(36), 0
-                            anchor_x: "center"
-                            anchor_y: "center"
-
-                            NagomiSwitch:
-                                size_hint: None, None
-                                size: dp(app.responsive(52, 58, 48, 68, 62)), dp(app.responsive(28, 32, 26, 38, 34))
-
-                                state: "down" if root.setting_show_queue_progress else "normal"
-                                on_state:
-                                    root.setting_show_queue_progress = self.state == "down"
+                                    if app.layout_profile != "phone_landscape": \
+                                    root.set_away_time_setting(self.state == "down")
 
             MDRaisedButton:
                 text: app.t("save", app.translation_version)

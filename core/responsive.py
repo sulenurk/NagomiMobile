@@ -213,7 +213,7 @@ class ResponsiveMixin:
             "timer": (
                 28,
                 60,
-                30,
+                42,
                 120,
                 56,
             ),
@@ -222,7 +222,7 @@ class ResponsiveMixin:
             "cycle": (
                 10,
                 20,
-                9,
+                11,
                 30,
                 15,
             ),

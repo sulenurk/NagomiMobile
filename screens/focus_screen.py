@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from kivy.app import App
 import time
 import uuid
 from datetime import datetime
@@ -41,8 +41,7 @@ class FocusScreen(MDScreen):
 
     setting_auto_start_focus = BooleanProperty(False)
     setting_auto_start_break = BooleanProperty(False)
-    setting_show_queue_progress = BooleanProperty(True)
-    setting_show_away_time = BooleanProperty(True)
+    setting_show_away_time = BooleanProperty(False)
 
     session_started_at: Optional[str] = None
 
@@ -916,12 +915,8 @@ class FocusScreen(MDScreen):
             settings.get("auto_start_break", False)
         )
 
-        self.setting_show_queue_progress = bool(
-            settings.get("show_queue_progress", True)
-        )
-
         self.setting_show_away_time = bool(
-            settings.get("show_cumulative_away_time", True)
+            settings.get("show_cumulative_away_time", False)
         )
 
 
@@ -935,10 +930,6 @@ class FocusScreen(MDScreen):
 
         settings["auto_start_break"] = bool(
             self.setting_auto_start_break
-        )
-
-        settings["show_queue_progress"] = bool(
-            self.setting_show_queue_progress
         )
 
         settings["show_cumulative_away_time"] = bool(
@@ -975,6 +966,15 @@ class FocusScreen(MDScreen):
             return ", ".join(str(item) for item in value)
 
         return str(value)
+
+    def set_away_time_setting(self, enabled):
+        app = App.get_running_app()
+
+        if app.layout_profile == "phone_landscape":
+            self.setting_show_away_time = False
+            return
+
+        self.setting_show_away_time = enabled
 
     @property
     def app(self):

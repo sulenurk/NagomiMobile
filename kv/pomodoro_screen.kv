@@ -42,13 +42,16 @@
                     theme_text_color: "Custom"
                     text_color: app.theme_colors["text"]
                     size_hint_y: None
-                    height: dp(app.responsive(26, 42, 24, 44, 38))
+                    height: 0 if app.layout_profile == "phone_landscape" else dp(app.responsive(26, 42, 24, 44, 38))
+                    opacity: 0 if app.layout_profile == "phone_landscape" else 1
 
 
                 MDCard:
                     orientation: "vertical"
-                    size_hint_y: 1
-                    height: dp(app.responsive(390, 570, 335, 820, 505))
+                    size_hint_y: 0 if app.layout_profile == "phone_landscape" else 1
+                    height: 0 if app.layout_profile == "phone_landscape" else dp(app.responsive(390, 570, 335, 820, 505))
+                    opacity: 0 if app.layout_profile == "phone_landscape" else 1
+                    disabled: app.layout_profile == "phone_landscape"
                     padding: (dp(app.responsive(10, 16, 8, 24, 20)), dp(app.responsive(18, 22, 14, 30, 24)), dp(app.responsive(10, 16, 8, 24, 20)), dp(app.responsive(10, 16, 8, 22, 18)))
                     spacing: dp(app.responsive(6, 8, 5, 10, 8))
                     radius: [dp(30), dp(30), dp(30), dp(30)]
@@ -174,6 +177,141 @@
                             md_bg_color: app.theme_colors["red"]
                             on_release: app.stop_alarm()
 
+                MDCard:
+                    orientation: "horizontal"
+
+                    size_hint_y: 1 if app.layout_profile == "phone_landscape" else 0
+                    height: 0
+
+                    opacity: 1 if app.layout_profile == "phone_landscape" else 0
+                    disabled: app.layout_profile != "phone_landscape"
+
+                    padding: dp(18), dp(10)
+                    spacing: dp(18)
+
+                    radius: [dp(24), dp(24), dp(24), dp(24)]
+                    elevation: 0
+                    md_bg_color: app.theme_colors["card"]
+
+                    # SOL DENGE BOŞLUĞU
+                    Widget:
+                        size_hint_x: None
+                        width: dp(96)
+
+                    # ORTA: MOD + TIMER
+                    MDBoxLayout:
+                        orientation: "vertical"
+                        size_hint_x: 1
+                        spacing: dp(4)
+
+                        MDLabel:
+                            text: root.mode_text
+                            halign: "center"
+                            valign: "middle"
+                            bold: True
+                            font_size: sp(app.typography("section_title", app.layout_profile))
+                            theme_text_color: "Custom"
+                            text_color: root.mode_color
+                            size_hint_y: None
+                            height: dp(26)
+                            text_size: self.width, self.height
+
+                        AnchorLayout:
+                            anchor_x: "center"
+                            anchor_y: "center"
+
+                            FloatLayout:
+                                size_hint: None, None
+                                size: dp(205), dp(205)
+
+                                CircularProgress:
+                                    progress: root.progress
+                                    progress_color: root.mode_color
+                                    track_color: app.theme_colors["card_soft"]
+                                    line_width: dp(7)
+                                    size_hint: 1, 1
+                                    pos: self.parent.pos
+
+                                MDBoxLayout:
+                                    orientation: "vertical"
+                                    size_hint: None, None
+                                    size: dp(150), dp(74)
+                                    spacing: 0
+                                    pos_hint: {"center_x": 0.5, "center_y": 0.5}
+
+                                    MDLabel:
+                                        text: root.timer_text
+                                        halign: "center"
+                                        bold: True
+                                        font_size: sp(app.typography("timer", app.layout_profile))
+                                        theme_text_color: "Custom"
+                                        text_color: app.theme_colors["text"]
+
+                                    MDLabel:
+                                        text: root.cycle_text
+                                        halign: "center"
+                                        font_size: sp(app.typography("cycle", app.layout_profile))
+                                        theme_text_color: "Custom"
+                                        text_color: app.theme_colors["muted"]
+
+                    # ALARM DURDURMA BUTONU
+                    AnchorLayout:
+                        size_hint_x: None
+                        width: dp(150)
+                        anchor_x: "center"
+                        anchor_y: "center"
+
+                        MDFillRoundFlatButton:
+                            text: app.t("stop_alarm", app.translation_version)
+                            size_hint: None, None
+                            width: dp(140)
+                            height: dp(40)
+
+                            opacity: 1 if app.alarm_active else 0
+                            disabled: not app.alarm_active
+
+                            font_size: sp(app.typography("body_small", app.layout_profile))
+
+                            md_bg_color: app.theme_colors["red"]
+                            text_color: 1, 1, 1, 1
+
+                            on_release: app.stop_alarm()
+
+                    # SAĞ: BUTONLAR
+                    AnchorLayout:
+                        size_hint_x: None
+                        width: dp(96)
+                        anchor_x: "right"
+                        anchor_y: "center"
+                        padding: 0, 0, dp(8), 0
+
+                        MDBoxLayout:
+                            orientation: "vertical"
+                            size_hint: None, None
+                            width: dp(72)
+                            height: dp(190)
+                            spacing: dp(10)
+
+                            MDFloatingActionButton:
+                                icon: "restore"
+                                type: "small"
+                                pos_hint: {"center_x": 0.5}
+                                md_bg_color: app.theme_colors["card_soft"]
+                                on_release: root.reset_timer()
+
+                            MDFloatingActionButton:
+                                icon: root.primary_action_icon
+                                type: "standard"
+                                pos_hint: {"center_x": 0.5}
+                                md_bg_color: root.mode_color
+                                on_release: root.toggle_timer()
+
+                            MDFloatingActionButton:
+                                icon: "skip-next"
+                                type: "small"
+                                pos_hint: {"center_x": 0.5}
+                                md_bg_color: app.theme_colors["card_soft"]
+                                on_release: root.skip_session()
 
         # =====================================================
         # PANEL AÇIKKEN ARKA PLANI KARARTAN KATMAN
