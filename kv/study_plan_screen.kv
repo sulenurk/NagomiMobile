@@ -7,7 +7,7 @@
     background_color: app.theme_colors["surface_light"]
 
     color: app.theme_colors["text"]
-    font_size: sp(15)
+    font_size: sp(app.typography("input", app.layout_profile))
 
     size_hint_y: None
     height: dp(48)
@@ -19,23 +19,31 @@
     background_down: ""
     background_color: app.theme_colors["card"]
     color: app.theme_colors["text"]
-    font_size: sp(15)
+    font_size: sp(app.typography("input", app.layout_profile))
     height: dp(46)
 
 <TaskRow>:
     orientation: "vertical"
     adaptive_height: True
-    padding: dp(16)
-    spacing: dp(10)
+
+    padding: dp(app.responsive(12, 16, 10, 20, 18)), dp(app.responsive(10, 14, 8, 18, 16))
+    spacing: dp(app.responsive(6, 10, 5, 12, 10))
+
     radius: [dp(22), dp(22), dp(22), dp(22)]
     elevation: 0
     md_bg_color: app.theme_colors["card"]
+
     line_color: app.hex_to_rgba(root.subject_color) if root.is_active else (0, 0, 0, 0)
     line_width: dp(2)
 
+    # -------------------------------------------------
+    # SUBJECT + STATUS
+    # -------------------------------------------------
+
     MDBoxLayout:
-        adaptive_height: True
-        spacing: dp(10)
+        size_hint_y: None
+        height: dp(app.responsive(28, 30, 26, 36, 32))
+        spacing: dp(6)
 
         MDCard:
             size_hint: None, None
@@ -43,79 +51,136 @@
             radius: [dp(9), dp(9), dp(9), dp(9)]
             elevation: 0
             md_bg_color: app.hex_to_rgba(root.subject_color)
+            pos_hint: {"center_y": 0.5}
 
         MDLabel:
             text: root.subject_name
+            size_hint_x: 1
             bold: True
+            font_size: sp(app.typography("body", app.layout_profile))
             theme_text_color: "Custom"
             text_color: app.hex_to_rgba(root.subject_color)
-            adaptive_height: True
+            valign: "middle"
+            text_size: self.width, self.height
+            shorten: True
+            shorten_from: "right"
 
         MDLabel:
             text: root.status_text
+            size_hint_x: None
+            width: dp(48)
             halign: "right"
+            valign: "middle"
+            text_size: self.width, self.height
+            font_size: sp(app.typography("caption", app.layout_profile))
             theme_text_color: "Custom"
             text_color: app.theme_colors["muted"]
-            adaptive_height: True
-
-    MDLabel:
-        text: root.title
-        font_style: "H6"
-        bold: True
-        theme_text_color: "Custom"
-        text_color: app.theme_colors["muted"] if root.is_completed else app.theme_colors["text"]
-        adaptive_height: True
-
-    MDLabel:
-        text: root.detail_text + "  •  " + root.priority_text
-        theme_text_color: "Custom"
-        text_color: app.theme_colors["muted"]
-        adaptive_height: True
-
-    MDBoxLayout:
-        adaptive_height: True
-        spacing: dp(4)
-
-        MDIconButton:
-            icon: "play-outline"
-            disabled: root.is_completed or root.is_active
-            opacity: 0.35 if self.disabled else 1
-            on_release: app.root.ids.screen_manager.get_screen("study").start_task(root.task_id)
-
-        MDIconButton:
-            icon: "check-circle-outline" if not root.is_completed else "backup-restore"
-            on_release: app.root.ids.screen_manager.get_screen("study").toggle_complete(root.task_id)
-
-        MDIconButton:
-            icon: "content-copy"
-            disabled: root.is_completed
-            opacity: 0.35 if self.disabled else 1
-            on_release: app.root.ids.screen_manager.get_screen("study").duplicate_task(root.task_id)
-
-        MDIconButton:
-            icon: "pencil-outline"
-            on_release: app.root.ids.screen_manager.get_screen("study").edit_task(root.task_id)
-
-        MDIconButton:
-            icon: "arrow-up"
-            disabled: root.index == 0 or root.is_completed
-            opacity: 0.35 if self.disabled else 1
-            on_release: app.root.ids.screen_manager.get_screen("study").move_task(root.task_id, -1)
-
-        MDIconButton:
-            icon: "arrow-down"
-            disabled: root.index >= root.total - 1 or root.is_completed
-            opacity: 0.35 if self.disabled else 1
-            on_release: app.root.ids.screen_manager.get_screen("study").move_task(root.task_id, 1)
-
-        Widget:
 
         MDIconButton:
             icon: "delete-outline"
+            size_hint: None, None
+            size: dp(30), dp(30)
+            pos_hint: {"center_y": 0.5}
             theme_icon_color: "Custom"
             icon_color: app.theme_colors["red"]
             on_release: app.root.ids.screen_manager.get_screen("study").delete_task(root.task_id)
+        
+    # -------------------------------------------------
+    # TASK TITLE
+    # -------------------------------------------------
 
+    MDLabel:
+        text: root.title
+        size_hint_y: None
+        height: dp(app.responsive(24, 28, 22, 36, 32))
+        font_size: sp(app.typography("section_title", app.layout_profile))
+        bold: True
+        theme_text_color: "Custom"
+
+        text_color: app.theme_colors["muted"] if root.is_completed else app.theme_colors["text"]
+
+        valign: "middle"
+        text_size: self.width, self.height
+        shorten: True
+        shorten_from: "right"
+
+    # -------------------------------------------------
+    # DETAILS
+    # -------------------------------------------------
+
+    MDLabel:
+        text: root.detail_text + "  •  " + root.priority_text
+        size_hint_y: None
+        height: dp(app.responsive(20, 24, 18, 30, 26))
+        font_size: sp(app.typography("body_small", app.layout_profile))
+        theme_text_color: "Custom"
+        text_color: app.theme_colors["muted"]
+        valign: "middle"
+        text_size: self.width, self.height
+        shorten: True
+        shorten_from: "right"
+
+    # -------------------------------------------------
+    # ACTION BUTTONS
+    # -------------------------------------------------
+
+    MDBoxLayout:
+        size_hint_y: None
+        height: dp(app.responsive(38, 44, 36, 52, 48))
+        spacing: dp(app.responsive(3, 5, 2, 8, 6))
+
+        MDIconButton:
+            icon: "play-outline"
+            size_hint_x: None
+            width: dp(36)
+            disabled: root.is_completed or root.is_active
+            opacity: 0.35 if self.disabled else 1
+
+            on_release:
+                app.root.ids.screen_manager.get_screen("study").start_task(root.task_id)
+
+        MDIconButton:
+            icon: "check-circle-outline" if not root.is_completed else "backup-restore"
+
+            size_hint_x: None
+            width: dp(36)
+
+            on_release:
+                app.root.ids.screen_manager.get_screen("study").toggle_complete(root.task_id)
+
+        MDIconButton:
+            icon: "content-copy"
+            size_hint_x: None
+            width: dp(36)
+            disabled: root.is_completed
+            opacity: 0.35 if self.disabled else 1
+
+            on_release:
+                app.root.ids.screen_manager.get_screen("study").duplicate_task(root.task_id)
+
+        MDIconButton:
+            icon: "arrow-up"
+            size_hint_x: None
+            width: dp(36)
+            disabled: root.index == 0 or root.is_completed
+            opacity: 0.35 if self.disabled else 1
+
+            on_release:
+                app.root.ids.screen_manager.get_screen("study").move_task(root.task_id, -1)
+
+        MDIconButton:
+            icon: "arrow-down"
+            size_hint_x: None
+            width: dp(36)
+
+            disabled: root.index >= root.total - 1 or root.is_completed
+
+            opacity: 0.35 if self.disabled else 1
+
+            on_release:
+                app.root.ids.screen_manager.get_screen("study").move_task(root.task_id, 1)
+
+        
 <StudyPlanScreen>:
     md_bg_color: app.theme_colors["bg"]
 
@@ -142,14 +207,15 @@
 
                 MDLabel:
                     text: app.t("daily_study_plan", app.translation_version)
-                    font_style: "H5"
+                    font_size: sp(app.typography("page_title", app.layout_profile))
                     bold: True
                     theme_text_color: "Custom"
-                    text_color: app.theme_colors["bg"]
+                    text_color: app.theme_colors["text"]
                     adaptive_height: True
 
                 MDLabel:
                     text: root.summary_text
+                    font_size: sp(app.typography("body_small", app.layout_profile))
                     theme_text_color: "Custom"
                     text_color: app.theme_colors["muted"]
                     adaptive_height: True
@@ -165,7 +231,7 @@
 
                     MDLabel:
                         text: app.t("add_task", app.translation_version) if not root.editing_task_id else app.t("edit_task", app.translation_version)
-                        font_style: "H6"
+                        font_size: sp(app.typography("section_title", app.layout_profile))
                         bold: True
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["text"]
@@ -179,6 +245,7 @@
 
                     MDTextField:
                         id: task_title
+                        font_size: sp(app.typography("input", app.layout_profile))
                         hint_text: app.t("task_name", app.translation_version)
                         mode: "fill"
                         multiline: False
@@ -220,6 +287,7 @@
                                 helper_text_mode: "persistent"
                                 mode: "fill"
                                 input_filter: "int"
+                                font_size: sp(app.typography("input", app.layout_profile))
 
                                 size_hint_y: None
                                 height: dp(68)
@@ -247,6 +315,7 @@
                                 helper_text_mode: "persistent"
                                 mode: "fill"
                                 input_filter: "int"
+                                font_size: sp(app.typography("input", app.layout_profile))
 
                                 size_hint_y: None
                                 height: dp(68)
@@ -279,19 +348,10 @@
                         height: dp(54)
                         spacing: dp(10)
 
-                        MDFlatButton:
-                            text: app.t("cancel", app.translation_version)
-                            size_hint_x: 0.35
-                            height: dp(48)
-                            opacity: 1 if root.editing_task_id else 0
-                            disabled: not root.editing_task_id
-                            theme_text_color: "Custom"
-                            text_color: app.theme_colors["muted"]
-                            on_release: root.cancel_edit()
-
                         MDRaisedButton:
                             text: app.t("save", app.translation_version)
                             size_hint_x: 0.65 if root.editing_task_id else 1
+                            font_size: sp(app.typography("body", app.layout_profile))
                             height: dp(48)
                             md_bg_color: app.theme_colors["primary"]
                             on_release: root.add_or_update_task()
@@ -299,6 +359,7 @@
                     MDLabel:
                         text: root.form_status
                         halign: "center"
+                        font_size: sp(app.typography("status", app.layout_profile))
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["orange"]
                         adaptive_height: True
@@ -308,15 +369,19 @@
                     spacing: dp(6)
 
                     MDFlatButton:
+                        font_size: sp(app.typography("body_small", app.layout_profile))
                         text: app.t("all", app.translation_version)
                         on_release: root.set_filter("all")
                     MDFlatButton:
+                        font_size: sp(app.typography("body_small", app.layout_profile))
                         text: app.t("pending", app.translation_version)
                         on_release: root.set_filter("pending")
                     MDFlatButton:
+                        font_size: sp(app.typography("body_small", app.layout_profile))
                         text: app.t("active", app.translation_version)
                         on_release: root.set_filter("active")
                     MDFlatButton:
+                        font_size: sp(app.typography("body_small", app.layout_profile))
                         text: app.t("completed", app.translation_version)
                         on_release: root.set_filter("completed")
 
@@ -324,6 +389,7 @@
                     id: empty_label
                     text: app.t("no_tasks_yet", app.translation_version)
                     halign: "center"
+                    font_size: sp(app.typography("body_small", app.layout_profile))
                     theme_text_color: "Custom"
                     text_color: app.theme_colors["text"]
                     adaptive_height: True
