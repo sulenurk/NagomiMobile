@@ -4,8 +4,8 @@ import os
 
 from kivy.config import Config
 
-Config.set("graphics", "width", "800")
-Config.set("graphics", "height", "360")
+Config.set("graphics", "width", "1280")
+Config.set("graphics", "height", "800")
 Config.set("graphics", "resizable", "0")
 
 from core.responsive import ResponsiveMixin
