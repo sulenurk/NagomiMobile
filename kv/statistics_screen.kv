@@ -1,4 +1,6 @@
 #:import dp kivy.metrics.dp
+#:import sp kivy.metrics.sp
+
 
 <StatisticsScreen>:
     md_bg_color: app.theme_colors["bg"]
@@ -28,7 +30,7 @@
 
                 MDLabel:
                     text: app.t("statistics", app.translation_version)
-                    font_style: "Subtitle1"
+                    font_size: sp(app.typography("page_title", app.layout_profile))
                     bold: True
                     theme_text_color: "Custom"
                     text_color: app.theme_colors["text"]
@@ -36,7 +38,7 @@
 
                 MDLabel:
                     text: app.t("statistics_subtitle" , app.translation_version)
-                    font_style: "Subtitle2"
+                    font_size: sp(app.typography("body_small", app.layout_profile))
                     theme_text_color: "Custom"
                     text_color: app.theme_colors["muted"]
                     adaptive_height: True
@@ -60,14 +62,14 @@
 
                         MDLabel:
                             text: app.t("today", app.translation_version)
-                            font_style: "Caption"
+                            font_size: sp(app.typography("caption", app.layout_profile))
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["muted"]
                             adaptive_height: True
 
                         MDLabel:
                             text: root.today_focus_text
-                            font_style: "H6"
+                            font_size: sp(app.typography("section_title", app.layout_profile))
                             bold: True
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["green"]
@@ -84,14 +86,14 @@
 
                         MDLabel:
                             text: app.t("sessions", app.translation_version)
-                            font_style: "Caption"
+                            font_size: sp(app.typography("caption", app.layout_profile))
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["muted"]
                             adaptive_height: True
 
                         MDLabel:
                             text: root.completed_sessions_text
-                            font_style: "H6"
+                            font_size: sp(app.typography("section_title", app.layout_profile))
                             bold: True
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["primary"]
@@ -108,14 +110,14 @@
 
                         MDLabel:
                             text: app.t("away", app.translation_version)
-                            font_style: "Caption"
+                            font_size: sp(app.typography("caption", app.layout_profile))
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["muted"]
                             adaptive_height: True
 
                         MDLabel:
                             text: root.away_time_text
-                            font_style: "H6"
+                            font_size: sp(app.typography("section_title", app.layout_profile))
                             bold: True
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["orange"]
@@ -136,7 +138,7 @@
 
                     MDLabel:
                         text: app.t("today_focus_distribution", app.translation_version)
-                        font_style: "Subtitle1"
+                        font_size: sp(app.typography("section_title", app.layout_profile))
                         bold: True
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["text"]
@@ -148,7 +150,7 @@
 
                         MDLabel:
                             text: app.t("study_plan", app.translation_version)
-                            font_style: "Caption"
+                            font_size: sp(app.typography("caption", app.layout_profile))
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["muted"]
                             adaptive_height: True
@@ -167,7 +169,7 @@
 
                         MDLabel:
                             text: app.t("pomodoro", app.translation_version)
-                            font_style: "Caption"
+                            font_size: sp(app.typography("caption", app.layout_profile))
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["muted"]
                             adaptive_height: True
@@ -176,6 +178,7 @@
                             text: root.regular_pomodoro_focus_text
                             halign: "right"
                             bold: True
+                            font_size: sp(app.typography("caption", app.layout_profile))
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["orange"]
                             adaptive_height: True
@@ -214,7 +217,7 @@
 
                     MDLabel:
                         text: app.t("daily_goal", app.translation_version)
-                        font_style: "Subtitle1"
+                        font_size: sp(app.typography("section_title", app.layout_profile))
                         bold: True
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["text"]
@@ -222,7 +225,7 @@
 
                     MDLabel:
                         text: root.goal_detail_text
-                        font_style: "Caption"
+                        font_size: sp(app.typography("body_small", app.layout_profile))
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["muted"]
                         adaptive_height: True
@@ -248,7 +251,7 @@
 
                     MDLabel:
                         text: app.t("weekly_overview", app.translation_version)
-                        font_style: "Subtitle1"
+                        font_size: sp(app.typography("section_title", app.layout_profile))
                         bold: True
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["text"]
@@ -257,6 +260,7 @@
                     Spinner:
                         text: root.selected_subject_name
                         values: root.subject_filter_values
+                        font_size: sp(app.typography("input", app.layout_profile))
                         size_hint_y: None
                         height: dp(44)
                         background_normal: ""
@@ -267,7 +271,7 @@
 
                     MDLabel:
                         text: root.weekly_total_text
-                        font_style: "Caption"
+                        font_size: sp(app.typography("section_title", app.layout_profile))
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["muted"]
                         adaptive_height: True
@@ -292,7 +296,7 @@
                                 text_size: None, None
                                 shorten: True
 
-                                font_style: "Caption"
+                                font_size: sp(app.typography("caption", app.layout_profile))
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["muted"]
 
@@ -304,7 +308,7 @@
                                 text_size: None, None
                                 shorten: True
 
-                                font_style: "Caption"
+                                font_size: sp(app.typography("caption", app.layout_profile))
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["muted"]
 
@@ -316,7 +320,7 @@
                                 text_size: None, None
                                 shorten: True
 
-                                font_style: "Caption"
+                                font_size: sp(app.typography("caption", app.layout_profile))
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["muted"]
 
@@ -328,7 +332,7 @@
                                 text_size: None, None
                                 shorten: True
 
-                                font_style: "Caption"
+                                font_size: sp(app.typography("caption", app.layout_profile))
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["muted"]
 
@@ -340,7 +344,7 @@
                                 text_size: None, None
                                 shorten: True
 
-                                font_style: "Caption"
+                                font_size: sp(app.typography("caption", app.layout_profile))
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["muted"]
 
@@ -352,7 +356,7 @@
                                 text_size: None, None
                                 shorten: True
 
-                                font_style: "Caption"
+                                font_size: sp(app.typography("caption", app.layout_profile))
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["muted"]
 
@@ -364,7 +368,7 @@
                                 text_size: None, None
                                 shorten: True
 
-                                font_style: "Caption"
+                                font_size: sp(app.typography("caption", app.layout_profile))
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["muted"]
 
@@ -388,49 +392,49 @@
                             MDLabel:
                                 text: root.weekly_labels[0]
                                 halign: "center"
-                                font_style: "Caption"
+                                font_size: sp(app.typography("caption", app.layout_profile))
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_labels[1]
                                 halign: "center"
-                                font_style: "Caption"
+                                font_size: sp(app.typography("caption", app.layout_profile))
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_labels[2]
                                 halign: "center"
-                                font_style: "Caption"
+                                font_size: sp(app.typography("caption", app.layout_profile))
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_labels[3]
                                 halign: "center"
-                                font_style: "Caption"
+                                font_size: sp(app.typography("caption", app.layout_profile))
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_labels[4]
                                 halign: "center"
-                                font_style: "Caption"
+                                font_size: sp(app.typography("caption", app.layout_profile))
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_labels[5]
                                 halign: "center"
-                                font_style: "Caption"
+                                font_size: sp(app.typography("caption", app.layout_profile))
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["muted"]
 
                             MDLabel:
                                 text: root.weekly_labels[6]
                                 halign: "center"
-                                font_style: "Caption"
+                                font_size: sp(app.typography("caption", app.layout_profile))
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["muted"]
 
@@ -449,7 +453,7 @@
 
                     MDLabel:
                         text: app.t("subject_distribution", app.translation_version)
-                        font_style: "Subtitle1"
+                        font_size: sp(app.typography("section_title", app.layout_profile))
                         bold: True
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["text"]
@@ -457,7 +461,7 @@
 
                     MDLabel:
                         text: root.subject_total_text
-                        font_style: "Caption"
+                        font_size: sp(app.typography("body_small", app.layout_profile))
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["muted"]
                         adaptive_height: True
@@ -465,7 +469,7 @@
                     MDLabel:
                         id: subject_empty
                         text: root.empty_subject_text
-                        font_style: "Caption"
+                        font_size: sp(app.typography("caption", app.layout_profile))
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["muted"]
                         adaptive_height: False
@@ -492,7 +496,7 @@
 
                     MDLabel:
                         text: app.t("today_recent_sessions", app.translation_version)
-                        font_style: "Subtitle1"
+                        font_size: sp(app.typography("section_title", app.layout_profile))
                         bold: True
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["text"]
@@ -501,7 +505,7 @@
                     MDLabel:
                         id: recent_empty
                         text: root.empty_recent_text
-                        font_style: "Caption"
+                        font_size: sp(app.typography("caption", app.layout_profile))
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["muted"]
                         adaptive_height: False

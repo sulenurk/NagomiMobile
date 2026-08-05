@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta
 from typing import Any
 
-from kivy.metrics import dp
+from kivy.metrics import dp, sp
 from kivy.properties import (
     ListProperty,
     NumericProperty,
@@ -679,17 +679,37 @@ class StatisticsScreen(MDScreen):
                 text_color=self.app.theme_colors["text"],
             )
 
+            name_label.font_size = sp(
+                self.app.responsive(
+                    9,   # compact phone
+                    11,  # phone portrait
+                    9,   # phone landscape
+                    14,  # tablet portrait
+                    12,  # tablet landscape
+                )
+            )
+
             value_label = MDLabel(
                 text=self.app.t("subject_distribution_value").format(
                     minutes=minutes,
                     percent=percent,
                 ),
                 size_hint_x=None,
-                width=dp(95),
+                width=dp(115),
                 halign="right",
                 adaptive_height=True,
                 theme_text_color="Custom",
                 text_color=self.app.theme_colors["muted"],
+            )
+
+            value_label.font_size = sp(
+                self.app.responsive(
+                    8,   # compact phone
+                    10,  # phone portrait
+                    8,   # phone landscape
+                    13,  # tablet portrait
+                    11,  # tablet landscape
+                )
             )
 
             progress = MDProgressBar(
