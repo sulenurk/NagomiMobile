@@ -72,7 +72,7 @@ class ResponsiveMixin:
         self.is_compact_phone = (
             self.is_phone
             and self.is_portrait
-            and self.screen_width_dp <= 360
+            and self.screen_width_dp < 360
         )
 
         if self.is_tablet:
@@ -146,6 +146,14 @@ class ResponsiveMixin:
                 28,
             ),
 
+            "page_title_small": (
+                16,
+                20,
+                15,
+                27,
+                24,
+            ),
+
             # Kart veya bölüm başlıkları:
             # Focus Time, Short Break, Appearance...
             "section_title": (
@@ -204,7 +212,7 @@ class ResponsiveMixin:
             # Timer'a özel
             "timer": (
                 28,
-                40,
+                60,
                 30,
                 64,
                 56,
@@ -213,7 +221,7 @@ class ResponsiveMixin:
             # Cycle'a özel
             "cycle": (
                 10,
-                12,
+                20,
                 9,
                 17,
                 15,
