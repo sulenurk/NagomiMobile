@@ -159,6 +159,7 @@
                             text: root.study_plan_focus_text
                             halign: "right"
                             bold: True
+                            font_size: sp(app.typography("body", app.layout_profile))
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["primary"]
                             adaptive_height: True
@@ -178,7 +179,7 @@
                             text: root.regular_pomodoro_focus_text
                             halign: "right"
                             bold: True
-                            font_size: sp(app.typography("caption", app.layout_profile))
+                            font_size: sp(app.typography("body", app.layout_profile))
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["orange"]
                             adaptive_height: True
@@ -190,6 +191,7 @@
                         MDLabel:
                             text: app.t("total", app.translation_version)
                             bold: True
+                            font_size: sp(app.typography("body", app.layout_profile))
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["text"]
                             adaptive_height: True
@@ -198,6 +200,7 @@
                             text: root.total_focus_text
                             halign: "right"
                             bold: True
+                            font_size: sp(app.typography("body", app.layout_profile))
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["green"]
                             adaptive_height: True
