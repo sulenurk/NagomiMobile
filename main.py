@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import os
+
 from kivy.config import Config
 
-Config.set("graphics", "width", "412")
-Config.set("graphics", "height", "915")
+os.environ["KIVY_METRICS_DENSITY"] = "0.60"
+
+Config.set("graphics", "width", "480")   # 800 × 0.60
+Config.set("graphics", "height", "768")  # 1280 × 0.60
 Config.set("graphics", "resizable", "0")
 
 from core.responsive import ResponsiveMixin

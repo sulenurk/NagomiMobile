@@ -47,13 +47,17 @@
 
                 MDCard:
                     orientation: "vertical"
-                    size_hint_y: None
-                    height: dp(app.responsive(390, 570, 335, 580, 505))
+                    size_hint_y: 1
+                    height: dp(app.responsive(390, 570, 335, 820, 505))
                     padding: (dp(app.responsive(10, 16, 8, 24, 20)), dp(app.responsive(18, 22, 14, 30, 24)), dp(app.responsive(10, 16, 8, 24, 20)), dp(app.responsive(10, 16, 8, 22, 18)))
                     spacing: dp(app.responsive(6, 8, 5, 10, 8))
                     radius: [dp(30), dp(30), dp(30), dp(30)]
                     elevation: 0
                     md_bg_color: app.theme_colors["card"]
+
+                    Widget:
+                        size_hint_y: None
+                        height: dp(app.responsive(8, 10, 8, 30, 14))
 
                     MDLabel:
                         text: root.mode_text
@@ -74,12 +78,12 @@
                     AnchorLayout:
                         anchor_x: "center"
                         anchor_y: "center"
-                        size_hint_y: None
-                        height: dp(app.responsive(170, 285, 165, 350, 320))
+                        size_hint_y: 1
+                        height: dp(app.responsive(170, 285, 165, 530, 320))
 
                         FloatLayout:
                             size_hint: None, None
-                            size: dp(app.responsive(170, 270, 155, 330, 300)), dp(app.responsive(170, 270, 155, 330, 300))
+                            size: dp(app.responsive(170, 270, 155, 590, 300)), dp(app.responsive(170, 270, 155, 590, 300))
 
                             CircularProgress:
                                 progress: root.progress
@@ -92,7 +96,7 @@
                             MDBoxLayout:
                                 orientation: "vertical"
                                 size_hint: None, None
-                                size: dp(app.responsive(130, 210, 120, 260, 230)), dp(app.responsive(60, 90, 56, 115, 100))
+                                size: dp(app.responsive(130, 210, 120, 390, 230)), dp(app.responsive(60, 90, 56, 170, 100))
                                 spacing: 0
                                 pos_hint: {"center_x": 0.5, "center_y": 0.5}
 
@@ -117,8 +121,8 @@
                     
                     MDBoxLayout:
                         size_hint_y: None
-                        height: dp(app.responsive(56, 68, 52, 94, 84))
-                        spacing: dp(app.responsive(6, 12, 5, 20, 16))
+                        height: dp(app.responsive(56, 68, 52, 110, 84))
+                        spacing: dp(app.responsive(6, 12, 5, 24, 16))
                         padding: dp(app.responsive(6, 10, 4, 16, 12)), 0
 
                         Widget:
@@ -170,8 +174,6 @@
                             md_bg_color: app.theme_colors["red"]
                             on_release: app.stop_alarm()
 
-                Widget:
-                    size_hint_y: 0.5
 
         # =====================================================
         # PANEL AÇIKKEN ARKA PLANI KARARTAN KATMAN

@@ -142,7 +142,7 @@ class ResponsiveMixin:
                 18,
                 24,
                 17,
-                32,
+                36,
                 28,
             ),
 
@@ -160,7 +160,7 @@ class ResponsiveMixin:
                 13,
                 18,
                 14,
-                25,
+                28,
                 22,
             ),
 
@@ -214,7 +214,7 @@ class ResponsiveMixin:
                 28,
                 60,
                 30,
-                64,
+                120,
                 56,
             ),
 
@@ -223,7 +223,7 @@ class ResponsiveMixin:
                 10,
                 20,
                 9,
-                17,
+                30,
                 15,
             ),
 
