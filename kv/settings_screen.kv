@@ -1,4 +1,5 @@
 #:import dp kivy.metrics.dp
+#:import sp kivy.metrics.sp
 
 <SettingsScreen>:
     md_bg_color: app.theme_colors["bg"]
@@ -41,7 +42,7 @@
 
                     MDLabel:
                         text: app.t("auto_start", app.translation_version)
-                        font_style: "Subtitle1"
+                        font_size: sp(app.typography("section_title", app.layout_profile))
                         bold: True
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["text"]
@@ -63,7 +64,7 @@
 
                                 MDLabel:
                                     text: app.t("auto_start_focus_sessions", app.translation_version)
-                                    font_style: "Subtitle2"
+                                    font_size: sp(app.typography("body", app.layout_profile))
                                     bold: True
                                     theme_text_color: "Custom"
                                     text_color: app.theme_colors["text"]
@@ -72,7 +73,7 @@
 
                                 MDLabel:
                                     text: app.t("auto_start_focus_sessions_description", app.translation_version)
-                                    font_style: "Caption"
+                                    font_size: sp(app.typography("caption", app.layout_profile))
                                     theme_text_color: "Custom"
                                     text_color: app.theme_colors["muted"]
                                     adaptive_height: True
@@ -86,6 +87,8 @@
                                 anchor_y: "center"
 
                                 NagomiSwitch:
+                                    size_hint: None, None
+                                    size: dp(app.responsive(52, 58, 48, 68, 62)), dp(app.responsive(28, 32, 26, 38, 34))
                                     state: "down" if root.auto_start_focus else "normal"
                                     on_state: root.set_auto_start_focus(self.state == "down")
                                     
@@ -102,7 +105,7 @@
 
                             MDLabel:
                                 text: app.t("auto_start_breaks", app.translation_version)
-                                font_style: "Subtitle2"
+                                font_size: sp(app.typography("body", app.layout_profile))
                                 bold: True
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["text"]
@@ -110,7 +113,7 @@
 
                             MDLabel:
                                 text: app.t("auto_start_breaks_description", app.translation_version)
-                                font_style: "Caption"
+                                font_size: sp(app.typography("caption", app.layout_profile))
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["muted"]
                                 adaptive_height: True
@@ -123,6 +126,8 @@
                             anchor_y: "center"
 
                             NagomiSwitch:
+                                size_hint: None, None
+                                size: dp(app.responsive(52, 58, 48, 68, 62)), dp(app.responsive(28, 32, 26, 38, 34))
                                 state: "down" if root.auto_start_break else "normal"
                                 on_state: root.set_auto_start_break(self.state == "down")
                                 
@@ -150,7 +155,7 @@
 
                             MDLabel:
                                 text: app.t("sound_notifications", app.translation_version)
-                                font_style: "Subtitle1"
+                                font_size: sp(app.typography("section_title", app.layout_profile))
                                 bold: True
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["text"]
@@ -158,7 +163,7 @@
 
                             MDLabel:
                                 text: app.t("sound_notifications_description", app.translation_version)
-                                font_style: "Subtitle2"
+                                font_size: sp(app.typography("caption", app.layout_profile))
                                 theme_text_color: "Custom"
                                 text_color: app.theme_colors["muted"]
                                 adaptive_height: True
@@ -172,6 +177,8 @@
                             anchor_y: "center"
 
                             NagomiSwitch:
+                                size_hint: None, None
+                                size: dp(app.responsive(52, 58, 48, 68, 62)), dp(app.responsive(28, 32, 26, 38, 34))
                                 state: "down" if root.sound_enabled else "normal"
                                 on_release: root.set_sound_enabled(self.state == "down")
 
@@ -188,7 +195,7 @@
 
                         MDLabel:
                             text: app.t("alarm_tone", app.translation_version)
-                            font_style: "Subtitle2"
+                            font_size: sp(app.typography("body", app.layout_profile))
                             bold: True
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["text"]
@@ -196,7 +203,7 @@
 
                         MDLabel:
                             text: app.t("alarm_tone_description", app.translation_version)
-                            font_style: "Caption"
+                            font_size: sp(app.typography("caption", app.layout_profile))
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["muted"]
                             adaptive_height: True
@@ -205,6 +212,7 @@
                         Spinner:
                             id: alarm_sound_spinner
                             text: root.selected_alarm_name
+                            font_size: sp(app.typography("input", app.layout_profile))
                             values: root.alarm_display_values
                             size_hint_y: None
                             height: dp(48)
@@ -234,7 +242,7 @@
 
                     MDLabel:
                         text: app.t("appearance", app.translation_version)
-                        font_style: "Subtitle1"
+                        font_size: sp(app.typography("section_title", app.layout_profile))
                         bold: True
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["text"]
@@ -242,7 +250,7 @@
 
                     MDLabel:
                         text: app.t("color_palette_description", app.translation_version)
-                        font_style: "Caption"
+                        font_size: sp(app.typography("caption", app.layout_profile))
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["muted"]
                         adaptive_height: True
@@ -251,6 +259,7 @@
                     Spinner:
                         id: color_palette_spinner
                         text: app.selected_palette_name
+                        font_size: sp(app.typography("input", app.layout_profile))
                         values: app.palette_display_values
                         size_hint_y: None
                         height: dp(48)
@@ -269,7 +278,7 @@
 
                         MDLabel:
                             text: app.t("palette_preview", app.translation_version)
-                            font_style: "Caption"
+                            font_size: sp(app.typography("caption", app.layout_profile))
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["muted"]
                             adaptive_height: True
@@ -312,7 +321,7 @@
 
                     MDLabel:
                         text: app.t("plan_and_statistics", app.translation_version)
-                        font_style: "Subtitle1"
+                        font_size: sp(app.typography("section_title", app.layout_profile))
                         bold: True
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["text"]
@@ -322,6 +331,7 @@
                         id: daily_goal
                         text: root.daily_goal_text
                         hint_text: app.t("daily_focus_goal")
+                        font_size: sp(app.typography("input", app.layout_profile))
                         helper_text: app.t("minutes")
                         helper_text_mode: "persistent"
                         input_filter: "int"
@@ -336,7 +346,7 @@
 
                         MDLabel:
                             text: app.t("show_queue_progress", app.translation_version)
-                            font_style: "Subtitle2"
+                            font_size: sp(app.typography("body", app.layout_profile))
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["text"]
                             adaptive_height: True
@@ -349,6 +359,8 @@
                             anchor_y: "center"
 
                             NagomiSwitch:
+                                size_hint: None, None
+                                size: dp(app.responsive(52, 58, 48, 68, 62)), dp(app.responsive(28, 32, 26, 38, 34))
                                 state: "down" if root.show_queue_progress else "normal"
                                 on_state: root.set_show_queue_progress(self.state == "down")
                                 
@@ -359,7 +371,7 @@
 
                         MDLabel:
                             text: app.t("show_total_away_time", app.translation_version)
-                            font_style: "Subtitle2"
+                            font_size: sp(app.typography("body", app.layout_profile))
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["text"]
                             adaptive_height: True
@@ -372,6 +384,8 @@
                             anchor_y: "center"
 
                             NagomiSwitch:
+                                size_hint: None, None
+                                size: dp(app.responsive(52, 58, 48, 68, 62)), dp(app.responsive(28, 32, 26, 38, 34))
                                 state: "down" if root.show_cumulative_away_time else "normal"
                                 on_state: root.set_show_cumulative_away_time(self.state == "down")
                                 
@@ -383,7 +397,7 @@
 
                         MDLabel:
                             text: app.t("first_day_of_week", app.translation_version)
-                            font_style: "Subtitle2"
+                            font_size: sp(app.typography("caption", app.layout_profile))
                             bold: True
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["text"]
@@ -391,7 +405,7 @@
 
                         MDLabel:
                             text: app.t("first_day_of_week_description", app.translation_version)
-                            font_style: "Caption"
+                            font_size: sp(app.typography("caption", app.layout_profile))
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["muted"]
                             adaptive_height: True
@@ -399,6 +413,7 @@
                         Spinner:
                             text: root.week_start_text
                             values: [app.t("monday"), app.t("sunday")]
+                            font_size: sp(app.typography("input", app.layout_profile))
                             size_hint_y: None
                             height: dp(48)
                             background_normal: ""
@@ -409,6 +424,7 @@
 
                 MDRaisedButton:
                     text: app.t("save", app.translation_version)
+                    font_size: sp(app.typography("body", app.layout_profile))
                     size_hint_x: 1
                     height: dp(50)
                     md_bg_color: app.theme_colors["primary"]
@@ -416,6 +432,7 @@
 
                 MDFlatButton:
                     text: app.t("reset_settings", app.translation_version)
+                    font_size: sp(app.typography("body", app.layout_profile))
                     size_hint_x: 1
                     height: dp(48)
                     theme_text_color: "Custom"
@@ -424,6 +441,7 @@
 
                 MDLabel:
                     text: root.status_text
+                    font_size: sp(app.typography("status", app.layout_profile))
                     halign: "center"
                     theme_text_color: "Custom"
                     text_color: app.theme_colors["orange"]
