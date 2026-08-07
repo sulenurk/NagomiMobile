@@ -156,5 +156,8 @@
   "weekday_thu_short": "Jue",
   "weekday_fri_short": "Vie",
   "weekday_sat_short": "Sáb",
-  "weekday_sun_short": "Dom"
+  "weekday_sun_short": "Dom",
+
+  "task_name": "Nombre de la tarea",
+  "break_minutes": "Duración del descanso"
 }

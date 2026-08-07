@@ -680,12 +680,9 @@ class StatisticsScreen(MDScreen):
             )
 
             name_label.font_size = sp(
-                self.app.responsive(
-                    9,   # compact phone
-                    11,  # phone portrait
-                    9,   # phone landscape
-                    14,  # tablet portrait
-                    12,  # tablet landscape
+                self.app.typography(
+                    "body",
+                    self.app.layout_profile
                 )
             )
 
@@ -703,12 +700,9 @@ class StatisticsScreen(MDScreen):
             )
 
             value_label.font_size = sp(
-                self.app.responsive(
-                    8,   # compact phone
-                    10,  # phone portrait
-                    8,   # phone landscape
-                    13,  # tablet portrait
-                    11,  # tablet landscape
+                self.app.typography(
+                    "body_small",
+                    self.app.layout_profile
                 )
             )
 
@@ -819,6 +813,13 @@ class StatisticsScreen(MDScreen):
                 text_color=self.app.theme_colors["text"],
             )
 
+            title_label.font_size = sp(
+                self.app.typography(
+                    "body",
+                    self.app.layout_profile
+                )
+            )
+
             time_label = MDLabel(
                 text=completed_time,
                 size_hint_x=None,
@@ -829,6 +830,13 @@ class StatisticsScreen(MDScreen):
                 text_color=self.app.theme_colors["muted"],
             )
 
+            time_label.font_size = sp(
+                self.app.typography(
+                    "body_small",
+                    self.app.layout_profile
+                )
+            )
+
             detail_label = MDLabel(
                 text=self.app.t("recent_session_detail").format(
                     source=source_text,
@@ -836,9 +844,15 @@ class StatisticsScreen(MDScreen):
                     away=away_minutes,
                 ),
                 adaptive_height=True,
-                font_style="Caption",
                 theme_text_color="Custom",
                 text_color=self.app.theme_colors["muted"],
+            )
+
+            detail_label.font_size = sp(
+                self.app.typography(
+                    "body_small",
+                    self.app.layout_profile
+                )
             )
 
             title_row.add_widget(title_label)

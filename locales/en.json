@@ -170,5 +170,8 @@
 
   "stop_alarm": "Stop alarm",
   "alarm_tone": "Alarm tone",
-  "alarm_tone_description": "Choose the sound played when a timer ends."
+  "alarm_tone_description": "Choose the sound played when a timer ends.",
+
+  "task_name": "Task Name",
+  "break_minutes": "Break Duration"
 }

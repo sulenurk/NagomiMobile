@@ -60,7 +60,7 @@
 
                     Widget:
                         size_hint_y: None
-                        height: dp(app.responsive(8, 10, 8, 30, 14))
+                        height: dp(app.responsive(8, 10, 8, 10, 14))
 
                     MDLabel:
                         text: root.mode_text
@@ -82,11 +82,11 @@
                         anchor_x: "center"
                         anchor_y: "center"
                         size_hint_y: 1
-                        height: dp(app.responsive(170, 285, 165, 530, 320))
+                        height: dp(app.responsive(200, 285, 165, 530, 320))
 
                         FloatLayout:
                             size_hint: None, None
-                            size: dp(app.responsive(170, 270, 155, 590, 300)), dp(app.responsive(170, 270, 155, 590, 300))
+                            size: dp(app.responsive(200, 270, 155, 450, 300)), dp(app.responsive(200, 270, 155, 450, 300))
 
                             CircularProgress:
                                 progress: root.progress

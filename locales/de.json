@@ -156,5 +156,8 @@
   "weekday_thu_short": "Do",
   "weekday_fri_short": "Fr",
   "weekday_sat_short": "Sa",
-  "weekday_sun_short": "So"
+  "weekday_sun_short": "So",
+
+  "task_name": "Aufgabenname",
+  "break_minutes": "Pausendauer"
 }

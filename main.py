@@ -4,9 +4,13 @@ import os
 
 from kivy.config import Config
 
-Config.set("graphics", "width", "1280")
-Config.set("graphics", "height", "800")
+Config.set("graphics", "width", "320")
+Config.set("graphics", "height", "568")
 Config.set("graphics", "resizable", "0")
+
+Config.set("graphics", "position", "custom")
+Config.set("graphics", "left", "50")
+Config.set("graphics", "top", "50")
 
 from core.responsive import ResponsiveMixin
 from kivy.core.window import Window
@@ -306,8 +310,6 @@ class NagomiApp(ResponsiveMixin, MDApp):
             "fr": "Français",
             "es": "Español",
             "pt": "Português",
-            "zh": "简体中文",
-            "ja": "日本語",
         }
 
         return language_names.get(language_code, "English")
@@ -321,8 +323,6 @@ class NagomiApp(ResponsiveMixin, MDApp):
             "Français": "fr",
             "Español": "es",
             "Português": "pt",
-            "简体中文": "zh",
-            "日本語": "ja",
         }
 
         return language_codes.get(language_name, "en")

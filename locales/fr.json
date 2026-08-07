@@ -156,5 +156,8 @@
   "weekday_thu_short": "Jeu",
   "weekday_fri_short": "Ven",
   "weekday_sat_short": "Sam",
-  "weekday_sun_short": "Dim"
+  "weekday_sun_short": "Dim",
+
+  "task_name": "Nom de la tâche",
+  "break_minutes": "Durée de la pause"
 }

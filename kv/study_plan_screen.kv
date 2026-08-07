@@ -68,7 +68,7 @@
         MDLabel:
             text: root.status_text
             size_hint_x: None
-            width: dp(48)
+            width: dp(app.responsive(62, 78, 68, 120, 100))
             halign: "right"
             valign: "middle"
             text_size: self.width, self.height
@@ -93,7 +93,7 @@
         text: root.title
         size_hint_y: None
         height: dp(app.responsive(24, 28, 22, 36, 32))
-        font_size: sp(app.typography("section_title", app.layout_profile))
+        font_size: sp(app.typography("body_small", app.layout_profile))
         bold: True
         theme_text_color: "Custom"
 
@@ -240,6 +240,7 @@
                         id: task_title
                         font_size: sp(app.typography("input", app.layout_profile))
                         hint_text: app.t("task_name", app.translation_version)
+                        hint_text_font_size: sp(app.typography("input_small", app.layout_profile))
                         mode: "fill"
                         multiline: False
 
@@ -268,16 +269,16 @@
                         spacing: dp(10)
 
                         MDBoxLayout:
+                            orientation: "vertical" if app.layout_profile in ("compact_portrait", "phone_portrait") else "horizontal"
                             size_hint_y: None
-                            height: dp(72)
+                            height: dp(146) if app.layout_profile in ("compact_portrait", "phone_portrait") else dp(72)
                             spacing: dp(10)
 
                             MDTextField:
                                 id: focus_duration
                                 text: "25"
                                 hint_text: app.t("focus_duration", app.translation_version)
-                                helper_text: app.t("minutes", app.translation_version)
-                                helper_text_mode: "persistent"
+                                hint_text_font_size: sp(app.typography("input_small", app.layout_profile))
                                 mode: "fill"
                                 input_filter: "int"
                                 font_size: sp(app.typography("input", app.layout_profile))
@@ -293,9 +294,6 @@
 
                                 hint_text_color_normal: app.theme_colors["muted"]
                                 hint_text_color_focus: app.theme_colors["primary"]
-
-                                helper_text_color_normal: app.theme_colors["muted"]
-                                helper_text_color_focus: app.theme_colors["primary"]
 
                                 line_color_normal: 0, 0, 0, 0
                                 line_color_focus: app.theme_colors["primary"]
@@ -304,8 +302,7 @@
                                 id: break_minutes
                                 text: "5"
                                 hint_text: app.t("break_minutes", app.translation_version)
-                                helper_text: app.t("minutes", app.translation_version)
-                                helper_text_mode: "persistent"
+                                hint_text_font_size: sp(app.typography("input_small", app.layout_profile))
                                 mode: "fill"
                                 input_filter: "int"
                                 font_size: sp(app.typography("input", app.layout_profile))
@@ -321,10 +318,7 @@
 
                                 hint_text_color_normal: app.theme_colors["muted"]
                                 hint_text_color_focus: app.theme_colors["primary"]
-
-                                helper_text_color_normal: app.theme_colors["muted"]
-                                helper_text_color_focus: app.theme_colors["primary"]
-
+                                
                                 line_color_normal: 0, 0, 0, 0
                                 line_color_focus: app.theme_colors["primary"]
                     DarkSpinner:

@@ -212,7 +212,7 @@ class ResponsiveMixin:
             # Timer'a özel
             "timer": (
                 28,
-                60,
+                66,
                 42,
                 120,
                 56,
