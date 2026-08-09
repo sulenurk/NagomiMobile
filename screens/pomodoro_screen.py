@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import time
 import uuid
 
 from kivy.clock import Clock
@@ -140,6 +141,11 @@ class PomodoroScreen(MDScreen):
         self.save_timer_state()
         self._cancel_clock_event()
 
+        # Arka plana geçerken, sayaç hâlâ çalışıyorsa kalan süreye
+        # göre bir Android alarmı kur - böylece uygulama kapalıyken
+        # bile oturum bittiğinde uyanır.
+        if self.timer.is_running:
+            self._schedule_android_alarm()
 
     def handle_app_resume(self) -> None:
         """
@@ -175,6 +181,10 @@ class PomodoroScreen(MDScreen):
                     self._tick,
                     1,
                 )
+
+        # Ön plana dönüldü; artik zamanlanmis alarma gerek yok,
+        # Clock zaten devraldi.
+        self._cancel_android_alarm()
 
         self.refresh_ui()
 
@@ -225,6 +235,7 @@ class PomodoroScreen(MDScreen):
         if self.timer.is_running:
             self.timer.pause()
             self.status_text = self.app.t("paused")
+            self._cancel_android_alarm()
         else:
             self.app.stop_alarm()
             self.timer.start()
@@ -240,6 +251,7 @@ class PomodoroScreen(MDScreen):
         self.app.stop_alarm()
         self.timer.reset()
         self.status_text = ""
+        self._cancel_android_alarm()
         self.save_timer_state()
         self.refresh_ui()
 
@@ -250,6 +262,7 @@ class PomodoroScreen(MDScreen):
         self.app.stop_alarm()
         self.timer.skip()
         self.status_text = self._ready_message()
+        self._cancel_android_alarm()
         self.save_timer_state()
         self.refresh_ui()
 
@@ -463,6 +476,41 @@ class PomodoroScreen(MDScreen):
             "completed_at": datetime.now().isoformat(timespec="seconds"),
         }
         self.app.app_data.setdefault("sessions", []).append(session)
+
+    # ---------------------------------------------------------
+    # ANDROID ALARM BAĞLANTISI
+    # ---------------------------------------------------------
+    # FocusScreen'deki ayni desen: gercek Android planlamasi
+    # main.py icindeki schedule_focus_alarm/cancel_focus_alarm
+    # metotlarinda yapilir, burada yalnizca cagirilir.
+
+    def _schedule_android_alarm(self) -> None:
+        schedule_method = getattr(
+            self.app,
+            "schedule_focus_alarm",
+            None,
+        )
+
+        if callable(schedule_method):
+            end_timestamp = (
+                time.time()
+                + int(self.timer.remaining_seconds)
+            )
+
+            schedule_method(
+                end_timestamp=end_timestamp,
+                mode=self.timer.mode,
+            )
+
+    def _cancel_android_alarm(self) -> None:
+        cancel_method = getattr(
+            self.app,
+            "cancel_focus_alarm",
+            None,
+        )
+
+        if callable(cancel_method):
+            cancel_method()
 
     @staticmethod
     def _read_positive_int(

@@ -6,23 +6,13 @@ MDNavigationLayout:
     ScreenManager:
         id: screen_manager
 
+        # Only the first-shown screen is built here. FocusScreen,
+        # SubjectsScreen, StudyPlanScreen, StatisticsScreen, and
+        # SettingsScreen are added lazily in main.py's show_page()
+        # the first time the user navigates to each - building all
+        # six screens up front was the main cause of slow startup.
         PomodoroScreen:
             name: "pomodoro"
-
-        FocusScreen:
-            name: "focus"
-
-        SubjectsScreen:
-            name: "subjects"
-
-        StudyPlanScreen:
-            name: "study"
-
-        StatisticsScreen:
-            name: "statistics"
-
-        SettingsScreen:
-            name: "settings"
 
     MDNavigationDrawer:
         id: nav_drawer

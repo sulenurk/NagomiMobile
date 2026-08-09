@@ -1,16 +1,19 @@
 from __future__ import annotations
 
 import os
+import time
 
 from kivy.config import Config
+from kivy.utils import platform
 
-Config.set("graphics", "width", "320")
-Config.set("graphics", "height", "568")
-Config.set("graphics", "resizable", "0")
+if platform != "android":
+    Config.set("graphics", "width", "320")
+    Config.set("graphics", "height", "568")
+    Config.set("graphics", "resizable", "0")
 
-Config.set("graphics", "position", "custom")
-Config.set("graphics", "left", "50")
-Config.set("graphics", "top", "50")
+    Config.set("graphics", "position", "custom")
+    Config.set("graphics", "left", "50")
+    Config.set("graphics", "top", "50")
 
 from core.responsive import ResponsiveMixin
 from kivy.core.window import Window
@@ -32,7 +35,7 @@ from kivymd.app import MDApp
 
 from kivy.clock import Clock
 from kivy.core.audio import SoundLoader
-from kivy.utils import get_color_from_hex, platform
+from kivy.utils import get_color_from_hex
 
 from core.theme import (
     PALETTE_NAMES,
@@ -167,6 +170,22 @@ class NagomiApp(ResponsiveMixin, MDApp):
         self.apply_theme()
 
         self._alarm_stop_event = None
+
+        # -----------------------------------------------
+        # LAZY EKRAN KAYDI
+        # -----------------------------------------------
+        # PomodoroScreen ekrani nagomi.kv icinde statik olarak
+        # tanimli (ilk gorunen ekran). Digerleri, kullanici ilk kez
+        # o sayfaya gittiginde show_page() tarafindan olusturulur.
+        # Bu, acilista tum 6 ekranin widget agacinin bir anda
+        # kurulmasini onler.
+        self._screen_classes = {
+            "focus": FocusScreen,
+            "subjects": SubjectsScreen,
+            "study": StudyPlanScreen,
+            "statistics": StatisticsScreen,
+            "settings": SettingsScreen,
+        }
 
         # -----------------------------------------------
         # KV DOSYALARI
@@ -620,11 +639,23 @@ class NagomiApp(ResponsiveMixin, MDApp):
 
         self.stop_alarm()
 
+        screen_manager = self.root.ids.screen_manager
+
+        # "pomodoro" var olan tek statik ekran; digerleri ilk
+        # ziyarette burada olusturulup ScreenManager'a eklenir.
+        if not screen_manager.has_screen(page_name):
+            screen_cls = self._screen_classes.get(page_name)
+
+            if screen_cls is not None:
+                screen_manager.add_widget(
+                    screen_cls(name=page_name)
+                )
+
         self.active_page = page_name
-        self.root.ids.screen_manager.current = page_name
+        screen_manager.current = page_name
         self.root.ids.nav_drawer.set_state("close")
 
-        current_screen = self.root.ids.screen_manager.get_screen(page_name)
+        current_screen = screen_manager.get_screen(page_name)
 
         if hasattr(current_screen, "refresh_ui"):
             current_screen.refresh_ui()
@@ -887,6 +918,198 @@ class NagomiApp(ResponsiveMixin, MDApp):
 
         except Exception as error:
             print("[VIBRATION STOP ERROR]", error)
+
+    # -----------------------------------------------
+    # ANDROID ALARM MANAGER
+    # -----------------------------------------------
+    # FocusScreen / PomodoroScreen already compute an absolute
+    # end-timestamp and re-sync against it whenever the app comes
+    # back to foreground (on_resume). That part is correct and
+    # battery-safe. The gap: if the app is backgrounded when a
+    # session ends, nothing wakes it up, so the alarm sound only
+    # plays whenever the user happens to reopen the app.
+    #
+    # schedule_focus_alarm() closes that gap using Android's
+    # AlarmManager to schedule an exact wake-up at end_timestamp
+    # that relaunches this app's own activity. No custom Java
+    # receiver is required: PendingIntent.getActivity() targets an
+    # activity Android already knows about (this app's launcher
+    # activity), so python-for-android's default manifest is
+    # enough. When the activity is brought back, on_resume() runs
+    # as usual, timer.sync() detects the session finished, and
+    # play_alarm() fires normally.
+    #
+    # Trade-off: this brings the app to the foreground rather than
+    # posting a silent tray notification while staying backgrounded,
+    # and it only survives backgrounding/Doze - not the OS fully
+    # killing the process. A tray notification that works even when
+    # the app is force-closed needs a custom BroadcastReceiver
+    # packaged via a p4a recipe, which is a separate, larger change.
+    #
+    # buildozer.spec must include, at minimum:
+    #   android.permissions = VIBRATE,SCHEDULE_EXACT_ALARM,USE_EXACT_ALARM
+    # (SCHEDULE_EXACT_ALARM/USE_EXACT_ALARM are required on Android 12+
+    # for setExactAndAllowWhileIdle to fire on time; without them the
+    # OS may silently delay the alarm.)
+
+    def schedule_focus_alarm(
+        self,
+        end_timestamp: float,
+        mode: str = "focus",
+    ) -> None:
+        if platform != "android":
+            return
+
+        if not end_timestamp or end_timestamp <= 0:
+            return
+
+        try:
+            from jnius import autoclass, cast
+
+            PythonActivity = autoclass(
+                "org.kivy.android.PythonActivity"
+            )
+            Context = autoclass(
+                "android.content.Context"
+            )
+            Intent = autoclass(
+                "android.content.Intent"
+            )
+            PendingIntent = autoclass(
+                "android.app.PendingIntent"
+            )
+            AlarmManager = autoclass(
+                "android.app.AlarmManager"
+            )
+            SystemClock = autoclass(
+                "android.os.SystemClock"
+            )
+
+            activity = PythonActivity.mActivity
+
+            intent = Intent(
+                activity.getApplicationContext(),
+                PythonActivity,
+            )
+            intent.setAction(
+                "com.nagomi.FOCUS_ALARM"
+            )
+            intent.addFlags(
+                Intent.FLAG_ACTIVITY_SINGLE_TOP
+                | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+            )
+
+            flag_update_current = getattr(
+                PendingIntent,
+                "FLAG_UPDATE_CURRENT",
+                0,
+            )
+
+            # Android 12+ (API 31+) requires FLAG_IMMUTABLE or
+            # FLAG_MUTABLE to be set explicitly.
+            flag_immutable = getattr(
+                PendingIntent,
+                "FLAG_IMMUTABLE",
+                0,
+            )
+
+            pending_intent = PendingIntent.getActivity(
+                activity.getApplicationContext(),
+                # Fixed request code: a new call replaces the
+                # previous pending alarm rather than stacking more.
+                4200,
+                intent,
+                flag_update_current | flag_immutable,
+            )
+
+            alarm_manager = cast(
+                "android.app.AlarmManager",
+                activity.getSystemService(
+                    Context.ALARM_SERVICE
+                ),
+            )
+
+            # Convert the wall-clock end_timestamp (time.time())
+            # into elapsed-realtime, which is what AlarmManager's
+            # *_WAKEUP variants expect.
+            now_wall = time.time()
+            now_elapsed = SystemClock.elapsedRealtime()
+
+            trigger_at_elapsed = int(
+                now_elapsed
+                + max(0.0, end_timestamp - now_wall) * 1000
+            )
+
+            alarm_manager.setExactAndAllowWhileIdle(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                trigger_at_elapsed,
+                pending_intent,
+            )
+
+        except Exception as error:
+            print("[ALARM SCHEDULE ERROR]", error)
+
+    def cancel_focus_alarm(self) -> None:
+        if platform != "android":
+            return
+
+        try:
+            from jnius import autoclass, cast
+
+            PythonActivity = autoclass(
+                "org.kivy.android.PythonActivity"
+            )
+            Context = autoclass(
+                "android.content.Context"
+            )
+            Intent = autoclass(
+                "android.content.Intent"
+            )
+            PendingIntent = autoclass(
+                "android.app.PendingIntent"
+            )
+
+            activity = PythonActivity.mActivity
+
+            intent = Intent(
+                activity.getApplicationContext(),
+                PythonActivity,
+            )
+            intent.setAction(
+                "com.nagomi.FOCUS_ALARM"
+            )
+
+            flag_update_current = getattr(
+                PendingIntent,
+                "FLAG_UPDATE_CURRENT",
+                0,
+            )
+            flag_immutable = getattr(
+                PendingIntent,
+                "FLAG_IMMUTABLE",
+                0,
+            )
+
+            pending_intent = PendingIntent.getActivity(
+                activity.getApplicationContext(),
+                4200,
+                intent,
+                flag_update_current | flag_immutable,
+            )
+
+            alarm_manager = cast(
+                "android.app.AlarmManager",
+                activity.getSystemService(
+                    Context.ALARM_SERVICE
+                ),
+            )
+
+            alarm_manager.cancel(pending_intent)
+
+        except Exception as error:
+            print("[ALARM CANCEL ERROR]", error)
+
 
     @staticmethod
     def hex_to_rgba(hex_color: str) -> list[float]:
