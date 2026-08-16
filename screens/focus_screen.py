@@ -185,6 +185,25 @@ class FocusScreen(MDScreen):
         if self.is_running:
             return
 
+        app.pause_other_timer(
+            "focus"
+        )
+
+        # Exact-alarm izni yalnızca uygulama arka plandayken alarmın
+        # zamanında çalması için gerekli - önyüzdeki geri sayımı
+        # etkilemez. Bu yüzden izin isteme çağrısı burada sayaç
+        # başlatmayı ENGELLEMEZ (fire-and-forget); izin verilmezse
+        # yalnızca arka plan alarmı atlanır, sayaç normal çalışmaya
+        # devam eder.
+        request_permission = getattr(
+            app,
+            "request_exact_alarm_permission",
+            None,
+        )
+
+        if callable(request_permission):
+            request_permission()
+
         if self.remaining_seconds <= 0:
             self._prepare_current_mode_duration()
 
@@ -218,7 +237,6 @@ class FocusScreen(MDScreen):
         self.status_text = self._get_mode_status_text()
 
         self.save_timer_state()
-        self._schedule_android_alarm()
         self._start_timer_event()
 
         self._update_display()
@@ -356,6 +374,7 @@ class FocusScreen(MDScreen):
     def complete_current_mode(
         self,
         completed_automatically: bool = False,
+        allow_auto_start: bool = True,
     ) -> None:
         """
         Mevcut odak veya mola geri sayımı sıfıra ulaştığında çalışır.
@@ -380,11 +399,18 @@ class FocusScreen(MDScreen):
             self.app.play_alarm()
 
         if self.current_mode == "focus":
-            self._complete_focus_mode()
+            self._complete_focus_mode(
+                allow_auto_start=allow_auto_start
+            )
         else:
-            self._complete_break_mode()
+            self._complete_break_mode(
+                allow_auto_start=allow_auto_start
+            )
 
-    def _complete_focus_mode(self) -> None:
+    def _complete_focus_mode(
+        self,
+        allow_auto_start: bool = True,
+    ) -> None:
         app = MDApp.get_running_app()
         task = self.get_active_task()
 
@@ -418,10 +444,13 @@ class FocusScreen(MDScreen):
             False,
         )
 
-        if auto_start_break:
+        if auto_start_break and allow_auto_start:
             self.start_timer(manual_start=False)
 
-    def _complete_break_mode(self) -> None:
+    def _complete_break_mode(
+        self,
+        allow_auto_start: bool = True,
+    ) -> None:
         app = MDApp.get_running_app()
 
         moved_to_next_task = self.move_to_next_queue_task()
@@ -453,7 +482,7 @@ class FocusScreen(MDScreen):
                 False,
             )
 
-            if auto_start_focus:
+            if auto_start_focus and allow_auto_start:
                 self.start_timer(manual_start=False)
 
             return
@@ -538,16 +567,41 @@ class FocusScreen(MDScreen):
 
         app.save_app_data()
 
-    def move_to_next_queue_task(self) -> bool:
-        """
-        Kuyrukta tamamlanmamış sıradaki görevi aktif hale getirir.
-        """
+    def _get_ordered_focus_task_ids(self) -> list[str]:
         app = MDApp.get_running_app()
 
+        tasks = app.app_data.get("tasks", [])
         queue_task_ids = list(
             app.app_data.get("queue_task_ids", [])
         )
 
+        ordered_ids: list[str] = []
+
+        # Önce varsa mevcut queue sırası korunsun.
+        for task_id in queue_task_ids:
+            if task_id and task_id not in ordered_ids:
+                ordered_ids.append(task_id)
+
+        # Sonra Study List'teki diğer task'ları ekle.
+        for task in tasks:
+            task_id = task.get("id")
+
+            if not task_id:
+                continue
+
+            if task_id not in ordered_ids:
+                ordered_ids.append(task_id)
+
+        return ordered_ids
+
+    def move_to_next_queue_task(self) -> bool:
+        """
+        Mevcut task tamamlandıktan sonra Study List'teki
+        sıradaki tamamlanmamış görevi aktif hale getirir.
+        """
+        app = MDApp.get_running_app()
+
+        task_ids = self._get_ordered_focus_task_ids()
         tasks = app.app_data.get("tasks", [])
 
         tasks_by_id = {
@@ -556,18 +610,37 @@ class FocusScreen(MDScreen):
             if task.get("id")
         }
 
-        for task_id in queue_task_ids:
+        current_task_id = app.app_data.get(
+            "active_task_id"
+        )
+
+        current_found = current_task_id is None
+
+        for task_id in task_ids:
+            # Önce mevcut task'ın bulunduğu yere kadar ilerle.
+            if not current_found:
+                if task_id == current_task_id:
+                    current_found = True
+                continue
+
+            # Mevcut task'ın kendisini tekrar seçme.
+            if task_id == current_task_id:
+                continue
+
             task = tasks_by_id.get(task_id)
 
             if not task:
                 continue
 
-            if task.get("status") != "completed":
-                app.app_data["active_task_id"] = task_id
-                app.app_data["queue_mode_active"] = True
-                app.app_data["last_queue_state"] = None
-                app.save_app_data()
-                return True
+            if task.get("status") == "completed":
+                continue
+
+            app.app_data["active_task_id"] = task_id
+            app.app_data["queue_mode_active"] = True
+            app.app_data["last_queue_state"] = None
+
+            app.save_app_data()
+            return True
 
         return False
 
@@ -655,7 +728,109 @@ class FocusScreen(MDScreen):
         app.app_data["focus_timer_state"] = state
         app.save_app_data()
 
-    def restore_timer_state(self) -> bool:
+    def _reconcile_expired_timer(
+        self,
+        play_alarm: bool = False,
+    ) -> None:
+        app = MDApp.get_running_app()
+        settings = app.app_data.setdefault("settings", {})
+
+        now = time.time()
+        next_end_timestamp = float(self.timer_end_timestamp)
+        first_completion = True
+
+        while (
+            self.is_running
+            and next_end_timestamp > 0
+            and next_end_timestamp <= now
+        ):
+            finished_mode = self.current_mode
+
+            self.remaining_seconds = 0
+            self.timer_end_timestamp = next_end_timestamp
+
+            self.complete_current_mode(
+                completed_automatically=(
+                    play_alarm and first_completion
+                ),
+                allow_auto_start=False,
+            )
+
+            first_completion = False
+
+            if finished_mode == "focus":
+                should_auto_start = bool(
+                    settings.get(
+                        "auto_start_break",
+                        False,
+                    )
+                )
+            else:
+                should_auto_start = bool(
+                    settings.get(
+                        "auto_start_focus",
+                        False,
+                    )
+                )
+
+            if not should_auto_start:
+                break
+
+            # Break tamamlandıktan sonra kuyruk da bittiyse
+            # başlayacak yeni bir focus yoktur.
+            if (
+                self.current_mode == "focus"
+                and not self.get_active_task()
+            ):
+                break
+
+            duration = int(self.remaining_seconds)
+
+            if duration <= 0:
+                break
+
+            # Yeni mod, kullanıcının uygulamaya döndüğü anda değil,
+            # önceki modun gerçek bitiş anında başlamış kabul edilir.
+            mode_started_timestamp = next_end_timestamp
+            next_end_timestamp = (
+                mode_started_timestamp + duration
+            )
+
+            self.timer_end_timestamp = next_end_timestamp
+            self.is_running = True
+            self.is_paused = False
+            self.is_waiting_for_next = False
+            self.pause_started_timestamp = 0
+
+            if self.current_mode == "focus":
+                self.session_started_at = datetime.fromtimestamp(
+                    mode_started_timestamp
+                ).isoformat(timespec="seconds")
+
+            self.remaining_seconds = max(
+                0,
+                int(next_end_timestamp - now),
+            )
+
+            self.primary_action_icon = "pause"
+            self.status_text = self._get_mode_status_text()
+
+        if self.is_running:
+            self.remaining_seconds = max(
+                0,
+                int(self.timer_end_timestamp - now),
+            )
+
+            if self.remaining_seconds > 0:
+                self._start_timer_event()
+
+        self.save_timer_state()
+        self._update_display()
+
+    def restore_timer_state(
+        self,
+        play_alarm: bool = True,
+    ) -> bool:
         app = MDApp.get_running_app()
 
         state = app.app_data.get("focus_timer_state")
@@ -727,11 +902,8 @@ class FocusScreen(MDScreen):
                 self._sync_remaining_seconds()
 
                 if self.remaining_seconds <= 0:
-                    Clock.schedule_once(
-                        lambda _dt: self.complete_current_mode(
-                            completed_automatically=True
-                        ),
-                        0,
+                    self._reconcile_expired_timer(
+                        play_alarm=play_alarm
                     )
                 else:
                     self.primary_action_icon = "pause"
@@ -763,28 +935,116 @@ class FocusScreen(MDScreen):
     # ---------------------------------------------------------
 
     def handle_app_pause(self) -> None:
-        """
-        Uygulama arka plana geçtiğinde çağrılmalı.
-
-        UI güncelleme eventi durdurulur. Asıl geri sayımın bitiş zamanı
-        JSON içinde saklandığı için sayaç doğruluğu bozulmaz.
-        """
         if self.is_running:
             self._sync_remaining_seconds()
 
         self.save_timer_state()
         self._cancel_timer_event()
 
+        if self.is_running:
+            self._schedule_android_alarm()
+
     def handle_app_resume(self) -> None:
-        """
-        Uygulama yeniden görünür olduğunda çağrılmalı.
-        """
-        self.restore_timer_state()
+        self.app.stop_android_alarm_service()
+        self._cancel_android_alarm()
+        self.restore_timer_state(play_alarm=False)
         self._update_display()
 
     # ---------------------------------------------------------
     # ANDROID ALARM BAĞLANTISI
     # ---------------------------------------------------------
+
+    def _build_background_focus_sequence(self) -> list[dict[str, int]]:
+        app = MDApp.get_running_app()
+
+        tasks = app.app_data.get("tasks", [])
+        queue_task_ids = (
+            self._get_ordered_focus_task_ids()
+        )
+        active_task_id = app.app_data.get(
+            "active_task_id"
+        )
+
+        tasks_by_id = {
+            task.get("id"): task
+            for task in tasks
+            if task.get("id")
+        }
+
+        sequence: list[dict[str, int]] = []
+
+        active_task = tasks_by_id.get(
+            active_task_id
+        )
+
+        # Mevcut task her zaman ilk eleman.
+        # Break modundaysak task completed işaretlenmiş
+        # olabilir ama mevcut break hâlâ ona aittir.
+        if active_task:
+            sequence.append(
+                {
+                    "focus_duration": (
+                        self._safe_positive_int(
+                            active_task.get(
+                                "focus_duration",
+                                25,
+                            ),
+                            default=25,
+                        )
+                        * 60
+                    ),
+                    "break_duration": (
+                        self._safe_positive_int(
+                            active_task.get(
+                                "break_minutes",
+                                5,
+                            ),
+                            default=5,
+                        )
+                        * 60
+                    ),
+                }
+            )
+
+        # Sonraki tamamlanmamış queue task'ları.
+        for task_id in queue_task_ids:
+            if task_id == active_task_id:
+                continue
+
+            task = tasks_by_id.get(task_id)
+
+            if not task:
+                continue
+
+            if task.get("status") == "completed":
+                continue
+
+            sequence.append(
+                {
+                    "focus_duration": (
+                        self._safe_positive_int(
+                            task.get(
+                                "focus_duration",
+                                25,
+                            ),
+                            default=25,
+                        )
+                        * 60
+                    ),
+                    "break_duration": (
+                        self._safe_positive_int(
+                            task.get(
+                                "break_minutes",
+                                5,
+                            ),
+                            default=5,
+                        )
+                        * 60
+                    ),
+                }
+            )
+
+        return sequence
 
     def _schedule_android_alarm(self) -> None:
         """
@@ -801,8 +1061,35 @@ class FocusScreen(MDScreen):
 
         if callable(schedule_method):
             schedule_method(
-                end_timestamp=float(self.timer_end_timestamp),
+                end_timestamp=float(
+                    self.timer_end_timestamp
+                ),
                 mode=self.current_mode,
+                service_data={
+                    "timer_type": "focus_timer",
+                    "focus_sequence": (
+                        self._build_background_focus_sequence()
+                    ),
+                    "focus_index": 0,
+                    "auto_start_break": bool(
+                        app.app_data.get(
+                            "settings",
+                            {},
+                        ).get(
+                            "auto_start_break",
+                            False,
+                        )
+                    ),
+                    "auto_start_focus": bool(
+                        app.app_data.get(
+                            "settings",
+                            {},
+                        ).get(
+                            "auto_start_focus",
+                            False,
+                        )
+                    ),
+                },
             )
 
     def _cancel_android_alarm(self) -> None:
@@ -975,6 +1262,8 @@ class FocusScreen(MDScreen):
             return
 
         self.setting_show_away_time = enabled
+
+    
 
     @property
     def app(self):

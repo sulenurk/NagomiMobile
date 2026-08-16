@@ -198,5 +198,3 @@ class PomodoroTimer:
         self.is_paused = bool(state.get("is_paused", False))
         self.cycle_completed = bool(state.get("cycle_completed", False))
 
-        if self.is_running:
-            self.sync()

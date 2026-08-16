@@ -118,8 +118,6 @@ class PomodoroScreen(MDScreen):
 
     def on_leave(self, *args):
         self.save_timer_state()
-        self._cancel_clock_event()
-
         return super().on_leave(*args)
 
     def _cancel_clock_event(self) -> None:
@@ -155,16 +153,12 @@ class PomodoroScreen(MDScreen):
         if self.timer is None:
             self.load_timer()
 
-        self.load_timer_state()
+        self.app.stop_android_alarm_service()
+
+        self.load_timer_state(play_alarm=False)
 
         if self.timer is None:
             return
-
-        session_finished = self.timer.sync()
-
-        if session_finished:
-            result = self.timer.finish_current_session()
-            self._handle_finished_session(result)
 
         current_screen = None
 
@@ -238,6 +232,11 @@ class PomodoroScreen(MDScreen):
             self._cancel_android_alarm()
         else:
             self.app.stop_alarm()
+
+            self.app.pause_other_timer(
+                "pomodoro"
+            )
+
             self.timer.start()
             self.status_text = ""
 
@@ -311,12 +310,12 @@ class PomodoroScreen(MDScreen):
                 "Odak süresi",
             )
 
-            short_break_minutes = self._read_non_negative_int(
+            short_break_minutes = self._read_positive_int(
                 self.ids.settings_short_break_minutes.text,
                 "Kısa mola",
             )
 
-            long_break_minutes = self._read_non_negative_int(
+            long_break_minutes = self._read_positive_int(
                 self.ids.settings_long_break_minutes.text,
                 "Uzun mola",
             )
@@ -379,18 +378,32 @@ class PomodoroScreen(MDScreen):
 
         self.refresh_ui()
 
-    def _handle_finished_session(self, result: dict[str, object]):
-        self.app.play_alarm()
+    def _handle_finished_session(
+        self,
+        result: dict[str, object],
+        play_alarm: bool = True,
+        allow_auto_start: bool = True,
+    ):
+        if play_alarm:
+            self.app.play_alarm()
 
         if bool(result.get("focus_completed")):
             self.log_regular_focus_session()
 
         if bool(result.get("cycle_completed")):
-            self.status_text = self.app.t("pomodoro_cycle_completed")
+            self.status_text = self.app.t(
+                "pomodoro_cycle_completed"
+            )
         else:
             self.status_text = self._ready_message()
 
-        if bool(result.get("should_auto_start")):
+        if (
+            allow_auto_start
+            and bool(result.get("should_auto_start"))
+        ):
+            self.app.pause_other_timer(
+                "pomodoro"
+            )
             self.timer.start()
 
         self.app.save_app_data()
@@ -443,7 +456,92 @@ class PomodoroScreen(MDScreen):
         self.app.app_data["regular_pomodoro_state"] = self.timer.export_state()
         self.app.save_app_data()
 
-    def load_timer_state(self):
+    def _reconcile_expired_timer(
+        self,
+        play_alarm: bool = False,
+    ) -> None:
+        if self.timer is None:
+            return
+
+        if (
+            not self.timer.is_running
+            or self.timer.end_timestamp is None
+        ):
+            return
+
+        now = time.time()
+        next_end_timestamp = float(
+            self.timer.end_timestamp
+        )
+        first_completion = True
+
+        while (
+            self.timer.is_running
+            and next_end_timestamp <= now
+        ):
+            # Biten mode'u tam sıfırda tamamlanmış hale getir.
+            self.timer.remaining_seconds = 0
+            self.timer.end_timestamp = None
+            self.timer.is_running = False
+            self.timer.is_paused = False
+
+            result = self.timer.finish_current_session()
+
+            self._handle_finished_session(
+                result,
+                play_alarm=(
+                    play_alarm and first_completion
+                ),
+                allow_auto_start=False,
+            )
+
+            first_completion = False
+
+            # Pomodoro döngüsünün tamamı bittiyse
+            # ilerleyecek başka mode yok.
+            if bool(result.get("cycle_completed")):
+                break
+
+            # Yeni mode otomatik başlamayacaksa
+            # hazır durumda bekle.
+            if not bool(result.get("should_auto_start")):
+                break
+
+            duration = int(
+                self.timer.remaining_seconds
+            )
+
+            if duration <= 0:
+                break
+
+            # Yeni mode, uygulamaya dönüş anında değil,
+            # önceki mode'un gerçek bitiş anında başlar.
+            mode_started_timestamp = next_end_timestamp
+
+            next_end_timestamp = (
+                mode_started_timestamp + duration
+            )
+
+            self.timer.end_timestamp = (
+                next_end_timestamp
+            )
+            self.timer.is_running = True
+            self.timer.is_paused = False
+
+            self.timer.remaining_seconds = max(
+                0,
+                int(round(
+                    next_end_timestamp - now
+                )),
+            )
+
+        self.save_timer_state()
+        self.refresh_ui()
+
+    def load_timer_state(
+        self,
+        play_alarm: bool = True,
+    ):
         if self.timer is None:
             self.load_timer()
 
@@ -454,11 +552,16 @@ class PomodoroScreen(MDScreen):
         if isinstance(state, dict):
             self.timer.restore_state(state)
 
-        session_finished = self.timer.sync()
-
-        if session_finished:
-            result = self.timer.finish_current_session()
-            self._handle_finished_session(result)
+        if (
+            self.timer.is_running
+            and self.timer.end_timestamp is not None
+        ):
+            if self.timer.end_timestamp <= time.time():
+                self._reconcile_expired_timer(
+                    play_alarm=play_alarm
+                )
+            else:
+                self.timer.sync()
 
         self.refresh_ui()
 
@@ -492,14 +595,41 @@ class PomodoroScreen(MDScreen):
         )
 
         if callable(schedule_method):
-            end_timestamp = (
-                time.time()
-                + int(self.timer.remaining_seconds)
-            )
+            end_timestamp = self.timer.end_timestamp
+
+            if end_timestamp is None:
+                return
 
             schedule_method(
                 end_timestamp=end_timestamp,
                 mode=self.timer.mode,
+                service_data={
+                    "timer_type": "pomodoro",
+                    "focus_duration": int(
+                        self.timer.settings.focus_duration * 60
+                    ),
+                    "short_break_duration": int(
+                        self.timer.settings.short_break_minutes * 60
+                    ),
+                    "long_break_duration": int(
+                        self.timer.settings.long_break_minutes * 60
+                    ),
+                    "long_break_after": int(
+                        self.timer.settings.long_break_after
+                    ),
+                    "focus_count": int(
+                        self.timer.settings.focus_count
+                    ),
+                    "completed_focus_count": int(
+                        self.timer.completed_focus_count
+                    ),
+                    "auto_start_break": bool(
+                        self.timer.settings.auto_start_break
+                    ),
+                    "auto_start_focus": bool(
+                        self.timer.settings.auto_start_focus
+                    ),
+                },
             )
 
     def _cancel_android_alarm(self) -> None:

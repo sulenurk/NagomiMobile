@@ -565,6 +565,16 @@ class NagomiApp(ResponsiveMixin, MDApp):
     def on_start(self) -> None:
         self.show_page("pomodoro")
 
+        Clock.schedule_once(
+            lambda _dt: self.request_notification_permission(),
+            0.8,
+        )
+
+        Clock.schedule_once(
+            lambda _dt: self.request_exact_alarm_permission(),
+            1.5,
+        )
+
     def on_pause(self) -> bool:
         if not self.root:
             return True
@@ -623,6 +633,59 @@ class NagomiApp(ResponsiveMixin, MDApp):
 
             if callable(handler):
                 handler()
+
+    def pause_other_timer(
+        self,
+        active_timer: str,
+    ) -> None:
+        if not self.root:
+            return
+
+        try:
+            screen_manager = self.root.ids.screen_manager
+        except (AttributeError, KeyError):
+            return
+
+        # Pomodoro başlatılıyorsa çalışan Focus Timer'ı duraklat.
+        if active_timer == "pomodoro":
+            if not screen_manager.has_screen("focus"):
+                return
+
+            try:
+                focus_screen = screen_manager.get_screen(
+                    "focus"
+                )
+            except Exception:
+                return
+
+            if focus_screen.is_running:
+                focus_screen.pause_timer()
+
+        # Focus Timer başlatılıyorsa çalışan Pomodoro'yu duraklat.
+        elif active_timer == "focus":
+            if not screen_manager.has_screen("pomodoro"):
+                return
+
+            try:
+                pomodoro_screen = screen_manager.get_screen(
+                    "pomodoro"
+                )
+            except Exception:
+                return
+
+            timer = getattr(
+                pomodoro_screen,
+                "timer",
+                None,
+            )
+
+            if timer is None or not timer.is_running:
+                return
+
+            timer.pause()
+            pomodoro_screen._cancel_android_alarm()
+            pomodoro_screen.save_timer_state()
+            pomodoro_screen.refresh_ui()
 
     def show_page(self, page_name: str) -> None:
         valid_pages = {
@@ -952,7 +1015,36 @@ class NagomiApp(ResponsiveMixin, MDApp):
     # for setExactAndAllowWhileIdle to fire on time; without them the
     # OS may silently delay the alarm.)
 
-    def schedule_focus_alarm(
+    def request_notification_permission(self) -> None:
+        if platform != "android":
+            return
+
+        try:
+            from jnius import autoclass
+            from android.permissions import (
+                request_permissions,
+                Permission,
+            )
+
+            BuildVersion = autoclass(
+                "android.os.Build$VERSION"
+            )
+
+            # POST_NOTIFICATIONS yalnızca Android 13+ için runtime izni.
+            if BuildVersion.SDK_INT < 33:
+                return
+
+            request_permissions(
+                [Permission.POST_NOTIFICATIONS]
+            )
+
+        except Exception as error:
+            print(
+                "[NOTIFICATION PERMISSION ERROR]",
+                error,
+            )
+
+    def show_timer_notification(
         self,
         end_timestamp: float,
         mode: str = "focus",
@@ -972,8 +1064,341 @@ class NagomiApp(ResponsiveMixin, MDApp):
             Context = autoclass(
                 "android.content.Context"
             )
+            BuildVersion = autoclass(
+                "android.os.Build$VERSION"
+            )
+            Notification = autoclass(
+                "android.app.Notification"
+            )
+            NotificationManager = autoclass(
+                "android.app.NotificationManager"
+            )
+            NotificationChannel = autoclass(
+                "android.app.NotificationChannel"
+            )
+            NotificationBuilder = autoclass(
+                "android.app.Notification$Builder"
+            )
+            PendingIntent = autoclass(
+                "android.app.PendingIntent"
+            )
             Intent = autoclass(
                 "android.content.Intent"
+            )
+
+            activity = PythonActivity.mActivity
+            context = activity.getApplicationContext()
+
+            notification_manager = cast(
+                "android.app.NotificationManager",
+                context.getSystemService(
+                    Context.NOTIFICATION_SERVICE
+                ),
+            )
+
+            channel_id = "nagomi_timer"
+
+            # Android 8+
+            if BuildVersion.SDK_INT >= 26:
+                channel = NotificationChannel(
+                    channel_id,
+                    "Timer",
+                    NotificationManager.IMPORTANCE_LOW,
+                )
+
+                channel.setDescription(
+                    "Nagomi active timer"
+                )
+
+                notification_manager.createNotificationChannel(
+                    channel
+                )
+
+            # Notification'a dokununca Nagomi açılsın.
+            open_intent = Intent(
+                context,
+                PythonActivity,
+            )
+
+            open_intent.addFlags(
+                Intent.FLAG_ACTIVITY_SINGLE_TOP
+                | Intent.FLAG_ACTIVITY_CLEAR_TOP
+            )
+
+            flag_update_current = getattr(
+                PendingIntent,
+                "FLAG_UPDATE_CURRENT",
+                0,
+            )
+
+            flag_immutable = getattr(
+                PendingIntent,
+                "FLAG_IMMUTABLE",
+                0,
+            )
+
+            content_intent = PendingIntent.getActivity(
+                context,
+                4300,
+                open_intent,
+                flag_update_current | flag_immutable,
+            )
+
+            if BuildVersion.SDK_INT >= 26:
+                builder = NotificationBuilder(
+                    context,
+                    channel_id,
+                )
+            else:
+                builder = NotificationBuilder(
+                    context
+                )
+
+            if mode in (
+                "short_break",
+                "long_break",
+                "break",
+            ):
+                content_text = "Break"
+            else:
+                content_text = "Focus"
+
+            builder.setContentTitle(
+                "Nagomi"
+            )
+
+            builder.setContentText(
+                content_text
+            )
+
+            # p4a'nın oluşturduğu uygulama ikonunu kullan.
+            icon_id = context.getApplicationInfo().icon
+
+            builder.setSmallIcon(
+                icon_id
+            )
+
+            builder.setContentIntent(
+                content_intent
+            )
+
+            builder.setOngoing(
+                True
+            )
+
+            builder.setOnlyAlertOnce(
+                True
+            )
+
+            builder.setVisibility(
+                Notification.VISIBILITY_PUBLIC
+            )
+
+            # Notification.when milisaniye cinsinden wall-clock timestamp.
+            builder.setWhen(
+                int(end_timestamp * 1000)
+            )
+
+            builder.setUsesChronometer(
+                True
+            )
+
+            # Countdown API 24+
+            if BuildVersion.SDK_INT >= 24:
+                builder.setChronometerCountDown(
+                    True
+                )
+
+            notification_manager.notify(
+                5001,
+                builder.build(),
+            )
+
+            print(
+                "[TIMER NOTIFICATION SHOWN]",
+                mode,
+                end_timestamp,
+            )
+
+        except Exception as error:
+            print(
+                "[TIMER NOTIFICATION ERROR]",
+                error,
+            )
+
+
+    def cancel_timer_notification(self) -> None:
+        if platform != "android":
+            return
+
+        try:
+            from jnius import autoclass, cast
+
+            PythonActivity = autoclass(
+                "org.kivy.android.PythonActivity"
+            )
+            Context = autoclass(
+                "android.content.Context"
+            )
+
+            activity = PythonActivity.mActivity
+            context = activity.getApplicationContext()
+
+            notification_manager = cast(
+                "android.app.NotificationManager",
+                context.getSystemService(
+                    Context.NOTIFICATION_SERVICE
+                ),
+            )
+
+            notification_manager.cancel(
+                5001
+            )
+
+            print(
+                "[TIMER NOTIFICATION CANCELLED]"
+            )
+
+        except Exception as error:
+            print(
+                "[TIMER NOTIFICATION CANCEL ERROR]",
+                error,
+            )
+
+    def can_schedule_exact_alarms(self) -> bool:
+        if platform != "android":
+            return True
+
+        try:
+            from jnius import autoclass, cast
+
+            BuildVersion = autoclass(
+                "android.os.Build$VERSION"
+            )
+
+            # canScheduleExactAlarms API 31'de geldi.
+            if BuildVersion.SDK_INT < 31:
+                return True
+
+            PythonActivity = autoclass(
+                "org.kivy.android.PythonActivity"
+            )
+            Context = autoclass(
+                "android.content.Context"
+            )
+
+            activity = PythonActivity.mActivity
+
+            alarm_manager = cast(
+                "android.app.AlarmManager",
+                activity.getSystemService(
+                    Context.ALARM_SERVICE
+                ),
+            )
+
+            return bool(
+                alarm_manager.canScheduleExactAlarms()
+            )
+
+        except Exception as error:
+            print(
+                "[EXACT ALARM PERMISSION CHECK ERROR]",
+                error,
+            )
+            return False
+
+
+    def request_exact_alarm_permission(self) -> bool:
+        """
+        True dönerse exact alarm zaten kullanılabilir.
+        False dönerse kullanıcı izin ekranına gönderilmiştir
+        veya izin alınamamıştır.
+        """
+
+        if platform != "android":
+            return True
+
+        if self.can_schedule_exact_alarms():
+            return True
+
+        try:
+            from jnius import autoclass
+
+            PythonActivity = autoclass(
+                "org.kivy.android.PythonActivity"
+            )
+            BuildVersion = autoclass(
+                "android.os.Build$VERSION"
+            )
+
+            if BuildVersion.SDK_INT < 31:
+                return True
+
+            Intent = autoclass(
+                "android.content.Intent"
+            )
+            Settings = autoclass(
+                "android.provider.Settings"
+            )
+            Uri = autoclass(
+                "android.net.Uri"
+            )
+
+            activity = PythonActivity.mActivity
+
+            intent = Intent(
+                Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+            )
+
+            intent.setData(
+                Uri.parse(
+                    "package:"
+                    + activity.getPackageName()
+                )
+            )
+
+            activity.startActivity(intent)
+
+            print(
+                "[EXACT ALARM PERMISSION] "
+                "Alarms & reminders ekranı açıldı."
+            )
+
+        except Exception as error:
+            print(
+                "[EXACT ALARM PERMISSION REQUEST ERROR]",
+                error,
+            )
+
+        return False
+
+    def schedule_focus_alarm(
+        self,
+        end_timestamp: float,
+        mode: str = "focus",
+        service_data: dict | None = None,
+    ) -> None:
+        if platform != "android":
+            return
+
+        if not end_timestamp or end_timestamp <= 0:
+            return
+
+        if not self.can_schedule_exact_alarms():
+            print(
+                "[ALARM SCHEDULE SKIPPED] "
+                "Exact alarm permission yok."
+            )
+            return
+
+        try:
+            from jnius import autoclass, cast
+
+            PythonActivity = autoclass(
+                "org.kivy.android.PythonActivity"
+            )
+            Context = autoclass(
+                "android.content.Context"
             )
             PendingIntent = autoclass(
                 "android.app.PendingIntent"
@@ -984,20 +1409,64 @@ class NagomiApp(ResponsiveMixin, MDApp):
             SystemClock = autoclass(
                 "android.os.SystemClock"
             )
+            BuildVersion = autoclass(
+                "android.os.Build$VERSION"
+            )
+
+            # buildozer.spec:
+            # services = nagomialarm:services/alarm_service.py:...
+            #
+            # p4a bunun için bu Java sınıfını üretir.
+            AlarmService = autoclass(
+                "com.sklabs.nagomi.ServiceNagomialarm"
+            )
 
             activity = PythonActivity.mActivity
+            context = activity.getApplicationContext()
 
-            intent = Intent(
-                activity.getApplicationContext(),
-                PythonActivity,
+            settings = self.app_data.setdefault(
+                "settings",
+                {},
             )
-            intent.setAction(
-                "com.nagomi.FOCUS_ALARM"
+
+            payload = {
+                "alarm_sound": str(
+                    settings.get(
+                        "alarm_sound",
+                        "beep",
+                    )
+                ),
+                "sound_enabled": bool(
+                    settings.get(
+                        "sound_enabled",
+                        True,
+                    )
+                ),
+                "vibration_enabled": bool(
+                    settings.get(
+                        "vibration_enabled",
+                        True,
+                    )
+                ),
+                "mode": str(mode),
+                "scheduled_end_timestamp": float(
+                    end_timestamp
+                ),
+            }
+
+            if service_data:
+                payload.update(service_data)
+
+            service_argument = json.dumps(
+                payload
             )
-            intent.addFlags(
-                Intent.FLAG_ACTIVITY_SINGLE_TOP
-                | Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+
+            service_intent = AlarmService.getDefaultIntent(
+                context,
+                "icon",
+                "Nagomi",
+                "Timer completed",
+                service_argument,
             )
 
             flag_update_current = getattr(
@@ -1006,22 +1475,36 @@ class NagomiApp(ResponsiveMixin, MDApp):
                 0,
             )
 
-            # Android 12+ (API 31+) requires FLAG_IMMUTABLE or
-            # FLAG_MUTABLE to be set explicitly.
             flag_immutable = getattr(
                 PendingIntent,
                 "FLAG_IMMUTABLE",
                 0,
             )
 
-            pending_intent = PendingIntent.getActivity(
-                activity.getApplicationContext(),
-                # Fixed request code: a new call replaces the
-                # previous pending alarm rather than stacking more.
-                4200,
-                intent,
-                flag_update_current | flag_immutable,
+            pending_flags = (
+                flag_update_current
+                | flag_immutable
             )
+
+            # getForegroundService API 26'dan itibaren mevcut.
+            if BuildVersion.SDK_INT >= 26:
+                pending_intent = (
+                    PendingIntent.getForegroundService(
+                        context,
+                        4200,
+                        service_intent,
+                        pending_flags,
+                    )
+                )
+            else:
+                pending_intent = (
+                    PendingIntent.getService(
+                        context,
+                        4200,
+                        service_intent,
+                        pending_flags,
+                    )
+                )
 
             alarm_manager = cast(
                 "android.app.AlarmManager",
@@ -1030,15 +1513,16 @@ class NagomiApp(ResponsiveMixin, MDApp):
                 ),
             )
 
-            # Convert the wall-clock end_timestamp (time.time())
-            # into elapsed-realtime, which is what AlarmManager's
-            # *_WAKEUP variants expect.
             now_wall = time.time()
             now_elapsed = SystemClock.elapsedRealtime()
 
             trigger_at_elapsed = int(
                 now_elapsed
-                + max(0.0, end_timestamp - now_wall) * 1000
+                + max(
+                    0.0,
+                    end_timestamp - now_wall,
+                )
+                * 1000
             )
 
             alarm_manager.setExactAndAllowWhileIdle(
@@ -1047,8 +1531,17 @@ class NagomiApp(ResponsiveMixin, MDApp):
                 pending_intent,
             )
 
+            print(
+                "[ALARM SCHEDULED]",
+                mode,
+                end_timestamp,
+            )
+
         except Exception as error:
-            print("[ALARM SCHEDULE ERROR]", error)
+            print(
+                "[ALARM SCHEDULE ERROR]",
+                error,
+            )
 
     def cancel_focus_alarm(self) -> None:
         if platform != "android":
@@ -1063,40 +1556,71 @@ class NagomiApp(ResponsiveMixin, MDApp):
             Context = autoclass(
                 "android.content.Context"
             )
-            Intent = autoclass(
-                "android.content.Intent"
-            )
             PendingIntent = autoclass(
                 "android.app.PendingIntent"
             )
+            AlarmManager = autoclass(
+                "android.app.AlarmManager"
+            )
+            BuildVersion = autoclass(
+                "android.os.Build$VERSION"
+            )
+
+            AlarmService = autoclass(
+                "com.sklabs.nagomi.ServiceNagomialarm"
+            )
 
             activity = PythonActivity.mActivity
+            context = activity.getApplicationContext()
 
-            intent = Intent(
-                activity.getApplicationContext(),
-                PythonActivity,
-            )
-            intent.setAction(
-                "com.nagomi.FOCUS_ALARM"
+            # PendingIntent kimliğinde extras dikkate alınmadığı için
+            # aynı Service component'i yeterli.
+            service_intent = AlarmService.getDefaultIntent(
+                context,
+                "icon",
+                "Nagomi",
+                "Timer completed",
+                "",
             )
 
-            flag_update_current = getattr(
+            flag_no_create = getattr(
                 PendingIntent,
-                "FLAG_UPDATE_CURRENT",
+                "FLAG_NO_CREATE",
                 0,
             )
+
             flag_immutable = getattr(
                 PendingIntent,
                 "FLAG_IMMUTABLE",
                 0,
             )
 
-            pending_intent = PendingIntent.getActivity(
-                activity.getApplicationContext(),
-                4200,
-                intent,
-                flag_update_current | flag_immutable,
+            pending_flags = (
+                flag_no_create
+                | flag_immutable
             )
+
+            if BuildVersion.SDK_INT >= 26:
+                pending_intent = (
+                    PendingIntent.getForegroundService(
+                        context,
+                        4200,
+                        service_intent,
+                        pending_flags,
+                    )
+                )
+            else:
+                pending_intent = (
+                    PendingIntent.getService(
+                        context,
+                        4200,
+                        service_intent,
+                        pending_flags,
+                    )
+                )
+
+            if pending_intent is None:
+                return
 
             alarm_manager = cast(
                 "android.app.AlarmManager",
@@ -1105,11 +1629,19 @@ class NagomiApp(ResponsiveMixin, MDApp):
                 ),
             )
 
-            alarm_manager.cancel(pending_intent)
+            alarm_manager.cancel(
+                pending_intent
+            )
+
+            pending_intent.cancel()
+
+            print("[ALARM CANCELLED]")
 
         except Exception as error:
-            print("[ALARM CANCEL ERROR]", error)
-
+            print(
+                "[ALARM CANCEL ERROR]",
+                error,
+            )
 
     @staticmethod
     def hex_to_rgba(hex_color: str) -> list[float]:
@@ -1185,6 +1717,42 @@ class NagomiApp(ResponsiveMixin, MDApp):
                 )
 
             self.preview_sound = None
+
+    def stop_android_alarm_service(self) -> None:
+        if platform != "android":
+            return
+
+        try:
+            from jnius import autoclass
+
+            PythonActivity = autoclass(
+                "org.kivy.android.PythonActivity"
+            )
+
+            AlarmService = autoclass(
+                "com.sklabs.nagomi.ServiceNagomialarm"
+            )
+
+            activity = PythonActivity.mActivity
+            context = activity.getApplicationContext()
+
+            service_intent = AlarmService.getDefaultIntent(
+                context,
+                "icon",
+                "Nagomi",
+                "Timer completed",
+                "",
+            )
+
+            context.stopService(service_intent)
+
+            print("[ALARM SERVICE STOPPED]")
+
+        except Exception as error:
+            print(
+                "[ALARM SERVICE STOP ERROR]",
+                error,
+            )
 
 
 if __name__ == "__main__":

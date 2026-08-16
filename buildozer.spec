@@ -42,7 +42,7 @@ version = 0.1.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,kivymd,plyer,pyjnius
+requirements = python3,kivy,kivymd==1.2.0,plyer,pyjnius
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -66,7 +66,7 @@ orientation = all
 # ":foreground:sticky" for sticky foreground services. The default is a background service.
 # Bound services are not supported.
 #services = NAME:ENTRYPOINT_TO_PY,NAME2:ENTRYPOINT2_TO_PY
-
+services = nagomialarm:services/alarm_service.py:foreground:foregroundServiceType=mediaPlayback
 #
 # OSX Specific
 #
@@ -103,7 +103,7 @@ fullscreen = 0
 
 # (list) Permissions
 # (See https://python-for-android.readthedocs.io/en/latest/buildoptions.html for all the supported syntaxes and properties)
-android.permissions = VIBRATE,SCHEDULE_EXACT_ALARM
+android.permissions = VIBRATE,SCHEDULE_EXACT_ALARM,POST_NOTIFICATIONS,FOREGROUND_SERVICE,FOREGROUND_SERVICE_MEDIA_PLAYBACK,WAKE_LOCK
 
 # (list) features (adds uses-feature -tags to manifest)
 #android.features = android.hardware.usb.host

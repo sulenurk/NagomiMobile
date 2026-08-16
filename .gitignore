@@ -34,3 +34,7 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp.buildozer-venv/
+
+build-311-final.txt
+build-error-311.txt
+build-error.txt
