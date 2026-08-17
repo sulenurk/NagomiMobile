@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from kivy.clock import Clock
+
 from datetime import datetime
 import uuid
 
@@ -36,6 +38,7 @@ class StudyPlanScreen(MDScreen):
         return App.get_running_app()
 
     def on_kv_post(self, base_widget):
+        self._form_status_clear_event = None
         self.ensure_defaults()
         self.refresh_subject_spinner()
         self.render_tasks()
@@ -102,6 +105,10 @@ class StudyPlanScreen(MDScreen):
             self.selected_subject_name = names[0]
         self.ids.subject_spinner.text = self.selected_subject_name
 
+    def _clear_form_status(self, dt):
+        self.form_status = ""
+        self._form_status_clear_event = None
+
     def add_or_update_task(self):
         title = self.ids.task_title.text.strip() or self.app.t("new_task")
 
@@ -121,9 +128,11 @@ class StudyPlanScreen(MDScreen):
 
         if self.editing_task_id:
             task = self.get_task(self.editing_task_id)
+
             if not task:
                 self.cancel_edit()
                 return
+
             task.update({
                 "subject_id": subject.get("id", "subject_other"),
                 "subject_name": (
@@ -135,8 +144,13 @@ class StudyPlanScreen(MDScreen):
                 "focus_duration": focus_duration,
                 "break_minutes": break_minutes,
                 "priority": priority,
+                "status": "pending",
+                "hidden_from_plan": False,
+                "hidden_from_completed": False,
             })
+
             self.form_status = self.app.t("task_updated")
+
         else:
             self.app.app_data["tasks"].append({
                 "id": f"task_{uuid.uuid4().hex[:8]}",
@@ -154,7 +168,16 @@ class StudyPlanScreen(MDScreen):
                 "hidden_from_plan": False,
                 "hidden_from_completed": False,
             })
+
             self.form_status = self.app.t("task_added")
+
+            if self._form_status_clear_event:
+                self._form_status_clear_event.cancel()
+
+            self._form_status_clear_event = Clock.schedule_once(
+                self._clear_form_status,
+                5
+            )
 
         self.app.save_app_data()
         self.clear_form()
@@ -330,6 +353,9 @@ class StudyPlanScreen(MDScreen):
         self.app.save_app_data()
         self.form_status = self.app.t("study_plan_started")
         self.render_tasks()
+
+        if hasattr(self.app, "show_page"):
+            self.app.show_page("focus")
 
     def set_filter(self, value):
         self.active_filter = value
