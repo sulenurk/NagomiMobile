@@ -373,8 +373,14 @@ class PomodoroScreen(MDScreen):
         session_finished = self.timer.sync()
 
         if session_finished:
+            finished_mode = self.timer.mode
+
             result = self.timer.finish_current_session()
-            self._handle_finished_session(result)
+
+            self._handle_finished_session(
+                result,
+                finished_mode=finished_mode,
+            )
 
         self.refresh_ui()
 
@@ -383,9 +389,32 @@ class PomodoroScreen(MDScreen):
         result: dict[str, object],
         play_alarm: bool = True,
         allow_auto_start: bool = True,
+        finished_mode: str = "",
     ):
         if play_alarm:
-            self.app.play_alarm()
+            if finished_mode == "focus":
+                self.app.play_alarm(
+                    source="pomodoro",
+                    mode="focus",
+                    title=self.app.t("pomodoro_completed"),
+                    subtitle=self.app.t("focus_session_finished"),
+                )
+
+            elif finished_mode == "short_break":
+                self.app.play_alarm(
+                    source="pomodoro",
+                    mode="short_break",
+                    title=self.app.t("short_break_finished"),
+                    subtitle=self.app.t("ready_for_focus"),
+                )
+
+            elif finished_mode == "long_break":
+                self.app.play_alarm(
+                    source="pomodoro",
+                    mode="long_break",
+                    title=self.app.t("long_break_finished"),
+                    subtitle=self.app.t("ready_for_focus"),
+                )
 
         if bool(result.get("focus_completed")):
             self.log_regular_focus_session()
@@ -485,6 +514,8 @@ class PomodoroScreen(MDScreen):
             self.timer.is_running = False
             self.timer.is_paused = False
 
+            finished_mode = self.timer.mode
+
             result = self.timer.finish_current_session()
 
             self._handle_finished_session(
@@ -493,6 +524,7 @@ class PomodoroScreen(MDScreen):
                     play_alarm and first_completion
                 ),
                 allow_auto_start=False,
+                finished_mode=finished_mode,
             )
 
             first_completion = False

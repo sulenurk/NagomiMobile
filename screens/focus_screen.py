@@ -396,7 +396,21 @@ class FocusScreen(MDScreen):
 
         # Alarm yalnızca sayaç kendiliğinden sona erdiyse çalsın.
         if completed_automatically:
-            self.app.play_alarm()
+            if self.current_mode == "focus":
+                self.app.play_alarm(
+                    source="focus",
+                    mode="focus",
+                    title=self.app.t("focus_timer_completed"),
+                    subtitle=self._get_active_task_name(),
+                )
+
+            else:
+                self.app.play_alarm(
+                    source="focus",
+                    mode="break",
+                    title=self.app.t("focus_break_finished"),
+                    subtitle=self.app.t("ready_for_focus"),
+                )
 
         if self.current_mode == "focus":
             self._complete_focus_mode(

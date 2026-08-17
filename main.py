@@ -90,6 +90,14 @@ class NagomiApp(ResponsiveMixin, MDApp):
     alarm_active = BooleanProperty(False)
     alarm_sound = ObjectProperty(None, allownone=True)
 
+    alarm_banner_visible = BooleanProperty(False)
+    alarm_card_visible = BooleanProperty(False)
+
+    alarm_source = StringProperty("")
+    alarm_mode = StringProperty("")
+    alarm_title = StringProperty("")
+    alarm_subtitle = StringProperty("")
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -249,6 +257,20 @@ class NagomiApp(ResponsiveMixin, MDApp):
             0,
         )
 
+    def refresh_alarm_card_visibility(self) -> None:
+        target_page = ""
+
+        if self.alarm_source == "focus":
+            target_page = "focus"
+        elif self.alarm_source == "pomodoro":
+            target_page = "pomodoro"
+
+        self.alarm_card_visible = bool(
+            self.alarm_banner_visible
+            and target_page
+            and self.active_page != target_page
+        )
+        
     def refresh_open_settings_panels(self, _dt=0) -> None:
         if not self.root:
             return
@@ -687,6 +709,14 @@ class NagomiApp(ResponsiveMixin, MDApp):
             pomodoro_screen.save_timer_state()
             pomodoro_screen.refresh_ui()
 
+
+    def go_to_alarm_timer(self) -> None:
+        if self.alarm_source == "focus":
+            self.show_page("focus")
+
+        elif self.alarm_source == "pomodoro":
+            self.show_page("pomodoro")
+
     def show_page(self, page_name: str) -> None:
         valid_pages = {
             "pomodoro",
@@ -700,12 +730,23 @@ class NagomiApp(ResponsiveMixin, MDApp):
         if page_name not in valid_pages:
             page_name = "pomodoro"
 
-        self.stop_alarm()
+        alarm_target_page = ""
+
+        if self.alarm_source == "focus":
+            alarm_target_page = "focus"
+        elif self.alarm_source == "pomodoro":
+            alarm_target_page = "pomodoro"
+
+        # Alarmın ait olduğu timer sayfasına dönülürse
+        # eski davranış gibi alarm + banner kapanır.
+        if (
+            self.alarm_banner_visible
+            and page_name == alarm_target_page
+        ):
+            self.stop_alarm()
 
         screen_manager = self.root.ids.screen_manager
 
-        # "pomodoro" var olan tek statik ekran; digerleri ilk
-        # ziyarette burada olusturulup ScreenManager'a eklenir.
         if not screen_manager.has_screen(page_name):
             screen_cls = self._screen_classes.get(page_name)
 
@@ -716,6 +757,9 @@ class NagomiApp(ResponsiveMixin, MDApp):
 
         self.active_page = page_name
         screen_manager.current = page_name
+
+        self.refresh_alarm_card_visibility() 
+        
         self.root.ids.nav_drawer.set_state("close")
 
         current_screen = screen_manager.get_screen(page_name)
@@ -865,16 +909,34 @@ class NagomiApp(ResponsiveMixin, MDApp):
         )
 
 
-    def play_alarm(self) -> None:
+    def play_alarm(
+        self,
+        source: str = "",
+        mode: str = "",
+        title: str = "",
+        subtitle: str = "",
+    ) -> None:
         print("[ALARM 1] play_alarm çağrıldı")
         print("[ALARM 2] sound_enabled:", self.sound_enabled)
+
+        # Önce varsa eski alarmı/preview'i temizle.
+        # Burada banner henüz yeni alarm için açılmadı.
+        self.stop_alarm_preview()
+        self.stop_alarm()
+
+        # Yeni alarmın bilgilerini kaydet.
+        self.alarm_source = str(source or "")
+        self.alarm_mode = str(mode or "")
+        self.alarm_title = str(title or "")
+        self.alarm_subtitle = str(subtitle or "")
+
+        # Banner ses kapalı olsa bile görünmeli.
+        self.alarm_banner_visible = True
+        self.refresh_alarm_card_visibility()
 
         if not self.sound_enabled:
             print("[ALARM STOP] Ses ayarı kapalı.")
             return
-
-        self.stop_alarm_preview()
-        self.stop_alarm()
 
         settings = self.app_data.setdefault(
             "settings",
@@ -886,8 +948,6 @@ class NagomiApp(ResponsiveMixin, MDApp):
         ).strip().lower()
 
         print("[ALARM 3] selected_alarm:", selected_alarm)
-
-        self.stop_alarm()
 
         alarm_path = self.get_alarm_path(selected_alarm)
 
@@ -923,10 +983,10 @@ class NagomiApp(ResponsiveMixin, MDApp):
 
     def _auto_stop_alarm(self, _dt) -> None:
         self._alarm_stop_event = None
-        self.stop_alarm()
+        self.stop_alarm(hide_banner=False)
 
 
-    def stop_alarm(self) -> None:
+    def stop_alarm(self, hide_banner: bool = True) -> None:
         # Bekleyen otomatik durdurma çağrısını iptal et.
         if self._alarm_stop_event is not None:
             self._alarm_stop_event.cancel()
@@ -942,6 +1002,11 @@ class NagomiApp(ResponsiveMixin, MDApp):
 
         self.stop_alarm_vibration()
         self.alarm_active = False
+
+        if hide_banner:
+            self.alarm_banner_visible = False
+
+        self.refresh_alarm_card_visibility()
 
     def start_alarm_vibration(self) -> None:
         settings = self.app_data.setdefault("settings", {})
