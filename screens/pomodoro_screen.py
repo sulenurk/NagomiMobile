@@ -185,18 +185,117 @@ class PomodoroScreen(MDScreen):
     def refresh_theme(self) -> None:
         from kivy.app import App
 
-        panel = self.ids.get("pomodoro_settings_panel")
-
-        if panel is None:
-            return
-
         app = App.get_running_app()
 
-        panel.md_bg_color = list(
-            app.theme_colors["sidebar"]
+        panel = self.ids.get("pomodoro_settings_panel")
+
+        if panel is not None:
+            panel.md_bg_color = list(
+                app.theme_colors["sidebar"]
+            )
+            panel.canvas.ask_update()
+
+        text_field_ids = (
+            "settings_focus_minutes",
+            "settings_short_break_minutes",
+            "settings_long_break_minutes",
+            "settings_long_break_after",
+            "settings_focus_count",
         )
 
-        panel.canvas.ask_update()
+        for field_id in text_field_ids:
+            field = self.ids.get(field_id)
+
+            if field is None:
+                continue
+
+            if app.dark_mode_enabled:
+                fill_normal = list(
+                    app.theme_colors["surface_light"]
+                )
+                fill_focus = list(
+                    app.theme_colors["card_soft"]
+                )
+                text_normal = list(
+                    app.theme_colors["text"]
+                )
+                text_focus = list(
+                    app.theme_colors["text"]
+                )
+            else:
+                fill_normal = list(
+                    app.theme_colors["input"]
+                )
+                fill_focus = list(
+                    app.theme_colors["input"]
+                )
+                text_normal = list(
+                    app.theme_colors["input_text"]
+                )
+                text_focus = list(
+                    app.theme_colors["input_text"]
+                )
+
+            field.fill_color_normal = fill_normal
+            field.fill_color_focus = fill_focus
+
+            field.text_color_normal = text_normal
+            field.text_color_focus = text_focus
+
+            field.hint_text_color_normal = list(
+                app.theme_colors["muted"]
+            )
+            field.hint_text_color_focus = list(
+                app.theme_colors["primary"]
+            )
+
+            field.helper_text_color_normal = list(
+                app.theme_colors["muted"]
+            )
+            field.helper_text_color_focus = list(
+                app.theme_colors["primary"]
+            )
+
+            field.line_color_normal = [0, 0, 0, 0]
+            field.line_color_focus = list(
+                app.theme_colors["primary"]
+            )
+
+            # KivyMD 1.2.0 MDTextField aktif renkleri ayrıca cache'liyor.
+            # Public property'leri değiştirmek her zaman görünür state'i
+            # yeniden üretmediği için aktif değerleri de zorla eşitliyoruz.
+            if hasattr(field, "_fill_color"):
+                field._fill_color = (
+                    fill_focus
+                    if field.focus
+                    else fill_normal
+                )
+
+            if hasattr(field, "_text_color_normal"):
+                field._text_color_normal = text_normal
+
+            if hasattr(field, "_hint_text_color"):
+                field._hint_text_color = (
+                    list(app.theme_colors["primary"])
+                    if field.focus
+                    else list(app.theme_colors["muted"])
+                )
+
+            if hasattr(field, "_helper_text_color"):
+                field._helper_text_color = (
+                    list(app.theme_colors["primary"])
+                    if field.focus
+                    else list(app.theme_colors["muted"])
+                )
+
+            if hasattr(field, "_line_color"):
+                field._line_color = (
+                    list(app.theme_colors["primary"])
+                    if field.focus
+                    else [0, 0, 0, 0]
+                )
+
+            field.canvas.ask_update()
 
     def load_timer(self):
         settings_data = self.app.app_data.setdefault("settings", {})

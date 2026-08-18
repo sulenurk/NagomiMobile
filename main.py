@@ -9,7 +9,7 @@ from kivy.utils import platform
 if platform != "android":
     Config.set("graphics", "width", "320")
     Config.set("graphics", "height", "568")
-    Config.set("graphics", "resizable", "1")
+    Config.set("graphics", "resizable", "0")
 
     Config.set("graphics", "position", "custom")
     Config.set("graphics", "left", "50")
@@ -824,7 +824,7 @@ class NagomiApp(ResponsiveMixin, MDApp):
                 refresh_stats()
 
     def on_start(self) -> None:
-        self.show_page("focus")
+        self.show_page("pomodoro")
 
         Clock.schedule_once(
             lambda _dt: self.request_notification_permission(),
@@ -842,7 +842,7 @@ class NagomiApp(ResponsiveMixin, MDApp):
                 0.5,
             )
 
-        if platform != "android":
+        """ if platform != "android":
             Clock.schedule_once(
                 lambda _dt: setattr(Window, "size", (568, 320)),
                 3,
@@ -851,7 +851,7 @@ class NagomiApp(ResponsiveMixin, MDApp):
             Clock.schedule_once(
                 lambda _dt: setattr(Window, "size", (320, 568)),
                 6,
-            )
+            ) """
 
     def on_pause(self) -> bool:
         if not self.root:
