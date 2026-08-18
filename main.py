@@ -632,6 +632,11 @@ class NagomiApp(ResponsiveMixin, MDApp):
         self.show_page("pomodoro")
 
         Clock.schedule_once(
+            lambda _dt: self.preload_screens(),
+            0.6,
+        )
+
+        Clock.schedule_once(
             lambda _dt: self.request_notification_permission(),
             0.8,
         )
@@ -777,6 +782,61 @@ class NagomiApp(ResponsiveMixin, MDApp):
 
         elif self.alarm_source == "pomodoro":
             self.show_page("pomodoro")
+
+    def preload_screens(self) -> None:
+        if not self.root:
+            return
+
+        try:
+            screen_manager = self.root.ids.screen_manager
+        except (AttributeError, KeyError):
+            return
+
+        preload_order = (
+            "focus",
+            "study",
+            "subjects",
+            "statistics",
+            "settings",
+        )
+
+        for index, screen_name in enumerate(preload_order):
+            Clock.schedule_once(
+                lambda _dt, name=screen_name: self._preload_screen(name),
+                0.35 * (index + 1),
+            )
+
+
+    def _preload_screen(self, screen_name: str) -> None:
+        if not self.root:
+            return
+
+        try:
+            screen_manager = self.root.ids.screen_manager
+        except (AttributeError, KeyError):
+            return
+
+        if screen_manager.has_screen(screen_name):
+            return
+
+        screen_cls = self._screen_classes.get(screen_name)
+
+        if screen_cls is None:
+            return
+
+        try:
+            screen_manager.add_widget(
+                screen_cls(name=screen_name)
+            )
+
+            print("[PRELOAD]", screen_name)
+
+        except Exception as error:
+            print(
+                "[PRELOAD ERROR]",
+                screen_name,
+                error,
+            )
 
     def show_page(self, page_name: str) -> None:
         valid_pages = {
