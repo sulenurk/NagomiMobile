@@ -19,6 +19,9 @@ from kivy.graphics import Color, Line, RoundedRectangle
 from kivy.properties import ListProperty
 from kivy.uix.widget import Widget
 
+from kivymd.uix.dialog import MDDialog
+from kivymd.uix.button import MDFlatButton, MDRaisedButton
+
 class WeeklyBarChart(Widget):
     labels = ListProperty([])
     values = ListProperty([])
@@ -177,6 +180,8 @@ class StatisticsScreen(MDScreen):
 
     selected_subject_id = StringProperty("all")
 
+    _clear_statistics_dialog = None
+
     @property
     def app(self):
         from kivy.app import App
@@ -192,6 +197,48 @@ class StatisticsScreen(MDScreen):
     # ---------------------------------------------------------
     # ANA YENİLEME
     # ---------------------------------------------------------
+
+    def open_clear_statistics_dialog(self) -> None:
+        if self._clear_statistics_dialog is None:
+            self._clear_statistics_dialog = MDDialog(
+                title=self.app.t("clear_statistics"),
+                text=self.app.t("clear_statistics_confirmation"),
+                buttons=[
+                    MDFlatButton(
+                        text=self.app.t("cancel"),
+                        theme_text_color="Custom",
+                        text_color=self.app.theme_colors["muted"],
+                        on_release=lambda *_: self._clear_statistics_dialog.dismiss(),
+                    ),
+                    MDRaisedButton(
+                        text=self.app.t("clear"),
+                        md_bg_color=self.app.theme_colors["red"],
+                        on_release=self.confirm_clear_statistics,
+                    ),
+                ],
+            )
+
+            if self._clear_statistics_dialog.ids.get("text"):
+                self._clear_statistics_dialog.ids.text.font_size = "14sp"
+
+        self._clear_statistics_dialog.open()
+
+
+    def confirm_clear_statistics(self, *_args) -> None:
+        self.app.app_data["sessions"] = []
+        self.app.save_app_data()
+
+        self.refresh_stats()
+
+        if self._clear_statistics_dialog is not None:
+            self._clear_statistics_dialog.dismiss()
+
+
+    def refresh_clear_statistics_dialog_theme(self) -> None:
+        if self._clear_statistics_dialog is None:
+            return
+
+        self._clear_statistics_dialog = None
 
     def refresh_stats(self) -> None:
         if not self.ids:

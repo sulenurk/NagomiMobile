@@ -172,6 +172,11 @@
 
   "stop_alarm": "Alarmı sustur",
   "alarm_tone": "Alarm tonu",
-  "alarm_tone_description": "Sayaç sona erdiğinde çalacak sesi seçin."
+  "alarm_tone_description": "Sayaç sona erdiğinde çalacak sesi seçin.",
+
+  "clear_statistics": "İstatistikleri temizle",
+  "clear_statistics_confirmation": "Tüm çalışma geçmişin ve istatistik kayıtların silinecek. Bu işlem geri alınamaz.",
+  "clear": "Temizle",
+  "cancel": "İptal"
 
 }

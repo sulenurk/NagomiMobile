@@ -514,3 +514,24 @@
                         orientation: "vertical"
                         adaptive_height: True
                         spacing: dp(8)
+
+                Widget:
+                    size_hint_y: None
+                    height: dp(8)
+
+                MDSeparator:
+                    size_hint_y: None
+                    height: dp(1)
+                    color: app.theme_colors["card_border"]
+
+                MDFlatButton:
+                    text: app.t("clear_statistics", app.translation_version)
+                    font_size: sp(app.typography("body", app.layout_profile))
+                    size_hint_x: 1
+                    size_hint_y: None
+                    height: dp(48)
+
+                    theme_text_color: "Custom"
+                    text_color: app.theme_colors["red"]
+
+                    on_release: root.open_clear_statistics_dialog()

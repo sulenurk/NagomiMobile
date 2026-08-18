@@ -183,5 +183,10 @@
   "focus_session_finished": "Focus session finished",
   "ready_for_focus": "Ready for Focus",
   "go_to_timer": "Go to timer",
-  "focus_break_finished": "Focus Timer · Break finished"
+  "focus_break_finished": "Focus Timer · Break finished",
+
+  "clear_statistics": "Clear statistics",
+  "clear_statistics_confirmation": "All of your study history and statistics records will be deleted. This action cannot be undone.",
+  "clear": "Clear",
+  "cancel": "Cancel"
 }
