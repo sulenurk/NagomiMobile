@@ -12,7 +12,7 @@ from kivy.properties import (
 # print() on Android goes through the logcat bridge and is
 # noticeably slower than desktop print, so this must default
 # to False for release/testing builds.
-RESPONSIVE_DEBUG = False
+RESPONSIVE_DEBUG = True
 
 
 class ResponsiveMixin:
@@ -98,6 +98,9 @@ class ResponsiveMixin:
         self,
         *_args,
     ) -> None:
+
+        old_profile = self.layout_profile
+
         self.screen_width = float(Window.width)
         self.screen_height = float(Window.height)
 
@@ -162,9 +165,11 @@ class ResponsiveMixin:
         if RESPONSIVE_DEBUG:
             print(
                 "[RESPONSIVE]",
-                f"{self.screen_width_dp:.0f}"
-                f"x{self.screen_height_dp:.0f}",
-                self.layout_profile,
+                f"raw={Window.width}x{Window.height}",
+                f"dp={self.screen_width_dp:.0f}x{self.screen_height_dp:.0f}",
+                f"old={old_profile}",
+                f"new={self.layout_profile}",
+                f"landscape={self.is_landscape}",
             )
 
     def responsive(

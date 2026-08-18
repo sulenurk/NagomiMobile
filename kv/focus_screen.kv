@@ -60,7 +60,7 @@
                 MDCard:
                     orientation: "vertical"
 
-                    size_hint_y: 0 if app.layout_profile == "phone_landscape" else 1
+                    size_hint_y: None if app.layout_profile == "phone_landscape" else 1
                     height: 0 if app.layout_profile == "phone_landscape" else dp(app.responsive(390, 440, 330, 560, 500))
 
                     opacity: 0 if app.layout_profile == "phone_landscape" else 1
@@ -214,8 +214,8 @@
                 MDCard:
                     orientation: "horizontal"
 
-                    size_hint_y: 1 if app.layout_profile == "phone_landscape" else 0
-                    height: 0
+                    size_hint_y: 1 if app.layout_profile == "phone_landscape" else None
+                    height: dp(1) if app.layout_profile == "phone_landscape" else 0
 
                     opacity: 1 if app.layout_profile == "phone_landscape" else 0
                     disabled: app.layout_profile != "phone_landscape"

@@ -11,11 +11,13 @@
         # =====================================================
 
         MDBoxLayout:
+            id: pomodoro_main_layout
             orientation: "vertical"
             size_hint: 1, 1
             pos_hint: {"x": 0, "y": 0}
 
             MDTopAppBar:
+                id: pomodoro_top_bar
                 anchor_title: "center"
                 elevation: 0
                 md_bg_color: app.theme_colors["bg"]
@@ -30,11 +32,13 @@
                     [["cog-outline", lambda x: root.open_settings()]]
 
             MDBoxLayout:
+                id: pomodoro_content_layout
                 orientation: "vertical"
                 padding: dp(app.responsive(10, 14, 8, 28, 20)), dp(app.responsive(6, 10, 4, 16, 10)), dp(app.responsive(10, 14, 8, 28, 20)), dp(app.responsive(10, 20, 8, 28, 16))
                 spacing: dp(app.responsive(8, 18, 6, 14, 10))
 
                 MDLabel:
+                    id: pomodoro_page_title
                     text: app.t("pomodoro", app.translation_version)
                     halign: "center"
                     bold: True
@@ -47,8 +51,9 @@
 
 
                 MDCard:
+                    id: pomodoro_portrait_card
                     orientation: "vertical"
-                    size_hint_y: 0 if app.layout_profile == "phone_landscape" else 1
+                    size_hint_y: None if app.layout_profile == "phone_landscape" else 1
                     height: 0 if app.layout_profile == "phone_landscape" else dp(app.responsive(390, 570, 335, 820, 505))
                     opacity: 0 if app.layout_profile == "phone_landscape" else 1
                     disabled: app.layout_profile == "phone_landscape"
@@ -180,8 +185,8 @@
                 MDCard:
                     orientation: "horizontal"
 
-                    size_hint_y: 1 if app.layout_profile == "phone_landscape" else 0
-                    height: 0
+                    size_hint_y: 1 if app.layout_profile == "phone_landscape" else None
+                    height: dp(1) if app.layout_profile == "phone_landscape" else 0
 
                     opacity: 1 if app.layout_profile == "phone_landscape" else 0
                     disabled: app.layout_profile != "phone_landscape"

@@ -9,7 +9,7 @@ from kivy.utils import platform
 if platform != "android":
     Config.set("graphics", "width", "320")
     Config.set("graphics", "height", "568")
-    Config.set("graphics", "resizable", "0")
+    Config.set("graphics", "resizable", "1")
 
     Config.set("graphics", "position", "custom")
     Config.set("graphics", "left", "50")
@@ -36,6 +36,13 @@ from kivymd.app import MDApp
 from kivy.clock import Clock
 from kivy.core.audio import SoundLoader
 from kivy.utils import get_color_from_hex
+
+# ---------------------------------------------------------
+# ANDROID ORIENTATION
+# False yaparsak telefon landscape desteği tekrar açılır.
+# Mevcut landscape KV/layout kodları silinmemiştir.
+# ---------------------------------------------------------
+LOCK_PHONE_TO_PORTRAIT = True
 
 from core.theme import (
     PALETTE_NAMES,
@@ -219,6 +226,238 @@ class NagomiApp(ResponsiveMixin, MDApp):
         Builder.load_file(
             "kv/settings_screen.kv"
         )
+
+    def apply_android_orientation_policy(self) -> None:
+        if platform != "android":
+            return
+
+        if not LOCK_PHONE_TO_PORTRAIT:
+            return
+
+        try:
+            from jnius import autoclass
+
+            PythonActivity = autoclass(
+                "org.kivy.android.PythonActivity"
+            )
+            ActivityInfo = autoclass(
+                "android.content.pm.ActivityInfo"
+            )
+
+            activity = PythonActivity.mActivity
+
+            if not self.is_tablet:
+                # Telefon:
+                # portrait ve reverse-portrait serbest,
+                # landscape engelli.
+                activity.setRequestedOrientation(
+                    ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                )
+            else:
+                # Tablet:
+                # mevcut rotation / landscape desteği korunur.
+                activity.setRequestedOrientation(
+                    ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
+                )
+
+        except Exception as error:
+            print("[ORIENTATION ERROR]", error)
+
+    def on_layout_profile(self, _instance, value):
+        print("[LAYOUT PROFILE CHANGED]", value)
+
+        Clock.schedule_once(
+            self._debug_pomodoro_layout,
+            0,
+        )
+
+        Clock.schedule_once(
+            self._debug_pomodoro_layout,
+            0.1,
+        )
+
+        Clock.schedule_once(
+            self._debug_pomodoro_layout,
+            0.4,
+        )
+
+    def _force_responsive_relayout(self, _dt):
+        if not self.root:
+            return
+
+        try:
+            screen_manager = self.root.ids.screen_manager
+
+            if not screen_manager.has_screen("pomodoro"):
+                return
+
+            screen = screen_manager.get_screen("pomodoro")
+
+            main_layout = screen.ids.get("pomodoro_main_layout")
+            content_layout = screen.ids.get("pomodoro_content_layout")
+            top_bar = screen.ids.get("pomodoro_top_bar")
+
+            if (
+                content_layout is not None
+                and top_bar is not None
+            ):
+                content_layout.pos = (0, 0)
+                content_layout.size = (
+                    screen.width,
+                    max(0, screen.height - top_bar.height),
+                )
+
+            if main_layout is not None:
+                main_layout.do_layout()
+
+            if content_layout is not None:
+                content_layout.do_layout()
+
+            Clock.schedule_once(
+                self._force_responsive_relayout_second_pass,
+                0.1,
+            )
+
+        except Exception as error:
+            print("[RESPONSIVE RELAYOUT ERROR]", error)
+
+    def _force_responsive_relayout_second_pass(self, _dt):
+        if not self.root:
+            return
+
+        try:
+            screen = self.root.ids.screen_manager.get_screen("pomodoro")
+
+            main_layout = screen.ids.get("pomodoro_main_layout")
+            content_layout = screen.ids.get("pomodoro_content_layout")
+            top_bar = screen.ids.get("pomodoro_top_bar")
+
+            if (
+                content_layout is not None
+                and top_bar is not None
+            ):
+                content_layout.pos = (0, 0)
+                content_layout.size = (
+                    screen.width,
+                    max(0, screen.height - top_bar.height),
+                )
+
+            if main_layout is not None:
+                main_layout.do_layout()
+
+            if content_layout is not None:
+                content_layout.do_layout()
+
+        except Exception as error:
+            print("[RESPONSIVE RELAYOUT 2 ERROR]", error)
+
+    def _debug_pomodoro_layout(self, _dt):
+        if not self.root:
+            return
+
+        try:
+            screen = self.root.ids.screen_manager.get_screen("pomodoro")
+
+            main_layout = screen.ids.get("pomodoro_main_layout")
+            content = screen.ids.get("pomodoro_content_layout")
+            top_bar = screen.ids.get("pomodoro_top_bar")
+            title = screen.ids.get("pomodoro_page_title")
+            portrait_card = screen.ids.get("pomodoro_portrait_card")
+
+            landscape_card = None
+
+            if content is not None:
+                for child in content.children:
+                    if (
+                        child is not portrait_card
+                        and child.__class__.__name__ == "MDCard"
+                    ):
+                        landscape_card = child
+                        break
+
+            print(
+                "[POMODORO LAYOUT]",
+                f"profile={self.layout_profile}",
+                f"window={Window.width:.1f}x{Window.height:.1f}",
+                f"screen_pos={screen.pos}",
+                f"screen_size={screen.size}",
+                f"main_pos={main_layout.pos if main_layout else None}",
+                f"main_size={main_layout.size if main_layout else None}",
+                f"content_pos={content.pos if content else None}",
+                f"content_size={content.size if content else None}",
+                f"topbar_pos={top_bar.pos if top_bar else None}",
+                f"topbar_size={top_bar.size if top_bar else None}",
+                f"title_pos={title.pos if title else None}",
+                f"title_size={title.size if title else None}",
+                f"title_opacity={title.opacity if title else None}",
+                f"portrait_pos={portrait_card.pos if portrait_card else None}",
+                f"portrait_size={portrait_card.size if portrait_card else None}",
+                f"portrait_hint={portrait_card.size_hint_y if portrait_card else None}",
+                f"landscape_pos={landscape_card.pos if landscape_card else None}",
+                f"landscape_size={landscape_card.size if landscape_card else None}",
+                f"landscape_hint={landscape_card.size_hint_y if landscape_card else None}",
+            )
+
+            print(
+                "[POMODORO COLLAPSE CHECK]",
+                f"profile={self.layout_profile}",
+                f"portrait_hint={portrait_card.size_hint_y if portrait_card else None}",
+                f"portrait_h={portrait_card.height if portrait_card else None}",
+                f"landscape_hint={landscape_card.size_hint_y if landscape_card else None}",
+                f"landscape_h={landscape_card.height if landscape_card else None}",
+            )
+
+            if self.layout_profile == "phone_portrait":
+                if landscape_card is not None:
+                    if landscape_card.size_hint_y is not None:
+                        print(
+                            "[BUG] Landscape card still participates "
+                            "in portrait layout"
+                        )
+
+                    if landscape_card.height != 0:
+                        print(
+                            "[BUG] Landscape card height is not zero "
+                            "in portrait:",
+                            landscape_card.height,
+                        )
+
+            elif self.layout_profile == "phone_landscape":
+                if portrait_card is not None:
+                    if portrait_card.size_hint_y is not None:
+                        print(
+                            "[BUG] Portrait card still participates "
+                            "in landscape layout"
+                        )
+
+                    if portrait_card.height != 0:
+                        print(
+                            "[BUG] Portrait card height is not zero "
+                            "in landscape:",
+                            portrait_card.height,
+                        )
+
+            if content is not None:
+                print("[CONTENT CHILDREN BEGIN]")
+
+                for index, child in enumerate(
+                    reversed(content.children)
+                ):
+                    print(
+                        "[CONTENT CHILD]",
+                        index,
+                        child.__class__.__name__,
+                        f"pos={child.pos}",
+                        f"size={child.size}",
+                        f"size_hint_y={child.size_hint_y}",
+                        f"height={child.height}",
+                        f"opacity={getattr(child, 'opacity', None)}",
+                    )
+
+                print("[CONTENT CHILDREN END]")
+
+        except Exception as error:
+            print("[POMODORO LAYOUT ERROR]", error)
 
     def apply_theme(self) -> None:
         appearance_mode = (
@@ -585,7 +824,7 @@ class NagomiApp(ResponsiveMixin, MDApp):
                 refresh_stats()
 
     def on_start(self) -> None:
-        self.show_page("pomodoro")
+        self.show_page("focus")
 
         Clock.schedule_once(
             lambda _dt: self.request_notification_permission(),
@@ -596,6 +835,23 @@ class NagomiApp(ResponsiveMixin, MDApp):
             lambda _dt: self.request_exact_alarm_permission(),
             1.5,
         )
+
+        if platform == "android":
+            Clock.schedule_once(
+                lambda _dt: self.apply_android_orientation_policy(),
+                0.5,
+            )
+
+        if platform != "android":
+            Clock.schedule_once(
+                lambda _dt: setattr(Window, "size", (568, 320)),
+                3,
+            )
+
+            Clock.schedule_once(
+                lambda _dt: setattr(Window, "size", (320, 568)),
+                6,
+            )
 
     def on_pause(self) -> bool:
         if not self.root:
