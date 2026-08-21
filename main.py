@@ -78,18 +78,19 @@ class NagomiApp(ResponsiveMixin, MDApp):
 
     sidebar_color = ListProperty([0.03, 0.04, 0.07, 1])
 
-    palette_display_values = ListProperty(
-        [
-            "Purple",
-            "Pinky",
-            "Ocean Blue",
-            "Forest Green",
-            "Monochrome",
-            "Slate",
-            "Sunset Amber",
-            "Nordic Mint",
-        ]
-    )
+    PALETTE_TRANSLATION_KEYS = {
+    "purple": "palette_purple",
+    "pinky": "palette_pinky",
+    "amber": "palette_sunset_amber",
+    "forest": "palette_forest_green",
+    "mint": "palette_nordic_mint",
+    "ocean": "palette_ocean_blue",
+    "slate": "palette_slate",
+    "monochrome": "palette_monochrome",
+}
+
+    palette_display_values = ListProperty([])
+
     preview_sound = ObjectProperty(
         None,
         allownone=True,
@@ -120,6 +121,7 @@ class NagomiApp(ResponsiveMixin, MDApp):
             Path(self.user_data_dir)
             / "app_data.json"
         )
+        self._save_event = None
 
         self.app_data = self.load_app_data()
         self.ensure_app_data_defaults()
@@ -134,6 +136,8 @@ class NagomiApp(ResponsiveMixin, MDApp):
         )
 
         self.load_translations()
+
+        self.refresh_palette_display_values()
 
         self.selected_language_name = (
             self.get_language_name(
@@ -175,10 +179,11 @@ class NagomiApp(ResponsiveMixin, MDApp):
         if self.color_palette not in PALETTE_NAMES:
             self.color_palette = "purple"
 
-        self.selected_palette_name = (
-            PALETTE_NAMES[
-                self.color_palette
-            ]
+        self.selected_palette_name = self.t(
+            self.PALETTE_TRANSLATION_KEYS.get(
+                self.color_palette,
+                "palette_purple",
+            )
         )
 
         # KV dosyaları yüklenmeden önce tema renkleri hazır olmalı.
@@ -394,7 +399,6 @@ class NagomiApp(ResponsiveMixin, MDApp):
             "de": "Deutsch",
             "fr": "Français",
             "es": "Español",
-            "pt": "Português",
         }
 
         return language_names.get(language_code, "English")
@@ -407,11 +411,24 @@ class NagomiApp(ResponsiveMixin, MDApp):
             "Deutsch": "de",
             "Français": "fr",
             "Español": "es",
-            "Português": "pt",
         }
 
         return language_codes.get(language_name, "en")
 
+    def refresh_palette_display_values(self) -> None:
+        self.palette_display_values = [
+            self.t(translation_key)
+            for translation_key in self.PALETTE_TRANSLATION_KEYS.values()
+        ]
+
+        current_translation_key = self.PALETTE_TRANSLATION_KEYS.get(
+            self.color_palette,
+            "palette_purple",
+        )
+
+        self.selected_palette_name = self.t(
+            current_translation_key
+        )
 
     def set_language_by_name(self, language_name: str) -> None:
         language_code = self.get_language_code(language_name)
@@ -461,6 +478,7 @@ class NagomiApp(ResponsiveMixin, MDApp):
         self.app_data["language"] = language_code
 
         self.load_translations()
+        self.refresh_palette_display_values()
         self.save_app_data()
         self.refresh_language_ui()
 
@@ -518,14 +536,19 @@ class NagomiApp(ResponsiveMixin, MDApp):
             self.stop_alarm()
             self.stop_alarm_preview()
 
-        print(
-            "[SOUND SETTING]",
-            "property:",
-            self.sound_enabled,
-            "saved:",
-            settings["sound_enabled"],
+    def set_vibration_enabled(self, enabled: bool) -> None:
+        enabled = bool(enabled)
+
+        settings = self.app_data.setdefault(
+            "settings",
+            {},
         )
 
+        settings["vibration_enabled"] = enabled
+        self.save_app_data()
+
+        if not enabled:
+            self.stop_alarm_vibration()
 
     def set_dark_mode(self, enabled: bool) -> None:
         enabled = bool(enabled)
@@ -554,9 +577,11 @@ class NagomiApp(ResponsiveMixin, MDApp):
     def get_palette_key(self, palette_name: str) -> str:
         normalized_name = str(palette_name).strip()
 
-        for palette_key, display_name in PALETTE_NAMES.items():
-            if display_name == normalized_name:
+        for palette_key, translation_key in self.PALETTE_TRANSLATION_KEYS.items():
+            if self.t(translation_key) == normalized_name:
                 return palette_key
+
+        return "purple"
 
     def set_color_palette_by_name(
         self,
@@ -581,11 +606,13 @@ class NagomiApp(ResponsiveMixin, MDApp):
             palette_key = "purple"
 
         self.color_palette = palette_key
-        self.selected_palette_name = (
-            PALETTE_NAMES.get(
-                palette_key,
-                "Purple",
-            )
+        translation_key = self.PALETTE_TRANSLATION_KEYS.get(
+            palette_key,
+            "palette_purple",
+        )
+
+        self.selected_palette_name = self.t(
+            translation_key
         )
 
         settings = self.app_data.setdefault(
@@ -690,6 +717,11 @@ class NagomiApp(ResponsiveMixin, MDApp):
 
             if callable(handler):
                 handler()
+
+        if self._save_event is not None:
+            self._save_event.cancel()
+            self._save_event = None
+            self._write_json(dict(self.app_data))
 
         return True
 
@@ -829,8 +861,6 @@ class NagomiApp(ResponsiveMixin, MDApp):
                 screen_cls(name=screen_name)
             )
 
-            print("[PRELOAD]", screen_name)
-
         except Exception as error:
             print(
                 "[PRELOAD ERROR]",
@@ -883,10 +913,10 @@ class NagomiApp(ResponsiveMixin, MDApp):
         
         self.root.ids.nav_drawer.set_state("close")
 
-        current_screen = screen_manager.get_screen(page_name)
+        """ current_screen = screen_manager.get_screen(page_name)
 
         if hasattr(current_screen, "refresh_ui"):
-            current_screen.refresh_ui()
+            current_screen.refresh_ui() """
 
     def toggle_navigation_drawer(self) -> None:
         self.root.ids.nav_drawer.set_state("toggle")
@@ -910,6 +940,7 @@ class NagomiApp(ResponsiveMixin, MDApp):
             "auto_start_break": False,
             "auto_start_focus": False,
             "sound_enabled": True,
+            "vibration_enabled": True,
             "daily_focus_goal_minutes": 300,
             "regular_focus_minutes": 25,
             "regular_short_break_minutes": 5,
@@ -984,7 +1015,21 @@ class NagomiApp(ResponsiveMixin, MDApp):
             print(f"[DATA ERROR] Veriler yüklenemedi: {error}")
             return default_data
 
+    """ def save_app_data(self) -> None:
+        self._write_json(dict(self.app_data)) """
+
     def save_app_data(self) -> None:
+        if self._save_event is not None:
+            self._save_event.cancel()
+
+        self._save_event = Clock.schedule_once(
+            self._flush_app_data,
+            0.12,
+        )
+
+
+    def _flush_app_data(self, _dt=0) -> None:
+        self._save_event = None
         self._write_json(dict(self.app_data))
 
     def _write_json(self, data: dict[str, Any]) -> None:
@@ -996,7 +1041,8 @@ class NagomiApp(ResponsiveMixin, MDApp):
                     data,
                     file,
                     ensure_ascii=False,
-                    indent=4,
+                    # indent=4,
+                    separators=(",", ":"),
                 )
 
         except OSError as error:
@@ -1037,9 +1083,6 @@ class NagomiApp(ResponsiveMixin, MDApp):
         title: str = "",
         subtitle: str = "",
     ) -> None:
-        print("[ALARM 1] play_alarm çağrıldı")
-        print("[ALARM 2] sound_enabled:", self.sound_enabled)
-
         # Önce varsa eski alarmı/preview'i temizle.
         # Burada banner henüz yeni alarm için açılmadı.
         self.stop_alarm_preview()
@@ -1056,7 +1099,6 @@ class NagomiApp(ResponsiveMixin, MDApp):
         self.refresh_alarm_card_visibility()
 
         if not self.sound_enabled:
-            print("[ALARM STOP] Ses ayarı kapalı.")
             return
 
         settings = self.app_data.setdefault(
@@ -1068,20 +1110,13 @@ class NagomiApp(ResponsiveMixin, MDApp):
             settings.get("alarm_sound", "beep")
         ).strip().lower()
 
-        print("[ALARM 3] selected_alarm:", selected_alarm)
-
         alarm_path = self.get_alarm_path(selected_alarm)
-
-        print("[ALARM 4] path:", alarm_path)
-        print("[ALARM 5] exists:", alarm_path.exists())
 
         if not alarm_path.exists():
             print("[ALARM ERROR] Dosya bulunamadı.")
             return
 
         sound = SoundLoader.load(str(alarm_path))
-
-        print("[ALARM 6] SoundLoader sonucu:", sound)
 
         if sound is None:
             print("[ALARM ERROR] Alarm yüklenemedi.")
@@ -1100,7 +1135,6 @@ class NagomiApp(ResponsiveMixin, MDApp):
             self._auto_stop_alarm,
             15,
         )
-
 
     def _auto_stop_alarm(self, _dt) -> None:
         self._alarm_stop_event = None
@@ -1545,11 +1579,6 @@ class NagomiApp(ResponsiveMixin, MDApp):
 
             activity.startActivity(intent)
 
-            print(
-                "[EXACT ALARM PERMISSION] "
-                "Alarms & reminders ekranı açıldı."
-            )
-
         except Exception as error:
             print(
                 "[EXACT ALARM PERMISSION REQUEST ERROR]",
@@ -1717,12 +1746,6 @@ class NagomiApp(ResponsiveMixin, MDApp):
                 pending_intent,
             )
 
-            print(
-                "[ALARM SCHEDULED]",
-                mode,
-                end_timestamp,
-            )
-
         except Exception as error:
             print(
                 "[ALARM SCHEDULE ERROR]",
@@ -1820,8 +1843,6 @@ class NagomiApp(ResponsiveMixin, MDApp):
             )
 
             pending_intent.cancel()
-
-            print("[ALARM CANCELLED]")
 
         except Exception as error:
             print(

@@ -1,19 +1,6 @@
 #:import dp kivy.metrics.dp
 #:import sp kivy.metrics.sp
 
-<DarkSpinner@Spinner>:
-    background_normal: ""
-    background_down: ""
-    background_color: app.theme_colors["surface_light"]
-
-    color: app.theme_colors["text"]
-    font_size: sp(app.typography("input", app.layout_profile))
-
-    size_hint_y: None
-    height: dp(48)
-
-    padding: dp(14), 0
-
 <SpinnerOption>:
     background_normal: ""
     background_down: ""
@@ -349,7 +336,31 @@
                         font_size: sp(app.typography("status", app.layout_profile))
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["orange"]
+
+                        size_hint_y: None
+                        height: self.texture_size[1] if self.text else 0
+                        opacity: 1 if self.text else 0
+
+                    MDBoxLayout:
                         adaptive_height: True
+                        spacing: dp(8)
+                        padding: dp(4), 0
+
+                        Widget:
+
+                        MDFlatButton:
+                            text: app.t("clear_completed", app.translation_version)
+                            theme_text_color: "Custom"
+                            font_size: sp(app.typography("body", app.layout_profile))
+                            text_color: app.theme_colors["muted"]
+                            on_release: root.clear_completed_tasks()
+
+                        MDFlatButton:
+                            text: app.t("clear_study_plan", app.translation_version)
+                            theme_text_color: "Custom"
+                            font_size: sp(app.typography("body", app.layout_profile))
+                            text_color: app.theme_colors["red"]
+                            on_release: root.open_clear_plan_dialog()
 
                 MDBoxLayout:
                     adaptive_height: True
@@ -371,6 +382,7 @@
                         font_size: sp(app.typography("body_small", app.layout_profile))
                         text: app.t("completed", app.translation_version)
                         on_release: root.set_filter("completed")
+
 
                 MDLabel:
                     id: empty_label

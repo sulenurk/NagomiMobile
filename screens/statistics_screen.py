@@ -3,47 +3,57 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta
 from typing import Any
 
+from kivy.clock import Clock
+from kivy.graphics import Color, Line, RoundedRectangle
 from kivy.metrics import dp, sp
-from kivy.properties import (
-    ListProperty,
-    NumericProperty,
-    StringProperty,
-)
+from kivy.properties import ListProperty, NumericProperty, StringProperty
+from kivy.uix.widget import Widget
+
 from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.uix.card import MDCard
+from kivymd.uix.dialog import MDDialog
 from kivymd.uix.label import MDLabel
 from kivymd.uix.progressbar import MDProgressBar
 from kivymd.uix.screen import MDScreen
 
-from kivy.graphics import Color, Line, RoundedRectangle
-from kivy.properties import ListProperty
-from kivy.uix.widget import Widget
 
-from kivymd.uix.dialog import MDDialog
-from kivymd.uix.button import MDFlatButton, MDRaisedButton
+# =========================================================
+# WEEKLY BAR CHART
+# =========================================================
 
 class WeeklyBarChart(Widget):
     labels = ListProperty([])
     values = ListProperty([])
+
     bar_color = ListProperty([0.49, 0.28, 0.86, 1])
     empty_bar_color = ListProperty([0.23, 0.21, 0.29, 1])
     text_color = ListProperty([0.72, 0.68, 0.84, 1])
-
     grid_color = ListProperty([0.22, 0.20, 0.28, 1])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.bind(
-            pos=self._redraw,
-            size=self._redraw,
-            labels=self._redraw,
-            values=self._redraw,
-            bar_color=self._redraw,
-            empty_bar_color=self._redraw,
-            grid_color=self._redraw,
-            text_color=self._redraw,
+        # Aynı frame içinde birden fazla property değişse bile
+        # canvas yalnızca bir kez çizilsin.
+        self._redraw_trigger = Clock.create_trigger(
+            self._redraw,
+            -1,
         )
+
+        self.bind(
+            pos=self._request_redraw,
+            size=self._request_redraw,
+            labels=self._request_redraw,
+            values=self._request_redraw,
+            bar_color=self._request_redraw,
+            empty_bar_color=self._request_redraw,
+            grid_color=self._request_redraw,
+            text_color=self._request_redraw,
+        )
+
+    def _request_redraw(self, *_args) -> None:
+        self._redraw_trigger()
 
     def set_data(
         self,
@@ -52,9 +62,8 @@ class WeeklyBarChart(Widget):
     ) -> None:
         self.labels = list(labels)
         self.values = list(values)
-        self._redraw()
 
-    def _redraw(self, *_args) -> None:
+    def _redraw(self, _dt=0) -> None:
         self.canvas.clear()
 
         if not self.labels or not self.values:
@@ -65,8 +74,15 @@ class WeeklyBarChart(Widget):
         chart_bottom = self.y + dp(34)
         chart_top = self.top - dp(30)
 
-        chart_width = max(0, chart_right - chart_left)
-        chart_height = max(0, chart_top - chart_bottom)
+        chart_width = max(
+            0,
+            chart_right - chart_left,
+        )
+
+        chart_height = max(
+            0,
+            chart_top - chart_bottom,
+        )
 
         if chart_width <= 0 or chart_height <= 0:
             return
@@ -91,15 +107,18 @@ class WeeklyBarChart(Widget):
         scale_max = max(max_value, 1)
 
         column_width = chart_width / 7
-        bar_width = min(dp(28), column_width * 0.56)
+        bar_width = min(
+            dp(28),
+            column_width * 0.56,
+        )
 
         with self.canvas:
-            # Yatay referans çizgileri
             Color(*self.grid_color)
 
             for index in range(4):
-                y = chart_bottom + (
-                    chart_height * index / 3
+                y = (
+                    chart_bottom
+                    + chart_height * index / 3
                 )
 
                 Line(
@@ -127,6 +146,7 @@ class WeeklyBarChart(Widget):
                         / scale_max,
                     )
                     color = self.bar_color
+
                 else:
                     bar_height = dp(4)
                     color = self.empty_bar_color
@@ -150,6 +170,11 @@ class WeeklyBarChart(Widget):
                     ],
                 )
 
+
+# =========================================================
+# STATISTICS SCREEN
+# =========================================================
+
 class StatisticsScreen(MDScreen):
     today_focus_text = StringProperty("00:00")
     completed_sessions_text = StringProperty("0")
@@ -159,36 +184,48 @@ class StatisticsScreen(MDScreen):
     regular_pomodoro_focus_text = StringProperty("00:00")
     total_focus_text = StringProperty("00:00")
 
-    goal_detail_text = StringProperty("0% · 00:00 / 05:00")
+    goal_detail_text = StringProperty(
+        "0% · 00:00 / 05:00"
+    )
     goal_progress = NumericProperty(0)
 
     weekly_total_text = StringProperty("")
     subject_total_text = StringProperty("")
 
     selected_subject_name = StringProperty("")
+    selected_subject_id = StringProperty("all")
+
     subject_filter_values = ListProperty([])
 
     empty_subject_text = StringProperty("")
     empty_recent_text = StringProperty("")
 
-    weekly_labels = ListProperty(["", "", "", "", "", "", ""])
+    weekly_labels = ListProperty(
+        ["", "", "", "", "", "", ""]
+    )
 
-    weekly_values = ListProperty([0, 0, 0, 0, 0, 0, 0])
+    weekly_values = ListProperty(
+        [0, 0, 0, 0, 0, 0, 0]
+    )
+
     weekly_value_texts = ListProperty(
         ["0", "0", "0", "0", "0", "0", "0"]
     )
 
-    selected_subject_id = StringProperty("all")
-
     _clear_statistics_dialog = None
+
+    # ---------------------------------------------------------
+    # APP
+    # ---------------------------------------------------------
 
     @property
     def app(self):
         from kivy.app import App
         return App.get_running_app()
 
-    def on_kv_post(self, base_widget) -> None:
-        self.refresh_stats()
+    # ---------------------------------------------------------
+    # SCREEN LIFECYCLE
+    # ---------------------------------------------------------
 
     def on_pre_enter(self, *args) -> None:
         self.refresh_stats()
@@ -198,33 +235,101 @@ class StatisticsScreen(MDScreen):
     # ANA YENİLEME
     # ---------------------------------------------------------
 
+    def refresh_stats(self) -> None:
+        if not self.ids:
+            return
+
+        self.empty_subject_text = self.app.t(
+            "no_subject_statistics_this_week"
+        )
+
+        self.empty_recent_text = self.app.t(
+            "no_completed_focus_sessions_today"
+        )
+
+        # Session listesi yalnızca bir kez okunur.
+        sessions = self.get_sessions()
+
+        today_sessions = self._filter_today_sessions(
+            sessions
+        )
+
+        week_sessions = self._filter_week_sessions(
+            sessions
+        )
+
+        self.refresh_subject_filter()
+
+        self.refresh_today_metrics(
+            today_sessions
+        )
+
+        self.refresh_source_breakdown(
+            today_sessions
+        )
+
+        self.refresh_goal(
+            today_sessions
+        )
+
+        self.render_weekly_overview(
+            week_sessions
+        )
+
+        self.render_subject_distribution(
+            week_sessions
+        )
+
+        self.render_recent_sessions(
+            today_sessions
+        )
+
+    # ---------------------------------------------------------
+    # CLEAR STATISTICS
+    # ---------------------------------------------------------
+
     def open_clear_statistics_dialog(self) -> None:
         if self._clear_statistics_dialog is None:
             self._clear_statistics_dialog = MDDialog(
-                title=self.app.t("clear_statistics"),
-                text=self.app.t("clear_statistics_confirmation"),
+                title=self.app.t(
+                    "clear_statistics"
+                ),
+                text=self.app.t(
+                    "clear_statistics_confirmation"
+                ),
                 buttons=[
                     MDFlatButton(
                         text=self.app.t("cancel"),
                         theme_text_color="Custom",
-                        text_color=self.app.theme_colors["muted"],
-                        on_release=lambda *_: self._clear_statistics_dialog.dismiss(),
+                        text_color=self.app.theme_colors[
+                            "muted"
+                        ],
+                        on_release=lambda *_:
+                            self._clear_statistics_dialog.dismiss(),
                     ),
                     MDRaisedButton(
                         text=self.app.t("clear"),
-                        md_bg_color=self.app.theme_colors["red"],
+                        md_bg_color=self.app.theme_colors[
+                            "red"
+                        ],
                         on_release=self.confirm_clear_statistics,
                     ),
                 ],
             )
 
-            if self._clear_statistics_dialog.ids.get("text"):
-                self._clear_statistics_dialog.ids.text.font_size = "14sp"
+            if self._clear_statistics_dialog.ids.get(
+                "text"
+            ):
+                self._clear_statistics_dialog.ids.text.font_size = (
+                    "14sp"
+                )
 
         self._clear_statistics_dialog.open()
 
-
-    def confirm_clear_statistics(self, *_args) -> None:
+    def confirm_clear_statistics(
+        self,
+        *_args,
+    ) -> None:
         self.app.app_data["sessions"] = []
         self.app.save_app_data()
 
@@ -233,38 +338,26 @@ class StatisticsScreen(MDScreen):
         if self._clear_statistics_dialog is not None:
             self._clear_statistics_dialog.dismiss()
 
-
-    def refresh_clear_statistics_dialog_theme(self) -> None:
+    def refresh_clear_statistics_dialog_theme(
+        self,
+    ) -> None:
         if self._clear_statistics_dialog is None:
             return
 
+        # Bir sonraki açılışta güncel tema ile yeniden oluşturulur.
         self._clear_statistics_dialog = None
 
-    def refresh_stats(self) -> None:
-        if not self.ids:
-            return
-
-        self.empty_subject_text = self.app.t(
-            "no_subject_statistics_this_week"
-        )
-        self.empty_recent_text = self.app.t(
-            "no_completed_focus_sessions_today"
-        )
-
-        self.refresh_subject_filter()
-        self.refresh_today_metrics()
-        self.refresh_source_breakdown()
-        self.refresh_goal()
-        self.render_weekly_overview()
-        self.render_subject_distribution()
-        self.render_recent_sessions()
-
     # ---------------------------------------------------------
-    # TARİH VE OTURUM YARDIMCILARI
+    # SESSION HELPERS
     # ---------------------------------------------------------
 
-    def get_sessions(self) -> list[dict[str, Any]]:
-        sessions = self.app.app_data.get("sessions", [])
+    def get_sessions(
+        self,
+    ) -> list[dict[str, Any]]:
+        sessions = self.app.app_data.get(
+            "sessions",
+            [],
+        )
 
         if not isinstance(sessions, list):
             return []
@@ -275,47 +368,53 @@ class StatisticsScreen(MDScreen):
             if isinstance(session, dict)
         ]
 
-    def get_today_sessions(self) -> list[dict[str, Any]]:
-        today_text = date.today().isoformat()
-        result = []
-
-        for session in self.get_sessions():
-            if session.get("mode") != "focus":
-                continue
-
-            completed_at = str(
-                session.get("completed_at", "")
-            )
-
-            if completed_at.startswith(today_text):
-                result.append(session)
-
-        return result
-
-    def get_week_start_date(self) -> date:
-        today = date.today()
-
-        week_start_day = self.app.app_data.get(
-            "settings",
-            {},
-        ).get(
-            "week_start_day",
-            "monday",
+    def get_today_sessions(
+        self,
+    ) -> list[dict[str, Any]]:
+        return self._filter_today_sessions(
+            self.get_sessions()
         )
 
-        if week_start_day == "sunday":
-            days_since_sunday = (today.weekday() + 1) % 7
-            return today - timedelta(days=days_since_sunday)
+    def get_week_sessions(
+        self,
+    ) -> list[dict[str, Any]]:
+        return self._filter_week_sessions(
+            self.get_sessions()
+        )
 
-        return today - timedelta(days=today.weekday())
+    def _filter_today_sessions(
+        self,
+        sessions: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        today_text = date.today().isoformat()
 
-    def get_week_sessions(self) -> list[dict[str, Any]]:
+        return [
+            session
+            for session in sessions
+            if (
+                session.get("mode") == "focus"
+                and str(
+                    session.get(
+                        "completed_at",
+                        "",
+                    )
+                ).startswith(today_text)
+            )
+        ]
+
+    def _filter_week_sessions(
+        self,
+        sessions: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
         start_of_week = self.get_week_start_date()
-        end_of_week = start_of_week + timedelta(days=7)
+        end_of_week = (
+            start_of_week
+            + timedelta(days=7)
+        )
 
         result = []
 
-        for session in self.get_sessions():
+        for session in sessions:
             if session.get("mode") != "focus":
                 continue
 
@@ -326,54 +425,110 @@ class StatisticsScreen(MDScreen):
             if session_date is None:
                 continue
 
-            if start_of_week <= session_date < end_of_week:
+            if (
+                start_of_week
+                <= session_date
+                < end_of_week
+            ):
                 result.append(session)
 
         return result
 
+    def get_week_start_date(self) -> date:
+        today = date.today()
+
+        week_start_day = (
+            self.app.app_data
+            .get("settings", {})
+            .get(
+                "week_start_day",
+                "monday",
+            )
+        )
+
+        if week_start_day == "sunday":
+            days_since_sunday = (
+                today.weekday() + 1
+            ) % 7
+
+            return (
+                today
+                - timedelta(
+                    days=days_since_sunday
+                )
+            )
+
+        return (
+            today
+            - timedelta(
+                days=today.weekday()
+            )
+        )
+
     # ---------------------------------------------------------
-    # GÜNLÜK METRİKLER
+    # DAILY METRICS
     # ---------------------------------------------------------
 
-    def refresh_today_metrics(self) -> None:
-        today_sessions = self.get_today_sessions()
-
+    def refresh_today_metrics(
+        self,
+        today_sessions: list[dict[str, Any]],
+    ) -> None:
         total_focus_seconds = sum(
             self._safe_seconds(
-                session.get("duration_seconds")
+                session.get(
+                    "duration_seconds"
+                )
             )
             for session in today_sessions
         )
 
         total_away_seconds = sum(
             self._safe_seconds(
-                session.get("away_seconds")
+                session.get(
+                    "away_seconds"
+                )
             )
             for session in today_sessions
         )
 
-        self.today_focus_text = self.format_hours_minutes(
-            total_focus_seconds
+        self.today_focus_text = (
+            self.format_hours_minutes(
+                total_focus_seconds
+            )
         )
 
         self.completed_sessions_text = str(
             len(today_sessions)
         )
 
-        self.away_time_text = self.format_hours_minutes(
-            total_away_seconds
+        self.away_time_text = (
+            self.format_hours_minutes(
+                total_away_seconds
+            )
         )
 
-    def refresh_source_breakdown(self) -> None:
+    # ---------------------------------------------------------
+    # SOURCE BREAKDOWN
+    # ---------------------------------------------------------
+
+    def refresh_source_breakdown(
+        self,
+        today_sessions: list[dict[str, Any]],
+    ) -> None:
         study_plan_seconds = 0
         regular_pomodoro_seconds = 0
 
-        for session in self.get_today_sessions():
+        for session in today_sessions:
             duration = self._safe_seconds(
-                session.get("duration_seconds")
+                session.get(
+                    "duration_seconds"
+                )
             )
 
-            if session.get("source") == "regular_pomodoro":
+            if (
+                session.get("source")
+                == "regular_pomodoro"
+            ):
                 regular_pomodoro_seconds += duration
             else:
                 study_plan_seconds += duration
@@ -384,7 +539,9 @@ class StatisticsScreen(MDScreen):
         )
 
         self.study_plan_focus_text = (
-            self.format_hours_minutes(study_plan_seconds)
+            self.format_hours_minutes(
+                study_plan_seconds
+            )
         )
 
         self.regular_pomodoro_focus_text = (
@@ -393,27 +550,33 @@ class StatisticsScreen(MDScreen):
             )
         )
 
-        self.total_focus_text = self.format_hours_minutes(
-            total_seconds
+        self.total_focus_text = (
+            self.format_hours_minutes(
+                total_seconds
+            )
         )
 
     # ---------------------------------------------------------
-    # GÜNLÜK HEDEF
+    # DAILY GOAL
     # ---------------------------------------------------------
 
-    def refresh_goal(self) -> None:
+    def refresh_goal(
+        self,
+        today_sessions: list[dict[str, Any]],
+    ) -> None:
         total_seconds = sum(
             self._safe_seconds(
-                session.get("duration_seconds")
+                session.get(
+                    "duration_seconds"
+                )
             )
-            for session in self.get_today_sessions()
+            for session in today_sessions
         )
 
         goal_minutes = self._safe_positive_int(
-            self.app.app_data.get(
-                "settings",
-                {},
-            ).get(
+            self.app.app_data
+            .get("settings", {})
+            .get(
                 "daily_focus_goal_minutes",
                 300,
             ),
@@ -422,11 +585,13 @@ class StatisticsScreen(MDScreen):
 
         goal_seconds = goal_minutes * 60
 
-        ratio = (
-            min(total_seconds / goal_seconds, 1)
-            if goal_seconds > 0
-            else 0
-        )
+        if goal_seconds > 0:
+            ratio = min(
+                total_seconds / goal_seconds,
+                1,
+            )
+        else:
+            ratio = 0
 
         self.goal_progress = ratio * 100
 
@@ -437,14 +602,18 @@ class StatisticsScreen(MDScreen):
         )
 
     # ---------------------------------------------------------
-    # DERS FİLTRESİ
+    # SUBJECT FILTER
     # ---------------------------------------------------------
 
-    def get_subject_options(self) -> list[dict[str, str]]:
+    def get_subject_options(
+        self,
+    ) -> list[dict[str, str]]:
         options = [
             {
                 "id": "all",
-                "name": self.app.t("all_subjects"),
+                "name": self.app.t(
+                    "all_subjects"
+                ),
             }
         ]
 
@@ -452,8 +621,14 @@ class StatisticsScreen(MDScreen):
             "subjects",
             [],
         ):
+            if not isinstance(subject, dict):
+                continue
+
             subject_id = str(
-                subject.get("id", "subject_other")
+                subject.get(
+                    "id",
+                    "subject_other",
+                )
             )
 
             subject_name = str(
@@ -477,21 +652,34 @@ class StatisticsScreen(MDScreen):
 
     def refresh_subject_filter(self) -> None:
         options = self.get_subject_options()
-        values = [option["name"] for option in options]
 
-        self.subject_filter_values = values
+        if not options:
+            return
+
+        self.subject_filter_values = [
+            option["name"]
+            for option in options
+        ]
 
         selected_option = next(
             (
                 option
                 for option in options
-                if option["id"] == self.selected_subject_id
+                if (
+                    option["id"]
+                    == self.selected_subject_id
+                )
             ),
             options[0],
         )
 
-        self.selected_subject_id = selected_option["id"]
-        self.selected_subject_name = selected_option["name"]
+        self.selected_subject_id = (
+            selected_option["id"]
+        )
+
+        self.selected_subject_name = (
+            selected_option["name"]
+        )
 
     def change_subject_filter(
         self,
@@ -499,71 +687,117 @@ class StatisticsScreen(MDScreen):
     ) -> None:
         for option in self.get_subject_options():
             if option["name"] == selected_name:
-                self.selected_subject_id = option["id"]
-                self.selected_subject_name = option["name"]
+                self.selected_subject_id = (
+                    option["id"]
+                )
+
+                self.selected_subject_name = (
+                    option["name"]
+                )
+
                 break
 
-        self.render_weekly_overview()
+        # Filtre yalnızca haftalık grafiği etkiliyor.
+        self.render_weekly_overview(
+            self.get_week_sessions()
+        )
 
     # ---------------------------------------------------------
-    # HAFTALIK GÖRÜNÜM
+    # WEEKLY OVERVIEW
     # ---------------------------------------------------------
 
-    def get_week_day_labels(self) -> list[str]:
-        week_start_day = self.app.app_data.get(
-            "settings",
-            {},
-        ).get(
-            "week_start_day",
-            "monday",
+    def get_week_day_labels(
+        self,
+    ) -> list[str]:
+        week_start_day = (
+            self.app.app_data
+            .get("settings", {})
+            .get(
+                "week_start_day",
+                "monday",
+            )
         )
 
         if week_start_day == "sunday":
             return [
-                self.app.t("weekday_sun_short"),
-                self.app.t("weekday_mon_short"),
-                self.app.t("weekday_tue_short"),
-                self.app.t("weekday_wed_short"),
-                self.app.t("weekday_thu_short"),
-                self.app.t("weekday_fri_short"),
-                self.app.t("weekday_sat_short"),
+                self.app.t(
+                    "weekday_sun_short"
+                ),
+                self.app.t(
+                    "weekday_mon_short"
+                ),
+                self.app.t(
+                    "weekday_tue_short"
+                ),
+                self.app.t(
+                    "weekday_wed_short"
+                ),
+                self.app.t(
+                    "weekday_thu_short"
+                ),
+                self.app.t(
+                    "weekday_fri_short"
+                ),
+                self.app.t(
+                    "weekday_sat_short"
+                ),
             ]
 
         return [
-            self.app.t("weekday_mon_short"),
-            self.app.t("weekday_tue_short"),
-            self.app.t("weekday_wed_short"),
-            self.app.t("weekday_thu_short"),
-            self.app.t("weekday_fri_short"),
-            self.app.t("weekday_sat_short"),
-            self.app.t("weekday_sun_short"),
+            self.app.t(
+                "weekday_mon_short"
+            ),
+            self.app.t(
+                "weekday_tue_short"
+            ),
+            self.app.t(
+                "weekday_wed_short"
+            ),
+            self.app.t(
+                "weekday_thu_short"
+            ),
+            self.app.t(
+                "weekday_fri_short"
+            ),
+            self.app.t(
+                "weekday_sat_short"
+            ),
+            self.app.t(
+                "weekday_sun_short"
+            ),
         ]
 
     def get_weekly_daily_totals(
         self,
+        week_sessions: list[dict[str, Any]],
     ) -> dict[str, int]:
         start_of_week = self.get_week_start_date()
 
         totals = {
             (
-                start_of_week + timedelta(days=index)
+                start_of_week
+                + timedelta(days=index)
             ).isoformat(): 0
             for index in range(7)
         }
 
-        for session in self.get_week_sessions():
+        for session in week_sessions:
             if (
                 self.selected_subject_id != "all"
-                and session.get(
-                    "subject_id",
-                    "subject_other",
+                and str(
+                    session.get(
+                        "subject_id",
+                        "subject_other",
+                    )
                 )
                 != self.selected_subject_id
             ):
                 continue
 
             session_date = self._parse_session_date(
-                session.get("completed_at")
+                session.get(
+                    "completed_at"
+                )
             )
 
             if session_date is None:
@@ -571,19 +805,32 @@ class StatisticsScreen(MDScreen):
 
             key = session_date.isoformat()
 
-            if key in totals:
-                totals[key] += self._safe_seconds(
-                    session.get("duration_seconds")
+            if key not in totals:
+                continue
+
+            totals[key] += self._safe_seconds(
+                session.get(
+                    "duration_seconds"
                 )
+            )
 
         return totals
 
-    def render_weekly_overview(self) -> None:
-        totals = self.get_weekly_daily_totals()
+    def render_weekly_overview(
+        self,
+        week_sessions: list[dict[str, Any]],
+    ) -> None:
+        totals = self.get_weekly_daily_totals(
+            week_sessions
+        )
+
         labels = self.get_week_day_labels()
 
         values = [
-            max(0, int(seconds)) // 60
+            max(
+                0,
+                int(seconds),
+            ) // 60
             for seconds in totals.values()
         ]
 
@@ -597,6 +844,7 @@ class StatisticsScreen(MDScreen):
 
         self.weekly_labels = labels
         self.weekly_values = values
+
         self.weekly_value_texts = [
             str(value)
             for value in values
@@ -609,22 +857,51 @@ class StatisticsScreen(MDScreen):
             subject=self.selected_subject_name,
         )
 
-        if "weekly_bar_chart" in self.ids:
-            self.ids.weekly_bar_chart.set_data(
+        chart = self.ids.get(
+            "weekly_bar_chart"
+        )
+
+        if chart is not None:
+            chart.set_data(
                 labels,
                 values,
             )
 
     # ---------------------------------------------------------
-    # DERS DAĞILIMI
+    # SUBJECT DISTRIBUTION
     # ---------------------------------------------------------
 
     def get_weekly_subject_totals(
         self,
+        week_sessions: list[dict[str, Any]],
     ) -> list[dict[str, Any]]:
-        totals: dict[str, dict[str, Any]] = {}
+        totals: dict[
+            str,
+            dict[str, Any],
+        ] = {}
 
-        for session in self.get_week_sessions():
+        # Her subject için tekrar tekrar subjects listesini
+        # taramamak için renkleri bir kere map'e dönüştür.
+        subject_colors = {
+            str(
+                subject.get(
+                    "id",
+                    "subject_other",
+                )
+            ): str(
+                subject.get(
+                    "color",
+                    "#A78BFA",
+                )
+            )
+            for subject in self.app.app_data.get(
+                "subjects",
+                [],
+            )
+            if isinstance(subject, dict)
+        }
+
+        for session in week_sessions:
             subject_id = str(
                 session.get(
                     "subject_id",
@@ -634,7 +911,9 @@ class StatisticsScreen(MDScreen):
 
             subject_name = str(
                 session.get("subject_name")
-                or self.app.t("other_subject")
+                or self.app.t(
+                    "other_subject"
+                )
             )
 
             if subject_id not in totals:
@@ -642,14 +921,17 @@ class StatisticsScreen(MDScreen):
                     "id": subject_id,
                     "name": subject_name,
                     "seconds": 0,
-                    "color": self.get_subject_color(
-                        subject_id
+                    "color": subject_colors.get(
+                        subject_id,
+                        "#A78BFA",
                     ),
                 }
 
             totals[subject_id]["seconds"] += (
                 self._safe_seconds(
-                    session.get("duration_seconds")
+                    session.get(
+                        "duration_seconds"
+                    )
                 )
             )
 
@@ -659,14 +941,22 @@ class StatisticsScreen(MDScreen):
             reverse=True,
         )
 
-    def render_subject_distribution(self) -> None:
-        if "subject_list" not in self.ids:
+    def render_subject_distribution(
+        self,
+        week_sessions: list[dict[str, Any]],
+    ) -> None:
+        container = self.ids.get(
+            "subject_list"
+        )
+
+        if container is None:
             return
 
-        container = self.ids.subject_list
         container.clear_widgets()
 
-        subjects = self.get_weekly_subject_totals()
+        subjects = self.get_weekly_subject_totals(
+            week_sessions
+        )
 
         total_seconds = sum(
             item["seconds"]
@@ -677,25 +967,71 @@ class StatisticsScreen(MDScreen):
 
         self.subject_total_text = self.app.t(
             "this_week_minutes"
-        ).format(minutes=total_minutes)
+        ).format(
+            minutes=total_minutes
+        )
+
+        subject_empty = self.ids.get(
+            "subject_empty"
+        )
 
         if total_seconds <= 0:
-            self.ids.subject_empty.opacity = 1
-            self.ids.subject_empty.height = dp(34)
+            if subject_empty is not None:
+                subject_empty.opacity = 1
+                subject_empty.height = dp(34)
+
             return
 
-        self.ids.subject_empty.opacity = 0
-        self.ids.subject_empty.height = 0
+        if subject_empty is not None:
+            subject_empty.opacity = 0
+            subject_empty.height = 0
+
+        body_size = sp(
+            self.app.typography(
+                "body",
+                self.app.layout_profile,
+            )
+        )
+
+        small_body_size = sp(
+            self.app.typography(
+                "body_small",
+                self.app.layout_profile,
+            )
+        )
+
+        card_color = self.app.theme_colors[
+            "card_soft"
+        ]
+
+        text_color = self.app.theme_colors[
+            "text"
+        ]
+
+        muted_color = self.app.theme_colors[
+            "muted"
+        ]
+
+        primary_color = self.app.theme_colors[
+            "primary"
+        ]
 
         for item in subjects:
             ratio = (
-                item["seconds"] / total_seconds
-                if total_seconds > 0
-                else 0
+                item["seconds"]
+                / total_seconds
             )
 
-            minutes = item["seconds"] // 60
-            percent = int(round(ratio * 100))
+            minutes = (
+                item["seconds"]
+                // 60
+            )
+
+            percent = int(
+                round(
+                    ratio * 100
+                )
+            )
 
             card = MDCard(
                 orientation="vertical",
@@ -709,7 +1045,7 @@ class StatisticsScreen(MDScreen):
                     dp(16),
                 ],
                 elevation=0,
-                md_bg_color=self.app.theme_colors["card_soft"],
+                md_bg_color=card_color,
             )
 
             header = MDBoxLayout(
@@ -719,22 +1055,20 @@ class StatisticsScreen(MDScreen):
             )
 
             name_label = MDLabel(
-                text=str(item["name"]),
+                text=str(
+                    item["name"]
+                ),
                 adaptive_height=True,
                 bold=True,
                 theme_text_color="Custom",
-                text_color=self.app.theme_colors["text"],
-            )
-
-            name_label.font_size = sp(
-                self.app.typography(
-                    "body",
-                    self.app.layout_profile
-                )
+                text_color=text_color,
+                font_size=body_size,
             )
 
             value_label = MDLabel(
-                text=self.app.t("subject_distribution_value").format(
+                text=self.app.t(
+                    "subject_distribution_value"
+                ).format(
                     minutes=minutes,
                     percent=percent,
                 ),
@@ -743,57 +1077,105 @@ class StatisticsScreen(MDScreen):
                 halign="right",
                 adaptive_height=True,
                 theme_text_color="Custom",
-                text_color=self.app.theme_colors["muted"],
-            )
-
-            value_label.font_size = sp(
-                self.app.typography(
-                    "body_small",
-                    self.app.layout_profile
-                )
+                text_color=muted_color,
+                font_size=small_body_size,
             )
 
             progress = MDProgressBar(
                 value=ratio * 100,
                 size_hint_y=None,
                 height=dp(8),
-                color=self.app.theme_colors["primary"],
+                color=primary_color,
             )
 
-            header.add_widget(name_label)
-            header.add_widget(value_label)
+            header.add_widget(
+                name_label
+            )
 
-            card.add_widget(header)
-            card.add_widget(progress)
+            header.add_widget(
+                value_label
+            )
 
-            container.add_widget(card)
+            card.add_widget(
+                header
+            )
+
+            card.add_widget(
+                progress
+            )
+
+            container.add_widget(
+                card
+            )
 
     # ---------------------------------------------------------
-    # SON OTURUMLAR
+    # RECENT SESSIONS
     # ---------------------------------------------------------
 
-    def render_recent_sessions(self) -> None:
-        if "recent_list" not in self.ids:
+    def render_recent_sessions(
+        self,
+        today_sessions: list[dict[str, Any]],
+    ) -> None:
+        container = self.ids.get(
+            "recent_list"
+        )
+
+        if container is None:
             return
 
-        container = self.ids.recent_list
         container.clear_widgets()
 
         sessions = sorted(
-            self.get_today_sessions(),
+            today_sessions,
             key=lambda session: str(
-                session.get("completed_at", "")
+                session.get(
+                    "completed_at",
+                    "",
+                )
             ),
             reverse=True,
         )[:5]
 
+        recent_empty = self.ids.get(
+            "recent_empty"
+        )
+
         if not sessions:
-            self.ids.recent_empty.opacity = 1
-            self.ids.recent_empty.height = dp(42)
+            if recent_empty is not None:
+                recent_empty.opacity = 1
+                recent_empty.height = dp(42)
+
             return
 
-        self.ids.recent_empty.opacity = 0
-        self.ids.recent_empty.height = 0
+        if recent_empty is not None:
+            recent_empty.opacity = 0
+            recent_empty.height = 0
+
+        body_size = sp(
+            self.app.typography(
+                "body",
+                self.app.layout_profile,
+            )
+        )
+
+        small_body_size = sp(
+            self.app.typography(
+                "body_small",
+                self.app.layout_profile,
+            )
+        )
+
+        card_color = self.app.theme_colors[
+            "card_soft"
+        ]
+
+        text_color = self.app.theme_colors[
+            "text"
+        ]
+
+        muted_color = self.app.theme_colors[
+            "muted"
+        ]
 
         for session in sessions:
             source = session.get(
@@ -802,32 +1184,55 @@ class StatisticsScreen(MDScreen):
             )
 
             if source == "regular_pomodoro":
-                title = self.app.t("pomodoro")
-                source_text = self.app.t("pomodoro")
+                title = self.app.t(
+                    "pomodoro"
+                )
+
+                source_text = self.app.t(
+                    "pomodoro"
+                )
+
             else:
                 title = str(
-                    session.get("task_title")
-                    or session.get("subject_name")
-                    or self.app.t("focus_session")
+                    session.get(
+                        "task_title"
+                    )
+                    or session.get(
+                        "subject_name"
+                    )
+                    or self.app.t(
+                        "focus_session"
+                    )
                 )
-                source_text = self.app.t("study_plan")
+
+                source_text = self.app.t(
+                    "study_plan"
+                )
 
             duration_minutes = (
                 self._safe_seconds(
-                    session.get("duration_seconds")
+                    session.get(
+                        "duration_seconds"
+                    )
                 )
                 // 60
             )
 
             away_minutes = (
                 self._safe_seconds(
-                    session.get("away_seconds")
+                    session.get(
+                        "away_seconds"
+                    )
                 )
                 // 60
             )
 
-            completed_time = self.format_session_time(
-                session.get("completed_at")
+            completed_time = (
+                self.format_session_time(
+                    session.get(
+                        "completed_at"
+                    )
+                )
             )
 
             card = MDCard(
@@ -842,7 +1247,7 @@ class StatisticsScreen(MDScreen):
                     dp(16),
                 ],
                 elevation=0,
-                md_bg_color=self.app.theme_colors["card_soft"],
+                md_bg_color=card_color,
             )
 
             title_row = MDBoxLayout(
@@ -851,20 +1256,13 @@ class StatisticsScreen(MDScreen):
                 spacing=dp(8),
             )
 
-
             title_label = MDLabel(
                 text=title,
                 bold=True,
                 adaptive_height=True,
                 theme_text_color="Custom",
-                text_color=self.app.theme_colors["text"],
-            )
-
-            title_label.font_size = sp(
-                self.app.typography(
-                    "body",
-                    self.app.layout_profile
-                )
+                text_color=text_color,
+                font_size=body_size,
             )
 
             time_label = MDLabel(
@@ -874,90 +1272,140 @@ class StatisticsScreen(MDScreen):
                 halign="right",
                 adaptive_height=True,
                 theme_text_color="Custom",
-                text_color=self.app.theme_colors["muted"],
-            )
-
-            time_label.font_size = sp(
-                self.app.typography(
-                    "body_small",
-                    self.app.layout_profile
-                )
+                text_color=muted_color,
+                font_size=small_body_size,
             )
 
             detail_label = MDLabel(
-                text=self.app.t("recent_session_detail").format(
+                text=self.app.t(
+                    "recent_session_detail"
+                ).format(
                     source=source_text,
                     focus=duration_minutes,
                     away=away_minutes,
                 ),
                 adaptive_height=True,
                 theme_text_color="Custom",
-                text_color=self.app.theme_colors["muted"],
+                text_color=muted_color,
+                font_size=small_body_size,
             )
 
-            detail_label.font_size = sp(
-                self.app.typography(
-                    "body_small",
-                    self.app.layout_profile
-                )
+            title_row.add_widget(
+                title_label
             )
 
-            title_row.add_widget(title_label)
-            title_row.add_widget(time_label)
+            title_row.add_widget(
+                time_label
+            )
 
-            card.add_widget(title_row)
-            card.add_widget(detail_label)
+            card.add_widget(
+                title_row
+            )
 
-            container.add_widget(card)
+            card.add_widget(
+                detail_label
+            )
+
+            container.add_widget(
+                card
+            )
 
     # ---------------------------------------------------------
-    # FORMAT VE GÜVENLİK
+    # SUBJECT HELPERS
     # ---------------------------------------------------------
 
-    def get_subject_color(self, subject_id: str) -> str:
+    def get_subject_color(
+        self,
+        subject_id: str,
+    ) -> str:
         for subject in self.app.app_data.get(
             "subjects",
             [],
         ):
-            if subject.get("id") == subject_id:
+            if (
+                isinstance(subject, dict)
+                and subject.get("id")
+                == subject_id
+            ):
                 return str(
-                    subject.get("color", "#A78BFA")
+                    subject.get(
+                        "color",
+                        "#A78BFA",
+                    )
                 )
 
         return "#A78BFA"
 
+    # ---------------------------------------------------------
+    # FORMAT / SAFETY
+    # ---------------------------------------------------------
+
     @staticmethod
-    def format_hours_minutes(seconds: int) -> str:
-        seconds = max(0, int(seconds))
+    def format_hours_minutes(
+        seconds: int,
+    ) -> str:
+        seconds = max(
+            0,
+            int(seconds),
+        )
 
         total_minutes = seconds // 60
         hours = total_minutes // 60
         minutes = total_minutes % 60
 
-        return f"{hours:02d}:{minutes:02d}"
+        return (
+            f"{hours:02d}:"
+            f"{minutes:02d}"
+        )
 
     @staticmethod
-    def format_session_time(value: Any) -> str:
+    def format_session_time(
+        value: Any,
+    ) -> str:
         try:
-            parsed = datetime.fromisoformat(str(value))
-            return parsed.strftime("%H:%M")
-        except (TypeError, ValueError):
+            parsed = datetime.fromisoformat(
+                str(value)
+            )
+
+            return parsed.strftime(
+                "%H:%M"
+            )
+
+        except (
+            TypeError,
+            ValueError,
+        ):
             return "--:--"
 
     @staticmethod
-    def _parse_session_date(value: Any):
+    def _parse_session_date(
+        value: Any,
+    ) -> date | None:
         try:
             return datetime.fromisoformat(
                 str(value)
             ).date()
-        except (TypeError, ValueError):
+
+        except (
+            TypeError,
+            ValueError,
+        ):
             return None
 
     @staticmethod
-    def _safe_seconds(value: Any) -> int:
+    def _safe_seconds(
+        value: Any,
+    ) -> int:
         try:
-            return max(0, int(value or 0))
-        except (TypeError, ValueError):
+            return max(
+                0,
+                int(value or 0),
+            )
+
+        except (
+            TypeError,
+            ValueError,
+        ):
             return 0
 
     @staticmethod
@@ -967,7 +1415,15 @@ class StatisticsScreen(MDScreen):
     ) -> int:
         try:
             parsed = int(value)
-        except (TypeError, ValueError):
+
+        except (
+            TypeError,
+            ValueError,
+        ):
             return default
 
-        return parsed if parsed > 0 else default
+        return (
+            parsed
+            if parsed > 0
+            else default
+        )

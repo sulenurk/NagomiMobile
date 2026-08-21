@@ -23,3 +23,14 @@
         Ellipse:
             pos: (root.x + root.width - dp(28), root.y + dp(4)) if root.state == "down" else (root.x + dp(4), root.y + dp(4))
             size: dp(24), dp(24)
+
+<DarkSpinner@Spinner>:
+    background_normal: ""
+    background_down: ""
+    background_color: app.theme_colors["card_soft"]
+    color: app.theme_colors["text"]
+
+    font_size: sp(app.typography("input", app.layout_profile))
+    size_hint_y: None
+    height: dp(48)
+    padding: dp(14), 0

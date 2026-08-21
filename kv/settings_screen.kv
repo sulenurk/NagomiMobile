@@ -188,6 +188,44 @@
                         height: dp(1)
                         color: app.theme_colors["card_border"]
 
+                    # Titreşim aç / kapat
+                    MDBoxLayout:
+                        adaptive_height: True
+                        spacing: dp(12)
+
+                        MDBoxLayout:
+                            orientation: "vertical"
+                            adaptive_height: True
+
+                            MDLabel:
+                                text: app.t("vibration", app.translation_version)
+                                font_size: sp(app.typography("body", app.layout_profile))
+                                bold: True
+                                theme_text_color: "Custom"
+                                text_color: app.theme_colors["text"]
+                                adaptive_height: True
+
+                            MDLabel:
+                                text: app.t("vibration_description", app.translation_version)
+                                font_size: sp(app.typography("caption", app.layout_profile))
+                                theme_text_color: "Custom"
+                                text_color: app.theme_colors["muted"]
+                                adaptive_height: True
+                                text_size: self.width, None
+
+                        AnchorLayout:
+                            size_hint_x: None
+                            width: dp(68)
+                            padding: 0, 0, dp(12), 0
+                            anchor_x: "center"
+                            anchor_y: "center"
+
+                            NagomiSwitch:
+                                size_hint: None, None
+                                size: dp(app.responsive(52, 58, 48, 68, 62)), dp(app.responsive(28, 32, 26, 38, 34))
+                                state: "down" if root.vibration_enabled else "normal"
+                                on_release: root.set_vibration_enabled(self.state == "down")
+        
                     # Alarm tonu seçimi
                     MDBoxLayout:
                         orientation: "vertical"
@@ -210,23 +248,15 @@
                             adaptive_height: True
                             text_size: self.width, None
 
-                        Spinner:
+                        DarkSpinner:
                             id: alarm_sound_spinner
                             text: root.selected_alarm_name
-                            font_size: sp(app.typography("input", app.layout_profile))
                             values: root.alarm_display_values
-                            size_hint_y: None
-                            height: dp(48)
-                            background_normal: ""
-                            background_down: ""
-                            background_color: app.theme_colors["surface_light"]
-                            color: app.theme_colors["text"]
 
                             disabled: not root.sound_enabled
                             opacity: 1 if root.sound_enabled else 0.45
 
                             on_text: root.set_alarm_sound_by_name(self.text)
-
                
                 # -------------------------------------------------
                 # GÖRÜNÜM VE RENK PALETİ
@@ -257,18 +287,10 @@
                         adaptive_height: True
                         text_size: self.width, None
 
-                    Spinner:
+                    DarkSpinner:
                         id: color_palette_spinner
                         text: app.selected_palette_name
-                        font_size: sp(app.typography("input", app.layout_profile))
                         values: app.palette_display_values
-                        size_hint_y: None
-                        height: dp(48)
-
-                        background_normal: ""
-                        background_down: ""
-                        background_color: app.theme_colors["surface_light"] if app.theme_version >= 0 else (1, 1, 1, 1)
-                        color: app.theme_colors["text"] if app.theme_version >= 0 else (0, 0, 0, 1)
 
                         on_text:
                             app.set_color_palette_by_name(self.text)
@@ -331,10 +353,8 @@
                     MDTextField:
                         id: daily_goal
                         text: root.daily_goal_text
-                        hint_text: app.t("daily_focus_goal")
+                        hint_text: app.t("daily_focus_goal", app.translation_version)
                         font_size: sp(app.typography("input", app.layout_profile))
-                        helper_text: app.t("minutes")
-                        helper_text_mode: "persistent"
                         input_filter: "int"
                         mode: "fill"
                         size_hint_y: None
@@ -411,16 +431,10 @@
                             text_color: app.theme_colors["muted"]
                             adaptive_height: True
 
-                        Spinner:
+                        DarkSpinner:
+                            id: week_start_spinner
                             text: root.week_start_text
-                            values: [app.t("monday"), app.t("sunday")]
-                            font_size: sp(app.typography("input", app.layout_profile))
-                            size_hint_y: None
-                            height: dp(48)
-                            background_normal: ""
-                            background_down: ""
-                            background_color: app.theme_colors["surface_light"]
-                            color: app.theme_colors["text"]
+                            values: [app.t("monday", app.translation_version), app.t("sunday", app.translation_version)]
                             on_text: root.change_week_start(self.text)
 
                 MDRaisedButton:

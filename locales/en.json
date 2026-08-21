@@ -115,7 +115,7 @@
   "sound_notifications_description": "Plays an alarm sound when focus or break is completed.",
 
   "plan_and_statistics": "Plan & Statistics",
-  "daily_focus_goal": "Daily focus goal",
+  "daily_focus_goal": "Daily focus goal (min)",
   "daily_goal": "Daily Goal",
   "first_day_of_week": "First Day of the Week",
   "first_day_of_week_description": "Choose which day the week starts on for statistics.",
@@ -188,5 +188,25 @@
   "clear_statistics": "Clear statistics",
   "clear_statistics_confirmation": "All of your study history and statistics records will be deleted. This action cannot be undone.",
   "clear": "Clear",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+
+  "vibration": "Vibration",
+  "vibration_description": "Vibrate when a timer finishes.",
+
+  "clear_completed": "Clear Completed",
+  "clear_study_plan": "Clear Study Plan",
+  "clear_study_plan_confirmation": "This will remove all tasks from the Study Plan. Your statistics will not be affected.",
+  "no_completed_tasks": "There are no completed tasks.",
+  "completed_tasks_cleared": "Completed tasks cleared.",
+  "study_plan_cleared": "Study plan cleared.",
+
+  "palette_purple": "Purple",
+  "palette_pinky": "Pinky",
+  "palette_ocean_blue": "Ocean Blue",
+  "palette_forest_green": "Forest Green",
+  "palette_monochrome": "Monochrome",
+  "palette_slate": "Slate",
+  "palette_sunset_amber": "Sunset Amber",
+  "palette_nordic_mint": "Nordic Mint"
+
 }

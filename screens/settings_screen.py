@@ -13,6 +13,7 @@ from kivymd.uix.screen import MDScreen
 class SettingsScreen(MDScreen):
     auto_start_focus = BooleanProperty(False)
     auto_start_break = BooleanProperty(False)
+    vibration_enabled = BooleanProperty(True)
     sound_enabled = BooleanProperty(True)
 
     selected_alarm_name = StringProperty("Beep")
@@ -86,6 +87,10 @@ class SettingsScreen(MDScreen):
                 self.get_alarm_display_name(alarm_key)
             )
 
+            self.vibration_enabled = bool(
+                settings.get("vibration_enabled", True)
+            )
+
             self.show_queue_progress = bool(
                 settings.get("show_queue_progress", True)
             )
@@ -104,21 +109,31 @@ class SettingsScreen(MDScreen):
                 )
             )
 
-            week_start_day = settings.get(
-                "week_start_day",
-                "monday",
-            )
+            week_start_day = str(
+                settings.get(
+                    "week_start_day",
+                    "monday",
+                )
+            ).strip().lower()
 
-            self.week_start_text = (
-                self.app.t("sunday")
-                if week_start_day == "sunday"
-                else self.app.t("monday")
+            if week_start_day not in ("monday", "sunday"):
+                week_start_day = "monday"
+                settings["week_start_day"] = "monday"
+
+            self.week_start_text = self.app.t(
+                week_start_day
             )
 
             self.status_text = ""
 
         finally:
             self._is_loading = False
+
+    def set_vibration_enabled(self, enabled: bool) -> None:
+        enabled = bool(enabled)
+
+        self.vibration_enabled = enabled
+        self.app.set_vibration_enabled(enabled)
 
     def set_alarm_sound_by_name(
         self,
@@ -269,13 +284,13 @@ class SettingsScreen(MDScreen):
         self.status_text = self.app.t("settings_saved")
 
     def change_week_start(self, selected_value: str) -> None:
-        self.week_start_text = selected_value
+        if selected_value == self.app.t("sunday"):
+            week_start_key = "sunday"
+        else:
+            week_start_key = "monday"
 
-        self.get_settings()["week_start_day"] = (
-            "sunday"
-            if selected_value == self.app.t("sunday")
-            else "monday"
-        )
+        self.get_settings()["week_start_day"] = week_start_key
+        self.week_start_text = self.app.t(week_start_key)
 
         self._save_without_message()
 
