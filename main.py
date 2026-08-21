@@ -7,9 +7,9 @@ from kivy.config import Config
 from kivy.utils import platform
 
 if platform != "android":
-    Config.set("graphics", "width", "320")
-    Config.set("graphics", "height", "568")
-    Config.set("graphics", "resizable", "0")
+    Config.set("graphics", "width", "700")
+    Config.set("graphics", "height", "1300")
+    Config.set("graphics", "resizable", "1")
 
     Config.set("graphics", "position", "custom")
     Config.set("graphics", "left", "50")
@@ -257,13 +257,7 @@ class NagomiApp(ResponsiveMixin, MDApp):
                 # landscape engelli.
                 activity.setRequestedOrientation(
                     ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
-                )
-            else:
-                # Tablet:
-                # mevcut rotation / landscape desteği korunur.
-                activity.setRequestedOrientation(
-                    ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
-                )
+                )    
 
         except Exception as error:
             print("[ORIENTATION ERROR]", error)

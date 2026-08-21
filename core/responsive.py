@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from kivy.utils import platform
 from kivy.core.window import Window
 from kivy.metrics import dp
 from kivy.properties import (
@@ -22,6 +23,8 @@ class ResponsiveMixin:
     screen_width_dp = NumericProperty(360)
     screen_height_dp = NumericProperty(800)
     shortest_side_dp = NumericProperty(360)
+
+    ui_scale = NumericProperty(1.0)
 
     layout_profile = StringProperty(
         "phone_portrait"
@@ -68,7 +71,7 @@ class ResponsiveMixin:
         "caption": (9, 10, 8, 14, 12),
 
         # Timer'a özel
-        "timer": (28, 66, 42, 120, 56),
+        "timer": (28, 66, 42, 70, 56),
 
         # Cycle'a özel
         "cycle": (10, 20, 11, 30, 15),
@@ -86,6 +89,36 @@ class ResponsiveMixin:
         "tablet_portrait": 3,
         "tablet_landscape": 4,
     }
+
+    def _get_device_smallest_width_dp(self) -> float:
+        if platform == "android":
+            try:
+                from jnius import autoclass
+
+                PythonActivity = autoclass(
+                    "org.kivy.android.PythonActivity"
+                )
+
+                activity = PythonActivity.mActivity
+                configuration = (
+                    activity.getResources().getConfiguration()
+                )
+
+                value = float(
+                    configuration.smallestScreenWidthDp
+                )
+
+                if value > 0:
+                    return value
+
+            except Exception as error:
+                if RESPONSIVE_DEBUG:
+                    print(
+                        "[RESPONSIVE DEVICE SIZE ERROR]",
+                        error,
+                    )
+
+        return self.shortest_side_dp
 
     def setup_responsive_layout(self) -> None:
         self.update_screen_metrics()
@@ -125,11 +158,29 @@ class ResponsiveMixin:
 
         self.is_portrait = not self.is_landscape
 
+        device_smallest_width_dp = (
+            self._get_device_smallest_width_dp()
+        )
+
         self.is_tablet = (
-            self.shortest_side_dp >= 600
+            device_smallest_width_dp >= 600
         )
 
         self.is_phone = not self.is_tablet
+
+        scale_reference_dp = (
+            device_smallest_width_dp
+            if self.is_tablet
+            else self.shortest_side_dp
+        )
+
+        self.ui_scale = max(
+            0.85,
+            min(
+                scale_reference_dp / 360.0,
+                1.70,
+            ),
+        )
 
         self.is_compact_phone = (
             self.is_phone
@@ -167,11 +218,13 @@ class ResponsiveMixin:
                 "[RESPONSIVE]",
                 f"raw={Window.width}x{Window.height}",
                 f"dp={self.screen_width_dp:.0f}x{self.screen_height_dp:.0f}",
+                f"device_min={device_smallest_width_dp:.0f}",
+                f"scale={self.ui_scale:.2f}",
                 f"old={old_profile}",
                 f"new={self.layout_profile}",
+                f"tablet={self.is_tablet}",
                 f"landscape={self.is_landscape}",
             )
-
     def responsive(
         self,
         compact_portrait: float,
@@ -203,4 +256,10 @@ class ResponsiveMixin:
             self._TYPOGRAPHY_STYLES["body"],
         )
 
-        return self.responsive(*style_values)
+        base_size = self.responsive(*style_values)
+
+        font_scale = 1.0 + (
+            (self.ui_scale - 1.0) * 0.35
+        )
+
+        return base_size * font_scale

@@ -39,7 +39,7 @@
 
                 MDLabel:
                     id: pomodoro_page_title
-                    text: app.t("pomodoro", app.translation_version)
+                    text: root.mode_text
                     halign: "center"
                     bold: True
                     font_size: sp(app.typography("page_title", app.layout_profile))
@@ -65,19 +65,7 @@
 
                     Widget:
                         size_hint_y: None
-                        height: dp(app.responsive(8, 10, 8, 10, 14))
-
-                    MDLabel:
-                        text: root.mode_text
-                        halign: "center"
-                        valign: "middle"
-                        bold: True
-                        font_size: sp(app.typography("section_title", app.layout_profile))
-                        theme_text_color: "Custom"
-                        text_color: root.mode_color
-                        size_hint_y: None
-                        height: dp(app.responsive(24, 30, 22, 42, 36))
-                        text_size: self.width, self.height
+                        height: dp(app.responsive(6, 10, 6, 12, 10))
 
                     Widget:
                         size_hint_y: None
@@ -209,19 +197,9 @@
                         size_hint_x: 1
                         spacing: dp(4)
 
-                        MDLabel:
-                            text: root.mode_text
-                            halign: "center"
-                            valign: "middle"
-                            bold: True
-                            font_size: sp(app.typography("section_title", app.layout_profile))
-                            theme_text_color: "Custom"
-                            text_color: root.mode_color
-                            size_hint_y: None
-                            height: dp(26)
-                            text_size: self.width, self.height
-
                         AnchorLayout:
+                            size_hint_y: None
+                            height: dp(225)
                             anchor_x: "center"
                             anchor_y: "center"
 
@@ -240,7 +218,7 @@
                                 MDBoxLayout:
                                     orientation: "vertical"
                                     size_hint: None, None
-                                    size: dp(150), dp(74)
+                                    size: dp(185), dp(92)
                                     spacing: 0
                                     pos_hint: {"center_x": 0.5, "center_y": 0.5}
 
