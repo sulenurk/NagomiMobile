@@ -1271,7 +1271,7 @@ class FocusScreen(MDScreen):
     def set_away_time_setting(self, enabled):
         app = App.get_running_app()
 
-        if app.layout_profile == "phone_landscape":
+        if not app.is_landscape:
             self.setting_show_away_time = False
             return
 

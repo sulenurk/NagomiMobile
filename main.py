@@ -7,13 +7,14 @@ from kivy.config import Config
 from kivy.utils import platform
 
 if platform != "android":
-    Config.set("graphics", "width", "700")
-    Config.set("graphics", "height", "1300")
-    Config.set("graphics", "resizable", "1")
+    if platform != "android":
+        Config.set("graphics", "width", "960")
+        Config.set("graphics", "height", "564")
+        Config.set("graphics", "resizable", "1")
 
-    Config.set("graphics", "position", "custom")
-    Config.set("graphics", "left", "50")
-    Config.set("graphics", "top", "50")
+        Config.set("graphics", "position", "custom")
+        Config.set("graphics", "left", "50")
+        Config.set("graphics", "top", "50")
 
 from core.responsive import ResponsiveMixin
 from kivy.core.window import Window

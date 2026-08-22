@@ -39,33 +39,29 @@
 
                 MDLabel:
                     id: pomodoro_page_title
-                    text: root.mode_text
+                    text: app.t("pomodoro", app.translation_version)
                     halign: "center"
                     bold: True
                     font_size: sp(app.typography("page_title", app.layout_profile))
                     theme_text_color: "Custom"
                     text_color: app.theme_colors["text"]
                     size_hint_y: None
-                    height: 0 if app.layout_profile == "phone_landscape" else dp(app.responsive(26, 42, 24, 44, 38))
-                    opacity: 0 if app.layout_profile == "phone_landscape" else 1
+                    height: dp(app.responsive(26, 42, 24, 44, 38))
+                    opacity: 1
 
 
                 MDCard:
                     id: pomodoro_portrait_card
                     orientation: "vertical"
-                    size_hint_y: None if app.layout_profile == "phone_landscape" else 1
-                    height: 0 if app.layout_profile == "phone_landscape" else dp(app.responsive(390, 570, 335, 820, 505))
-                    opacity: 0 if app.layout_profile == "phone_landscape" else 1
-                    disabled: app.layout_profile == "phone_landscape"
-                    padding: (dp(app.responsive(10, 16, 8, 24, 20)), dp(app.responsive(18, 22, 14, 30, 24)), dp(app.responsive(10, 16, 8, 24, 20)), dp(app.responsive(10, 16, 8, 22, 18)))
+                    size_hint_y: 1
+                    opacity: 1
+                    disabled: False
+                    padding: (dp(app.responsive(10, 16, 8, 24, 20)), dp(app.responsive(18, 22, 14, 30, 0)), dp(app.responsive(10, 16, 8, 24, 20)), dp(app.responsive(10, 16, 8, 22, 18)))
                     spacing: dp(app.responsive(6, 8, 5, 10, 8))
                     radius: [dp(30), dp(30), dp(30), dp(30)]
                     elevation: 0
                     md_bg_color: app.theme_colors["card"]
 
-                    Widget:
-                        size_hint_y: None
-                        height: dp(app.responsive(6, 10, 6, 12, 10))
 
                     Widget:
                         size_hint_y: None
@@ -111,9 +107,19 @@
                                     theme_text_color: "Custom"
                                     text_color: app.theme_colors["muted"]
 
-                    Widget:
-                        size_hint_y: None
-                        height: dp(app.responsive(12, 14, 8, 20, 16))
+                                MDLabel:
+                                    text: root.mode_text
+                                    halign: "center"
+                                    valign: "middle"
+                                    bold: True
+                                    font_size: sp(app.typography("section_title", app.layout_profile))
+                                    theme_text_color: "Custom"
+                                    text_color: root.mode_color
+                                    size_hint_y: None
+                                    height: dp(app.responsive(24, 30, 22, 42, 36))
+                                    text_size: self.width, self.height
+
+
                     
                     MDBoxLayout:
                         size_hint_y: None
@@ -173,11 +179,10 @@
                 MDCard:
                     orientation: "horizontal"
 
-                    size_hint_y: 1 if app.layout_profile == "phone_landscape" else None
-                    height: dp(1) if app.layout_profile == "phone_landscape" else 0
-
-                    opacity: 1 if app.layout_profile == "phone_landscape" else 0
-                    disabled: app.layout_profile != "phone_landscape"
+                    size_hint_y: None
+                    height: 0
+                    opacity: 0
+                    disabled: True
 
                     padding: dp(18), dp(10)
                     spacing: dp(18)
@@ -197,15 +202,25 @@
                         size_hint_x: 1
                         spacing: dp(4)
 
-                        AnchorLayout:
+                        MDLabel:
+                            text: root.mode_text
+                            halign: "center"
+                            valign: "middle"
+                            bold: True
+                            font_size: sp(app.typography("section_title", app.layout_profile))
+                            theme_text_color: "Custom"
+                            text_color: root.mode_color
                             size_hint_y: None
-                            height: dp(225)
+                            height: dp(26)
+                            text_size: self.width, self.height
+
+                        AnchorLayout:
                             anchor_x: "center"
                             anchor_y: "center"
 
                             FloatLayout:
                                 size_hint: None, None
-                                size: dp(205), dp(205)
+                                size: (dp(205), dp(205)) if app.is_phone else (dp(300), dp(300))
 
                                 CircularProgress:
                                     progress: root.progress
@@ -218,7 +233,7 @@
                                 MDBoxLayout:
                                     orientation: "vertical"
                                     size_hint: None, None
-                                    size: dp(185), dp(92)
+                                    size: dp(150), dp(74)
                                     spacing: 0
                                     pos_hint: {"center_x": 0.5, "center_y": 0.5}
 

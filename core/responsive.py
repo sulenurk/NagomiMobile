@@ -24,8 +24,6 @@ class ResponsiveMixin:
     screen_height_dp = NumericProperty(800)
     shortest_side_dp = NumericProperty(360)
 
-    ui_scale = NumericProperty(1.0)
-
     layout_profile = StringProperty(
         "phone_portrait"
     )
@@ -71,10 +69,10 @@ class ResponsiveMixin:
         "caption": (9, 10, 8, 14, 12),
 
         # Timer'a özel
-        "timer": (28, 66, 42, 70, 56),
+        "timer": (28, 46, 42, 70, 56),
 
         # Cycle'a özel
-        "cycle": (10, 20, 11, 30, 15),
+        "cycle": (10, 14, 11, 18, 15),
 
         # Durum mesajları
         "status": (9, 10, 8, 14, 12),
@@ -168,20 +166,6 @@ class ResponsiveMixin:
 
         self.is_phone = not self.is_tablet
 
-        scale_reference_dp = (
-            device_smallest_width_dp
-            if self.is_tablet
-            else self.shortest_side_dp
-        )
-
-        self.ui_scale = max(
-            0.85,
-            min(
-                scale_reference_dp / 360.0,
-                1.70,
-            ),
-        )
-
         self.is_compact_phone = (
             self.is_phone
             and self.is_portrait
@@ -219,7 +203,6 @@ class ResponsiveMixin:
                 f"raw={Window.width}x{Window.height}",
                 f"dp={self.screen_width_dp:.0f}x{self.screen_height_dp:.0f}",
                 f"device_min={device_smallest_width_dp:.0f}",
-                f"scale={self.ui_scale:.2f}",
                 f"old={old_profile}",
                 f"new={self.layout_profile}",
                 f"tablet={self.is_tablet}",
@@ -256,10 +239,4 @@ class ResponsiveMixin:
             self._TYPOGRAPHY_STYLES["body"],
         )
 
-        base_size = self.responsive(*style_values)
-
-        font_scale = 1.0 + (
-            (self.ui_scale - 1.0) * 0.35
-        )
-
-        return base_size * font_scale
+        return self.responsive(*style_values)

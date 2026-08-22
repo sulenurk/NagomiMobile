@@ -152,7 +152,7 @@ android.ndk = 28c
 
 # (str) Extra xml to write directly inside the <manifest> element of AndroidManifest.xml
 # use that parameter to provide a filename from where to load your custom XML code
-#android.extra_manifest_xml = ./src/android/extra_manifest.xml
+android.extra_manifest_xml = %(source.dir)s/extra_manifest.xml
 
 # (str) Extra xml to write directly inside the <manifest><application> tag of AndroidManifest.xml
 # use that parameter to provide a filename from where to load your custom XML arguments:

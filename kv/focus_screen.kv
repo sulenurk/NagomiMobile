@@ -40,8 +40,8 @@
                     theme_text_color: "Custom"
                     text_color: app.theme_colors["text"]
                     size_hint_y: None
-                    height: 0 if app.layout_profile == "phone_landscape" else dp(34)
-                    opacity: 0 if app.layout_profile == "phone_landscape" else 1
+                    height: 0 if not app.is_landscape else dp(34)
+                    opacity: 0 if not app.is_landscape else 1
 
                 MDLabel:
                     text: app.t("focus_subtitle", app.translation_version)
@@ -50,21 +50,21 @@
                     font_size: sp(app.typography("body_small", app.layout_profile))
                     text_color: app.theme_colors["muted"]
                     size_hint_y: None
-                    height: 0 if app.layout_profile == "phone_landscape" else dp(30)
-                    opacity: 0 if app.layout_profile == "phone_landscape" else 1
+                    height: 0 if not app.is_landscape else dp(30)
+                    opacity: 0 if not app.is_landscape else 1
 
                 Widget:
                     size_hint_y: None
-                    height: 0 if app.layout_profile == "phone_landscape" else dp(app.responsive(8, 16, 6, 24, 18))
+                    height: 0 if not app.is_landscape else dp(app.responsive(8, 16, 6, 24, 18))
 
                 MDCard:
                     orientation: "vertical"
 
-                    size_hint_y: None if app.layout_profile == "phone_landscape" else 1
-                    height: 0 if app.layout_profile == "phone_landscape" else dp(app.responsive(390, 440, 330, 560, 500))
+                    size_hint_y: None if not app.is_landscape else 1
+                    height: 0 if not app.is_landscape else dp(app.responsive(390, 440, 330, 560, 500))
 
-                    opacity: 0 if app.layout_profile == "phone_landscape" else 1
-                    disabled: app.layout_profile == "phone_landscape"
+                    opacity: 0 if not app.is_landscape else 1
+                    disabled: not app.is_landscape
                     padding: dp(app.responsive(12, 18, 10, 24, 20)), dp(app.responsive(14, 20, 10, 26, 22))
                     spacing: dp(10)
                     radius: [dp(30), dp(30), dp(30), dp(30)]
@@ -214,10 +214,10 @@
                 MDCard:
                     orientation: "horizontal"
 
-                    size_hint_y: 1 if app.layout_profile == "phone_landscape" else None
-                    height: dp(1) if app.layout_profile == "phone_landscape" else 0
+                    size_hint_y: 1 if not app.is_landscape else None
+                    height: dp(1) if not app.is_landscape else 0
 
-                    opacity: 1 if app.layout_profile == "phone_landscape" else 0
+                    opacity: 1 if not app.is_landscape else 0
                     disabled: app.layout_profile != "phone_landscape"
 
                     padding: dp(18), dp(12)
@@ -525,10 +525,10 @@
                                 size_hint: None, None
                                 size: dp(app.responsive(52, 58, 48, 68, 62)), dp(app.responsive(28, 32, 26, 38, 34))
 
-                                disabled: app.layout_profile == "phone_landscape"
+                                disabled: not app.is_landscape
 
                                 state:
-                                    "normal" if app.layout_profile == "phone_landscape" else \
+                                    "normal" if not app.is_landscape else \
                                     ("down" if root.setting_show_away_time else "normal")
 
                                 on_state:
