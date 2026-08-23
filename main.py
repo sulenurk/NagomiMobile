@@ -8,8 +8,8 @@ from kivy.utils import platform
 
 if platform != "android":
     if platform != "android":
-        Config.set("graphics", "width", "960")
-        Config.set("graphics", "height", "564")
+        Config.set("graphics", "width", "1200")
+        Config.set("graphics", "height", "900")
         Config.set("graphics", "resizable", "1")
 
         Config.set("graphics", "position", "custom")

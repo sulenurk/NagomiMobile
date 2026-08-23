@@ -18,12 +18,13 @@
 
             MDTopAppBar:
                 id: pomodoro_top_bar
+                title: app.t("pomodoro", app.translation_version) if app.layout_profile == "tablet_landscape" else ""
                 anchor_title: "center"
                 elevation: 0
                 md_bg_color: app.theme_colors["bg"]
                 specific_text_color: app.theme_colors["text"]
                 size_hint_y: None
-                height: dp(app.responsive(46, 54, 44, 64, 58))
+                height: dp(app.responsive(46, 54, 44, 64, 56))
 
                 left_action_items:
                     [["menu", lambda x: app.toggle_navigation_drawer()]]
@@ -102,9 +103,15 @@
                                     theme_text_color: "Custom"
                                     text_color: app.theme_colors["text"]
 
+                                Widget:
+                                    size_hint_y: None
+                                    height: dp(app.responsive(0, 2, 2, 4, 8))
+
                                 MDLabel:
                                     text: root.cycle_text
                                     halign: "center"
+                                    valign: "middle"
+                                    text_size: self.width, self.height
                                     font_size: sp(app.typography("cycle", app.layout_profile))
                                     theme_text_color: "Custom"
                                     text_color: app.theme_colors["muted"]
@@ -112,7 +119,7 @@
                                 MDLabel:
                                     text: root.mode_text
                                     halign: "center"
-                                    valign: "middle"
+                                    valign: "bottom"
                                     bold: True
                                     font_size: sp(app.typography("section_title", app.layout_profile))
                                     theme_text_color: "Custom"
@@ -120,8 +127,7 @@
                                     size_hint_y: None
                                     height: dp(app.responsive(24, 30, 22, 42, 36))
                                     text_size: self.width, self.height
-
-
+                                    padding_y: dp(4)
                     
                     MDBoxLayout:
                         size_hint_y: None
