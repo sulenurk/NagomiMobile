@@ -35,19 +35,21 @@
                 id: pomodoro_content_layout
                 orientation: "vertical"
                 padding: dp(app.responsive(10, 14, 8, 28, 20)), dp(app.responsive(6, 10, 4, 16, 10)), dp(app.responsive(10, 14, 8, 28, 20)), dp(app.responsive(10, 20, 8, 28, 16))
-                spacing: dp(app.responsive(8, 18, 6, 14, 10))
+                spacing: dp(app.responsive(8, 18, 6, 14, 0))
+
 
                 MDLabel:
                     id: pomodoro_page_title
                     text: app.t("pomodoro", app.translation_version)
                     halign: "center"
+                    valign: "top"
                     bold: True
                     font_size: sp(app.typography("page_title", app.layout_profile))
                     theme_text_color: "Custom"
                     text_color: app.theme_colors["text"]
                     size_hint_y: None
-                    height: dp(app.responsive(26, 42, 24, 44, 38))
-                    opacity: 1
+                    height: dp(app.responsive(26, 42, 24, 44, 0))
+                    opacity: 0 if app.layout_profile == "tablet_landscape" else 1
 
 
                 MDCard:

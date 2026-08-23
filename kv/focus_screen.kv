@@ -35,6 +35,7 @@
                 MDLabel:
                     text: app.t("focus_timer", app.translation_version)
                     halign: "center"
+                    valign: "top"
                     font_size: sp(app.typography("page_title", app.layout_profile))
                     bold: True
                     theme_text_color: "Custom"
@@ -51,11 +52,11 @@
                     text_color: app.theme_colors["muted"]
                     size_hint_y: None
                     height: 0 if not app.is_landscape else dp(30)
-                    opacity: 0 if not app.is_landscape else 1
+                    opacity: 0 if app.layout_profile == "tablet_landscape" else (0 if not app.is_landscape else 1)
 
                 Widget:
                     size_hint_y: None
-                    height: 0 if not app.is_landscape else dp(app.responsive(8, 16, 6, 24, 18))
+                    height: 0 if not app.is_landscape else dp(app.responsive(8, 16, 6, 24, 0))
 
                 MDCard:
                     orientation: "vertical"
@@ -73,30 +74,26 @@
 
                     Widget:
                         size_hint_y: None
-                        height: dp(app.responsive(8, 10, 8, 18, 14))
+                        height: dp(app.responsive(8, 10, 8, 18, 28))
 
                     MDLabel:
                         text: str(root.active_task_name)
                         halign: "center"
-                        valign: "middle"
+                        valign: "bottom"
                         font_size: sp(app.typography("section_title", app.layout_profile))
                         bold: True
                         theme_text_color: "Custom"
                         text_color: app.theme_colors["primary"]
                         size_hint_y: None
                         height: dp(46)
-                        text_size: self.width - dp(20), None
-
-                    Widget:
-                        size_hint_y: 1 if app.layout_profile == "tablet_portrait" else None
-                        height: 0
+                        text_size: self.width - dp(20), self.height
 
                     MDBoxLayout:
                         orientation: "vertical"
                         size_hint: None, None
                         width: dp(app.responsive(220, 280, 210, 420, 360))
-                        height: dp(app.responsive(120, 150, 110, 220, 190))
-                        spacing: dp(app.responsive(4, 6, 3, 10, 8))
+                        height: dp(app.responsive(120, 150, 110, 220, 120))
+                        spacing: dp(app.responsive(4, 6, 3, 10, 4))
                         pos_hint: {"center_x": 0.5}
 
                         MDLabel:
@@ -106,6 +103,8 @@
                             bold: True
                             theme_text_color: "Custom"
                             text_color: app.theme_colors["text"]
+                            size_hint_y: None
+                            height: dp(app.responsive(60, 70, 60, 90, 70))
 
                         MDLabel:
                             text: str(root.status_text)
